@@ -28,6 +28,30 @@
         }
       } catch (err) {}
       document.documentElement.setAttribute("data-hero-mode", hero);
+      var years = "scroll";
+      try {
+        var yearsQuery = new URLSearchParams(location.search).get("years");
+        if (yearsQuery === "plain" || yearsQuery === "stretched" || yearsQuery === "scroll") years = yearsQuery;
+        else {
+          var yearsSaved = localStorage.getItem("laureates-years-mode");
+          if (yearsSaved === "plain" || yearsSaved === "stretched" || yearsSaved === "scroll") years = yearsSaved;
+        }
+      } catch (err) {}
+      document.documentElement.setAttribute("data-years-mode", years);
+      try {
+        if (sessionStorage.getItem("laureates-dev-plain") !== "0") {
+          document.documentElement.setAttribute("data-dev-plain", "");
+        }
+      } catch (err) {
+        document.documentElement.setAttribute("data-dev-plain", "");
+      }
+      try {
+        if (sessionStorage.getItem("laureates-dev-hide-tech") !== "0") {
+          document.documentElement.setAttribute("data-dev-hide-tech", "");
+        }
+      } catch (err) {
+        document.documentElement.setAttribute("data-dev-hide-tech", "");
+      }
     })();
   </script>
   <title>From the Stalin Prize to the Lenin Prize: the Soviet international prize for strengthening peace among the peoples</title>
@@ -389,6 +413,11 @@
       <button type="button" class="dev-plain-toggle" data-hero-mode="wall">hero: wall</button>
       <button type="button" class="dev-plain-toggle" data-hero-mode="hex">hero: hex</button>
       <button type="button" class="dev-plain-toggle" data-hero-mode="dove">hero: dove</button>
+    </nav>
+    <nav class="dev-hero-mode" id="years-mode" aria-label="Years mode">
+      <button type="button" class="dev-plain-toggle" data-years-mode="plain">years: plain</button>
+      <button type="button" class="dev-plain-toggle" data-years-mode="stretched">years: stretched</button>
+      <button type="button" class="dev-plain-toggle" data-years-mode="scroll">years: scroll</button>
     </nav>
   </div>
   </div>

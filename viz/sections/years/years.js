@@ -7,6 +7,7 @@ var YEAR_SCROLL = {
   mode: "mid",
   progress: 0
 };
+var YEARS_MODE_KEY = "laureates-years-mode";
 
 function yearsStickyTop() {
   return 16;
@@ -16,8 +17,56 @@ function yearsReduced() {
   return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 }
 
+function yearsModeOk(mode) {
+  return mode === "plain" || mode === "stretched" || mode === "scroll";
+}
+
+function yearsModeFromQuery() {
+  try {
+    var query = new URLSearchParams(window.location.search).get("years");
+    if (yearsModeOk(query)) return query;
+  } catch (err) {}
+  return "";
+}
+
+function yearsMode() {
+  var fromQuery = yearsModeFromQuery();
+  if (fromQuery) return fromQuery;
+  try {
+    var saved = localStorage.getItem(YEARS_MODE_KEY);
+    if (yearsModeOk(saved)) return saved;
+  } catch (err) {}
+  return "scroll";
+}
+
+function setYearsMode(next) {
+  var mode = yearsModeOk(next) ? next : "scroll";
+  try { localStorage.setItem(YEARS_MODE_KEY, mode); } catch (err) {}
+  try {
+    var url = new URL(window.location.href);
+    if (mode === "scroll") url.searchParams.delete("years");
+    else url.searchParams.set("years", mode);
+    history.replaceState(null, "", url);
+  } catch (err) {}
+  document.documentElement.setAttribute("data-years-mode", mode);
+  syncYearsModeControls();
+  layoutYears();
+  syncYears();
+  refreshYearCopy();
+}
+
+function syncYearsModeControls() {
+  var mode = yearsMode();
+  document.documentElement.setAttribute("data-years-mode", mode);
+  document.querySelectorAll("[data-years-mode]").forEach(function (button) {
+    var id = button.getAttribute("data-years-mode");
+    if (id === mode) button.setAttribute("aria-current", "true");
+    else button.removeAttribute("aria-current");
+  });
+}
+
 function yearsUseSticky() {
-  return !yearsReduced() && !yearChartNarrow();
+  return !yearsReduced() && yearsMode() === "scroll";
 }
 
 function yearModeFromProgress(progress) {
@@ -77,11 +126,19 @@ function syncYears() {
     var top = yearsStickyTop();
     var passed = Math.min(travel, Math.max(0, top - scrolly.getBoundingClientRect().top));
     progress = travel > 0 ? passed / travel : 0;
-  } else if (!yearsReduced() && yearChartNarrow()) {
-    progress = 1;
+    scrubYearsPinScroll(pin, progress);
+  } else {
+    pin.scrollTop = 0;
+    if (!yearsReduced() && yearsMode() === "stretched") progress = 1;
   }
 
   applyYearProgress(progress);
+}
+
+function scrubYearsPinScroll(pin, progress) {
+  if (!yearChartNarrow()) return;
+  var maxScroll = pin.scrollHeight - pin.clientHeight;
+  pin.scrollTop = maxScroll > 8 ? Math.min(1, Math.max(0, progress)) * maxScroll : 0;
 }
 
 function applyYearProgress(progress) {
@@ -124,7 +181,7 @@ function refreshYearCopy() {
       color: yearColorMode(),
       peakWorld: YEAR_SCROLL.peakWorld,
       peakCount: YEAR_SCROLL.peakCount,
-      canScroll: !yearsReduced()
+      canScroll: yearsUseSticky()
     });
   }
   var source = document.getElementById("year-source");
@@ -317,3 +374,16 @@ function renderYearsTimeline(cohorts) {
   svg.appendChild(hatchGroup);
   document.getElementById("year-chart").appendChild(svg);
 }
+
+(function bindYearsModeControls() {
+  var nav = document.getElementById("years-mode");
+  if (!nav) return;
+  syncYearsModeControls();
+  nav.addEventListener("click", function (event) {
+    var button = event.target.closest("[data-years-mode]");
+    if (!button) return;
+    var next = button.getAttribute("data-years-mode");
+    if (!next || next === yearsMode()) return;
+    setYearsMode(next);
+  });
+})();

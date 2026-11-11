@@ -97,17 +97,20 @@ window.addEventListener("resize", function () {
     button.setAttribute("aria-pressed", plain ? "true" : "false");
     button.textContent = plain ? "dev: show section colors" : "dev: drop section colors";
   }
+  // Default: section colors dropped. sessionStorage "0" keeps them on for this tab.
   try {
-    if (sessionStorage.getItem(key) === "1") {
+    if (sessionStorage.getItem(key) !== "0") {
       document.documentElement.setAttribute("data-dev-plain", "");
     }
-  } catch (err) {}
+  } catch (err) {
+    document.documentElement.setAttribute("data-dev-plain", "");
+  }
   button.addEventListener("click", function () {
     document.documentElement.toggleAttribute("data-dev-plain");
     var plain = document.documentElement.hasAttribute("data-dev-plain");
     try {
-      if (plain) sessionStorage.setItem(key, "1");
-      else sessionStorage.removeItem(key);
+      if (plain) sessionStorage.removeItem(key);
+      else sessionStorage.setItem(key, "0");
     } catch (err) {}
     syncDevPlain();
   });
@@ -123,17 +126,20 @@ window.addEventListener("resize", function () {
     button.setAttribute("aria-pressed", hide ? "true" : "false");
     button.textContent = hide ? "dev: show chart tech notes" : "dev: drop chart tech notes";
   }
+  // Default: chart tech notes dropped. sessionStorage "0" keeps them on for this tab.
   try {
-    if (sessionStorage.getItem(key) === "1") {
+    if (sessionStorage.getItem(key) !== "0") {
       document.documentElement.setAttribute("data-dev-hide-tech", "");
     }
-  } catch (err) {}
+  } catch (err) {
+    document.documentElement.setAttribute("data-dev-hide-tech", "");
+  }
   button.addEventListener("click", function () {
     document.documentElement.toggleAttribute("data-dev-hide-tech");
     var hide = document.documentElement.hasAttribute("data-dev-hide-tech");
     try {
-      if (hide) sessionStorage.setItem(key, "1");
-      else sessionStorage.removeItem(key);
+      if (hide) sessionStorage.removeItem(key);
+      else sessionStorage.setItem(key, "0");
     } catch (err) {}
     syncDevTech();
   });

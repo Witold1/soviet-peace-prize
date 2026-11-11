@@ -132,7 +132,7 @@ function heroHexLayout() {
   cloudW *= scale;
   cloudH *= scale;
 
-  var tile = hexSize * 1.86;
+  var tile = hexSize * 1.68;
   var inset = tile * 0.55;
   var topPad = Math.max(narrow ? 32 : 24, tile * 2);
   var cloudOriginX = (width - cloudW) / 2;

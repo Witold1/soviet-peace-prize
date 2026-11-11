@@ -47,6 +47,37 @@ html[data-dev-plain] .years-scrolly.is-sticky .years-pin {
   min-height: 120px;
 }
 
+/* Narrow scroll mode: no inner scrollbar; page scroll pans the pin. */
+html[data-display="phone"] .years-scrolly.is-sticky .years-pin {
+  overflow: hidden;
+}
+
+html[data-display="phone"] .years-step {
+  height: 40vh;
+  min-height: 200px;
+}
+
+html[data-display="phone"] .years-step[data-step="span"] {
+  height: 48vh;
+  min-height: 240px;
+}
+
+@container page (max-width: 640px) {
+  .years-scrolly.is-sticky .years-pin {
+    overflow: hidden;
+  }
+
+  .years-step {
+    height: 40vh;
+    min-height: 200px;
+  }
+
+  .years-step[data-step="span"] {
+    height: 48vh;
+    min-height: 240px;
+  }
+}
+
 #year-chart rect[data-mark="1"] {
   vector-effect: non-scaling-stroke;
 }
