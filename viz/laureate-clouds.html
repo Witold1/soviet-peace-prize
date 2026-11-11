@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script>
+    (function () {
+      var display = "laptop";
+      try {
+        var query = new URLSearchParams(location.search).get("display");
+        if (query === "phone" || query === "tablet" || query === "laptop") display = query;
+        else {
+          var saved = localStorage.getItem("laureates-display");
+          if (saved === "phone" || saved === "tablet" || saved === "laptop") display = saved;
+        }
+      } catch (err) {}
+      document.documentElement.setAttribute("data-display", display);
+      if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        document.documentElement.classList.add("js-enter");
+      }
+      var hero = "dove";
+      try {
+        var heroQuery = new URLSearchParams(location.search).get("hero");
+        if (heroQuery === "wall" || heroQuery === "hex" || heroQuery === "dove") hero = heroQuery;
+        else {
+          var heroSaved = localStorage.getItem("laureates-hero-mode");
+          if (heroSaved === "wall" || heroSaved === "hex" || heroSaved === "dove") hero = heroSaved;
+        }
+      } catch (err) {}
+      document.documentElement.setAttribute("data-hero-mode", hero);
+    })();
+  </script>
+  <title>From the Stalin Prize to the Lenin Prize: the Soviet international prize for strengthening peace among the peoples</title>
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/chrome.css">
+  <link rel="stylesheet" href="sections/press/press.css">
+  <link rel="stylesheet" href="sections/decree/decree.css">
+  <link rel="stylesheet" href="sections/footnotes/footnotes.css">
+  <link rel="stylesheet" href="css/sections.css">
+  <link rel="stylesheet" href="sections/hero/hero.css">
+  <link rel="stylesheet" href="sections/occupations/occupations.css">
+  <link rel="stylesheet" href="sections/years/years.css">
+  <link rel="stylesheet" href="css/world.css">
+  <link rel="stylesheet" href="css/charts.css">
+  <link rel="stylesheet" href="sections/ages/ages.css">
+  <link rel="stylesheet" href="sections/map/map.css">
+  <link rel="stylesheet" href="sections/map/map-narrow.css">
+  <link rel="stylesheet" href="sections/tip/tip.css">
+  <link rel="stylesheet" href="sections/method/method.css">
+  <link rel="stylesheet" href="sections/toc/toc.css">
+</head>
+<body>
+  <div class="layout">
+  <p class="section-mark" id="section-mark" aria-hidden="true"></p>
+  <div class="toc-rail">
+    <nav class="toc" id="toc" aria-labelledby="toc-label">
+      <p class="toc-label" id="toc-label" data-i18n="tocLabel">Contents</p>
+      <ol>
+        <li><a href="#opening" data-i18n="tocOpening">Forty years of one prize</a></li>
+        <li><a href="#all" data-i18n="hAll">Who received the prize</a></li>
+        <li><a href="#prize" data-i18n="tocPrize">How the prize was founded</a></li>
+        <li><a href="#occupation" data-i18n="hOcc">Who they were</a></li>
+        <li><a href="#years" data-i18n="hYear">When it was awarded</a></li>
+        <li><a href="#decree-1956" data-i18n="tocRename">From Stalin to Lenin</a></li>
+        <li><a href="#ages" data-i18n="hAge">How old they were</a></li>
+        <li><a href="#decree-1989" data-i18n="tocRename1989">The Lenin Peace Prize</a></li>
+        <li><a href="#births" data-i18n="hMap">Where they came from</a></li>
+        <li><a href="#method" data-i18n="methTitle">How the list was made</a></li>
+        <li><a href="#footnotes" data-i18n="fnListTitle">Footnotes</a></li>
+      </ol>
+    </nav>
+  </div>
+  <div class="shell">
+  <div class="wrap">
+    <div class="mast">
+      <nav class="display" id="display">
+        <button type="button" data-set-display="phone" aria-label="Phone">
+          <svg viewBox="0 0 16 16" aria-hidden="true">
+            <rect x="4.75" y="1.15" width="6.5" height="13.7" rx="1.25" fill="none" stroke="currentColor" stroke-width="1.2"/>
+            <path d="M7.15 12.55h1.7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+          </svg>
+        </button>
+        <button type="button" data-set-display="tablet" aria-label="Tablet">
+          <svg viewBox="0 0 16 16" aria-hidden="true">
+            <rect x="1.15" y="3" width="13.7" height="10" rx="1.25" fill="none" stroke="currentColor" stroke-width="1.2"/>
+            <path d="M8 11.15h0.01" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+        </button>
+        <button type="button" data-set-display="laptop" aria-label="Laptop">
+          <svg viewBox="0 0 16 16" aria-hidden="true">
+            <rect x="2.7" y="1.7" width="10.6" height="7.5" rx="0.7" fill="none" stroke="currentColor" stroke-width="1.2"/>
+            <path d="M1.2 10.5h13.6l-1.15 2.35H2.35z" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </nav>
+      <nav class="lang" id="lang">
+        <button type="button" data-set-lang="ru">RU</button>
+        <button type="button" data-set-lang="en">EN</button>
+      </nav>
+    </div>
+    <h1 id="opening" data-i18n="h1">From the Stalin Prize to the Lenin Prize: the Soviet international prize for strengthening peace among the peoples</h1>
+      <p class="opener" data-i18n="opener">For forty years, from 1950 to 1990, the Soviet Union awarded a peace prize of its own. It ended with the state that gave it.</p>
+    <section class="hero-scroll" id="all">
+      <header class="figcap">
+        <h2><span class="fig-no" data-i18n="n1">Fig. 1.</span> <span data-i18n="capAll">Everyone who received the prize</span></h2>
+      </header>
+      <div class="hero-pin" id="hero-pin">
+        <div class="stage" id="hero"></div>
+        <p class="hero-count" id="hero-count"></p>
+      </div>
+    </section>
+    <p class="intro" data-i18n="intro" data-i18n-html>Peace prizes are awarded by many kinds of institutions<sup class="fn"><button type="button" class="fn-ref" id="fnref-1" data-fn="1">1</button></sup>. Governments give them, and so do religious organizations, universities, and private foundations. Some are known around the world, and some are known mainly to the people who receive them. Some last only a few years and then disappear. Others are still awarded decades after they were founded. Each prize works from its own definition of peace and of peacebuilding, and each awarding committee judges by its own standards and its own biases<sup class="fn"><button type="button" class="fn-ref" id="fnref-2" data-fn="2">2</button></sup>. The prize followed here is one of the long ones that later closed.</p>
+    <section class="press-scroll" id="prize">
+      <header class="figcap">
+        <h2><span class="fig-no" data-i18n="n2">Fig. 2.</span> <span data-i18n="capPress">The world the prize was founded in</span></h2>
+      </header>
+      <div class="press-pin" id="press-pin">
+        <div class="press-band">
+          <div class="press-frame" id="press-frame">
+            <div class="press-reel" id="press-reel">
+              <ol class="press-list" id="press-list"></ol>
+    </div>
+            <div class="press-heat" id="press-heat" aria-hidden="true"></div>
+          </div>
+          <p class="press-issue" id="press-issue"></p>
+        </div>
+      </div>
+    </section>
+    <figure class="doc" id="decree-1949">
+      <blockquote class="ukaz is-open">
+        <div class="ukaz-text">
+        <button type="button" class="ukaz-original" id="ukaz-original" aria-expanded="true" aria-controls="ukaz-scan"><svg class="ukaz-lines" viewBox="0 0 16 16" aria-hidden="true"><path d="M2.15 3.7h11.7M2.15 8h11.7M2.15 12.3h7.4" fill="none" stroke="currentColor" stroke-width="1.35" stroke-linecap="round"/></svg><svg class="ukaz-glass" viewBox="0 0 16 16" aria-hidden="true"><rect x="1.35" y="2.15" width="9.1" height="6.35" fill="none" stroke="currentColor" stroke-width="1.35"/><path d="M9.15 7.7L13.15 12.55" fill="none" stroke="currentColor" stroke-width="1.35" stroke-linecap="round"/></svg><span class="ukaz-original-label">See the transcription</span></button>
+        <button type="button" class="ukaz-zoom" id="ukaz-zoom"><span class="ukaz-zoom-label">Whole page</span></button>
+        <div class="ukaz-loupe is-page" id="ukaz-loupe">
+          <div class="ukaz-view">
+            <img class="ukaz-scan" id="ukaz-scan" src="../figures/pravda-1949-355.jpg" width="3680" height="5317" alt="Pravda, 21 December 1949, page 2, with the decree marked in the upper left column." data-i18n-alt="decreeScanAlt">
+            <button type="button" class="ukaz-side" id="ukaz-side" aria-pressed="false" aria-label="Enlarge the decree"></button>
+          </div>
+          <div class="ukaz-mark" id="ukaz-mark" aria-hidden="true"></div>
+          <div class="ukaz-lens" id="ukaz-lens" aria-hidden="true"></div>
+        </div>
+        <div class="ukaz-copy" data-i18n="decree" data-i18n-html>
+        <header class="ukaz-head">
+          <p class="ukaz-kicker">Decree</p>
+          <p>of the Presidium of the Supreme Soviet of the USSR</p>
+          <p>On the establishment of the international</p>
+          <p>Stalin Prizes</p>
+          <p>"For strengthening peace among the peoples"</p>
+        </header>
+        <div class="ukaz-body">
+          <p>1. Establish the international Stalin Prizes "For strengthening peace among the peoples."</p>
+          <p>The prizes are awarded to citizens of any country in the world, regardless of political, religious, and racial differences, for outstanding service in the struggle against the instigators of war and for the strengthening of peace.</p>
+          <p>2. Establish that persons awarded the international Stalin Prize receive:</p>
+          <ul class="ukaz-items">
+            <li>a) a diploma of laureate of the international Stalin Prize;</li>
+            <li>b) a gold breast medal with a portrait of J. V. Stalin;</li>
+            <li>c) a cash prize of 100,000 rubles.</li>
+          </ul>
+          <p>3. Establish that the international Stalin Prizes "For strengthening peace among the peoples" are awarded each year, from 5 to 10 prizes, by a special Committee for the International Stalin Prizes, formed by the Presidium of the Supreme Soviet of the USSR from representatives of the democratic forces of various countries of the world.</p>
+          <p>4. Award the prizes on the birthday of Joseph Vissarionovich Stalin - 21 December of each year.</p>
+          <p>Award the first prizes in 1950.</p>
+        </div>
+        <footer class="ukaz-signoff">
+          <p class="ukaz-sign">Chairman of the Presidium of the Supreme Soviet of the USSR <span class="ukaz-who">N. SHVERNIK.</span></p>
+          <p class="ukaz-sign">Secretary of the Presidium of the Supreme Soviet of the USSR <span class="ukaz-who">A. GORKIN.</span></p>
+          <p class="ukaz-place">Moscow, the Kremlin. 20 December 1949.</p>
+        </footer>
+        </div>
+        </div>
+      </blockquote>
+      <figcaption data-i18n="decreeSource" data-i18n-html>The picture is a page of the official newspaper of the Soviet Communist Party devoted to the 70th anniversary of J. V. Stalin, with the printed decree establishing the prize. <a target="_blank" rel="noopener noreferrer" href="https://oldgazette.org/pravda/21121949/text2.html">Transcription of the decree</a>. <a target="_blank" rel="noopener noreferrer" href="https://archive.org/details/1949355_7165">Scan of the issue: Pravda, 21 December 1949, no. 355 (11462), page 2</a>.</figcaption>
+    </figure>
+    <div class="hook" data-i18n="hook" data-i18n-html>
+      <p>The International Lenin Prize for Strengthening Peace Among Peoples (until 1955: International Stalin Prize for Strengthening Peace Among Peoples) was established on December 20, 1949, by the Presidium of the Supreme Soviet of the USSR on the occasion of Joseph Stalin's seventieth birthday. It was awarded annually in Moscow to up to ten people.</p>
+      <p>The award was considered the Soviet Union's answer to the Nobel Peace Prize and was bestowed by an international prize committee. Usually, several people were honored at a time. The chairman of the prize committee was the physicist Dmitri Skobelzyn from 1950 to 1973, followed by the oncologist Nikolai Blokhin until 1987, and finally, after the prize was restructured in 1989, the welding engineer Borys Paton.</p>
+      <p>In the course of de-Stalinization, the name was changed by decree of the Presidium of the Supreme Soviet on September 6, 1956, to the International Lenin Prize for Strengthening Peace Among Peoples (Russian: Международная Ленинская премия «За укрепление мира между народами»). All previous laureates were asked to return their medals for exchange. Subsequently, the announcement of the laureates no longer took place on Stalin's birthday in December, but usually on May 1.</p>
+      <p>On December 11, 1989, the Supreme Soviet reorganized the awarding of the prize. It was to be awarded every two years; the recipient(s) were to be announced on Lenin's birthday, April 22. Only one more prize was awarded under the new rules until the dissolution of the Soviet Union in 1991.</p>
+    </div>
+    <section id="occupation">
+      <div class="essay" data-i18n="occEssay" data-i18n-html>
+        <p>The decree of 1949 assigns the prize to citizens of any country for the struggle against the instigators of war. The clouds show the kind of public life those people brought into the list.</p>
+        <p>Of the 167 people, 67 are classed as politicians and 50 as cultural figures. Together they are most of the list. There are 15 scientists, 18 public figures, 10 religious figures, and 7 labor-movement figures. Twenty-nine are women. Thirteen of the women are in the political cloud, and eight are public figures. The cultural cloud holds four women. The religious cloud and the labor cloud hold none.</p>
+      </div>
+      <p class="lead" id="split-lead"></p>
+      <p class="finding" id="split-finding"></p>
+      <figure class="viz">
+        <figcaption class="figcap">
+          <h2><span class="fig-no" data-i18n="n3">Fig. 3.</span> <span id="cap-occ" data-i18n="capOcc">What work did they do?</span></h2>
+        </figcaption>
+      <div class="legend" id="occ-legend">
+        <span><i class="swatch female"></i> <span data-i18n="female">Female</span></span>
+        <span><i class="swatch male"></i> <span data-i18n="male">Male</span></span>
+      </div>
+      <div class="clouds" id="clouds"></div>
+      </figure>
+      <p class="source chart-tech" id="src-occ" data-i18n="srcOcc">Each cloud is one class from WINNER_BIO_occupation_class. Women are drawn toward the center of their cloud. Source: laureates.csv.</p>
+    </section>
+
+    <section id="years">
+      <div class="essay" data-i18n="yearEssay" data-i18n-html>
+        <p>The decree of 1949 promised five to ten prizes a year. The columns keep that promise only at the start.</p>
+        <p>From 1950 through 1955 there are six full years and 45 people. The shortest of those columns has six, and in 1953 the column reaches ten, the ceiling the decree set for itself. From 1956 the prize goes on, but the columns sit lower, often at four or five, and from the late 1960s a cohort often covers two years. The span 1980-1982 covers three. There are thirty cohorts in all. Two of them, 1988 and 1990, are a single person. The list has no cohort of its own for 1987 or for 1989.</p>
+        <p>Women are in the prize from the first year: three of the seven in 1950. After that, whole years pass without them. They stand thickest in the 1977-1978 cohort, four of six. Among the Stalin-year laureates, 10 of 45 are women. Among the later laureates, 19 of 122.</p>
+      </div>
+      <div class="years-scrolly" id="years-scrolly">
+        <div class="years-pin" id="years-pin">
+          <p class="tally" id="year-tally"></p>
+          <p class="lead" id="year-lead"></p>
+          <header class="figcap">
+            <h2><span class="fig-no" data-i18n="n4">Fig. 4.</span> <span data-i18n="capYear">Which year did each person receive it?</span></h2>
+          </header>
+          <div class="legend" id="year-legend"></div>
+          <div class="chart" id="year-chart"></div>
+          <p class="source chart-tech" id="year-source" data-i18n="srcYear">Each column is one prize cohort, placed at the middle of the year or span in the decree. Women are drawn at the foot of the column. The Stalin Prize runs through 1955; from 1956 the prize is the Lenin Prize, and 1990 is the single Lenin Peace Prize. Source: laureates.csv.</p>
+        </div>
+        <div class="years-steps" id="years-steps" aria-hidden="true">
+          <div class="years-step" data-step="mid"></div>
+          <div class="years-step" data-step="span"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="decree-1956">
+      <div class="essay" data-i18n="renameEssay" data-i18n-html>
+        <p>On the chart, 1956 is not an empty year. That cohort has eight people, and the list already counts them as Lenin laureates. The decree below is dated September 6, 1956. It does not found a new prize, and it does not close the old one. It changes the name, and it changes the portrait on the medal.</p>
+        <p>The first sentence explains the renaming by the wishes of the committees. The sum does not change: still 100,000 rubles. Point 3 extends to the laureates of 1950-1955 only the diploma and the medal, subparagraphs (a) and (b), and does not extend the cash. Those earlier laureates, as the text above has already said, were asked to hand the medal back for exchange: the old one bears Stalin, the new one bears Lenin. The decree still says each year, and up to ten. No column after 1953 reaches ten. The decree does not set the day of the announcement. It leaves the rules for nominating candidates to be drawn up and published by the committee itself.</p>
+      </div>
+      <figure class="doc">
+      <blockquote class="ukaz is-open">
+        <div class="ukaz-text">
+        <button type="button" class="ukaz-original" aria-expanded="true" aria-controls="ukaz-loupe-1956"><svg class="ukaz-lines" viewBox="0 0 16 16" aria-hidden="true"><path d="M2.15 3.7h11.7M2.15 8h11.7M2.15 12.3h7.4" fill="none" stroke="currentColor" stroke-width="1.35" stroke-linecap="round"/></svg><svg class="ukaz-glass" viewBox="0 0 16 16" aria-hidden="true"><rect x="1.35" y="2.15" width="9.1" height="6.35" fill="none" stroke="currentColor" stroke-width="1.35"/><path d="M9.15 7.7L13.15 12.55" fill="none" stroke="currentColor" stroke-width="1.35" stroke-linecap="round"/></svg><span class="ukaz-original-label">See the transcription</span></button>
+        <button type="button" class="ukaz-zoom"><span class="ukaz-zoom-label">Whole page</span></button>
+        <div class="ukaz-loupe is-page" id="ukaz-loupe-1956">
+          <div class="ukaz-view">
+            <img class="ukaz-scan" src="../figures/pravda-1956-252.jpg" width="1836" height="2673" alt="Pravda, 8 September 1956, page 1, with the renaming decree marked in the lower left." data-i18n-alt="renameScanAlt">
+            <button type="button" class="ukaz-side" aria-pressed="false" aria-label="Enlarge the decree"></button>
+          </div>
+          <div class="ukaz-mark" aria-hidden="true"></div>
+          <div class="ukaz-lens" aria-hidden="true"></div>
+        </div>
+        <div class="ukaz-copy" data-i18n="rename" data-i18n-html>
+        <header class="ukaz-head">
+          <p class="ukaz-kicker">Decree</p>
+          <p>of the Presidium of the Supreme Soviet of the USSR</p>
+          <p>On renaming the international</p>
+          <p>Stalin Prizes</p>
+          <p>as the international Lenin Prizes</p>
+          <p>"For strengthening peace among the peoples"</p>
+        </header>
+        <div class="ukaz-body">
+          <p>1. Taking into account the wishes of the Committees for the International Stalin Prizes,<sup>1</sup> rename the international Stalin Prizes as the international Lenin Prizes "For strengthening peace among the peoples."</p>
+          <p>2. Establish that persons awarded the international Lenin Prize receive:</p>
+          <ul class="ukaz-items">
+            <li>a) a diploma of laureate of the international Lenin Prize;</li>
+            <li>b) a gold breast medal with a portrait of V. I. Lenin;</li>
+            <li>c) a cash prize of 100,000 rubles.</li>
+          </ul>
+          <p>3. Extend subparagraphs (a) and (b) of § 2 of this Decree also to persons who received the International Prize "For strengthening peace among the peoples" in 1950-1955.</p>
+          <p>4. Establish that the international Lenin Prizes "For strengthening peace among the peoples" are awarded each year, up to 10 prizes, by the Committee for the International Lenin Prizes.</p>
+          <p>5. The procedure for nominating candidates for the international Lenin Prizes "For strengthening peace among the peoples," and the conditions for awarding these prizes, are drawn up and published by the Committee for the International Lenin Prizes.</p>
+        </div>
+        <footer class="ukaz-signoff">
+          <p class="ukaz-place">Moscow, the Kremlin. 6 September 1956.</p>
+        </footer>
+        <p class="ukaz-note"><sup>1</sup> They were established by the Decree of the Presidium of the Supreme Soviet of the USSR of 20 December 1949 (Vedomosti of the Supreme Soviet of the USSR, 1949, no. 66).</p>
+        </div>
+        </div>
+      </blockquote>
+      <figcaption class="source" data-i18n="renameSource" data-i18n-html>The picture is a page of <em>Pravda</em> with the printed decree renaming the prize.<sup class="fn"><button type="button" class="fn-ref" id="fnref-3" data-fn="3">3</button></sup> Scan of the issue: Pravda, 8 September 1956, no. 252 (13915), page 1.</figcaption>
+      </figure>
+    </section>
+
+    <section id="ages">
+      <div class="essay" data-i18n="ageEssay" data-i18n-html>
+        <p>The decree speaks of outstanding service. On the age chart that service belongs to a long public life. The mean sits near sixty, and the dashed line stands about there. Only eight people were under forty. Eighteen were seventy-five or older. The mass of the list lies between those edges: 76 people from 40 to 59, and 65 from 60 to 74.</p>
+        <p>The women are a little younger than the men on average, about 57 against about 61. The gap is small. In this too the prize reads as a list of public lives already made. The youngest and the oldest are named in the line under this paragraph. The empty left end of the scale matters more than the extreme.</p>
+      </div>
+      <p class="lead" id="age-lead"></p>
+      <figure class="viz">
+        <figcaption class="figcap">
+          <h2><span class="fig-no" data-i18n="n5">Fig. 5.</span> <span data-i18n="capAge">How old were they when they received it?</span></h2>
+        </figcaption>
+      <div class="legend">
+        <span><i class="swatch dot female"></i> <span data-i18n="female">Female</span></span>
+        <span><i class="swatch dot male"></i> <span data-i18n="male">Male</span></span>
+      </div>
+      <div class="chart" id="age-chart"></div>
+      </figure>
+    </section>
+
+    <section id="decree-1989">
+      <div class="essay" data-i18n="rename1989Essay" data-i18n-html>
+        <p>By late 1989 the country was already deep in perestroika: shortages, political instability, a growing internal crisis. Against that noise a second renaming of a peace prize was a small act. The resolution below is dated 11 December 1989. It does not found a new prize, and it does not close the old one. It shortens the name to the International Lenin Peace Prize, and it replaces the statute and the committee rules. The prize itself was already slipping toward the far edge of the story.</p>
+        <p>The opening sentence explains the change by the present stage of the movement for human survival, a nuclear-free and nonviolent world, and new political thinking. Point 1 is the rename. Points 2 and 3 approve the new statute and the new committee regulations. Point 4 repeals earlier acts, including the renaming decree of 6 September 1956 as later amended. Only one prize was given under the new name: Mandela, for 1990. The Union dissolved the next year.</p>
+      </div>
+      <figure class="doc">
+      <blockquote class="ukaz is-open">
+        <div class="ukaz-text">
+        <button type="button" class="ukaz-original" aria-expanded="true" aria-controls="ukaz-loupe-1989"><svg class="ukaz-lines" viewBox="0 0 16 16" aria-hidden="true"><path d="M2.15 3.7h11.7M2.15 8h11.7M2.15 12.3h7.4" fill="none" stroke="currentColor" stroke-width="1.35" stroke-linecap="round"/></svg><svg class="ukaz-glass" viewBox="0 0 16 16" aria-hidden="true"><rect x="1.35" y="2.15" width="9.1" height="6.35" fill="none" stroke="currentColor" stroke-width="1.35"/><path d="M9.15 7.7L13.15 12.55" fill="none" stroke="currentColor" stroke-width="1.35" stroke-linecap="round"/></svg><span class="ukaz-original-label">See the transcription</span></button>
+        <button type="button" class="ukaz-zoom"><span class="ukaz-zoom-label">Whole page</span></button>
+        <div class="ukaz-loupe is-page" id="ukaz-loupe-1989">
+          <div class="ukaz-view">
+            <img class="ukaz-scan" src="../figures/pravda-1989-346.jpg" width="1798" height="2628" alt="Pravda, 12 December 1989, page 1, with the Presidium meeting note marked in the upper right column." data-i18n-alt="rename1989ScanAlt">
+            <button type="button" class="ukaz-side" aria-pressed="false" aria-label="Enlarge the decree"></button>
+          </div>
+          <div class="ukaz-mark" aria-hidden="true"></div>
+          <div class="ukaz-lens" aria-hidden="true"></div>
+        </div>
+        <div class="ukaz-copy" data-i18n="rename1989" data-i18n-html>
+        <header class="ukaz-head">
+          <p class="ukaz-kicker">Resolution</p>
+          <p>of the Presidium of the Supreme Soviet of the USSR</p>
+          <p>of 11 December 1989, No. 905-1</p>
+          <p>On the International Lenin Peace Prize</p>
+        </header>
+        <div class="ukaz-body">
+          <p>Having considered the proposal of the Committee of the Supreme Soviet of the USSR on International Affairs on transforming the International Lenin Prize "For strengthening peace among the peoples" and improving the practice of its awarding in light of the present stage of the movement of broad public forces for the survival of humanity, the building of a nuclear-free and nonviolent world, and the establishment in international affairs of new political thinking, the Presidium of the Supreme Soviet of the USSR resolves:</p>
+          <p>1. Consider it expedient henceforth to name the International Lenin Prize "For strengthening peace among the peoples" the International Lenin Peace Prize.</p>
+          <p>2. Approve the Statute of the International Lenin Peace Prize.</p>
+          <p>3. Approve the Regulations on the Committee for the International Lenin Peace Prizes.</p>
+          <p>4. Consider as no longer in force:</p>
+          <ul class="ukaz-items">
+            <li>the Decree of the Presidium of the Supreme Soviet of the USSR of 6 September 1956 "On the international Lenin Prizes 'For strengthening peace among the peoples'" as amended by the Decrees of 15 February 1980 and 26 November 1986;</li>
+            <li>the Decree of the Presidium of the Supreme Soviet of the USSR of 22 April 1957 "On the approval of the diploma and the gold breast medal of a laureate of the International Lenin Prize 'For strengthening peace among the peoples'" as amended by the Decree of 15 February 1980;</li>
+            <li>the Resolution of the Presidium of the Supreme Soviet of the USSR of 22 April 1966 "On the Committee for the international Lenin Prizes 'For strengthening peace among the peoples'" as amended by the Decrees of 15 February 1980 and 26 November 1986.</li>
+          </ul>
+        </div>
+        <footer class="ukaz-signoff">
+          <p class="ukaz-place">Moscow, the Kremlin. 11 December 1989.</p>
+        </footer>
+        </div>
+        </div>
+      </blockquote>
+      <figcaption class="source" data-i18n="rename1989Source" data-i18n-html>The picture is a page of <em>Pravda</em> reporting the Presidium meeting the day after the resolution. The full text is the resolution as published. <a target="_blank" rel="noopener noreferrer" href="http://pravo.levonevsky.org/baza/soviet/sssr1118.htm">Transcription of the resolution</a>. <a target="_blank" rel="noopener noreferrer" href="https://archive.org/details/1989346_4216">Scan of the issue: Pravda, 12 December 1989, no. 346 (26064), page 1</a>. <a target="_blank" rel="noopener noreferrer" href="https://vedomosti.sssr.su/1989/29/">Vedomosti of the Congress of People's Deputies of the USSR and the Supreme Soviet of the USSR, 1989, no. 27, art. 534</a>.</figcaption>
+      </figure>
+    </section>
+
+    <section id="births">
+      <div class="essay" data-i18n="mapEssay" data-i18n-html>
+        <p>The same decree says: citizens of any country, with no regard to political, religious, and racial differences. The map tests the geography in that sentence. It does not test the rest. Birth is not citizenship, and it is not the country that put a person forward. A prize that was a domestic honor of the Soviet Union would have piled its births up there.</p>
+        <p>The births pile up elsewhere. The largest numbers on record are France, 13, then Germany, 12, the United States, 9, and India, 7. Germany is one label in the file, with East and West not split. Russia and Ukraine together account for eight births. No other Soviet republic appears as a birth country. More than fifty birth countries are named, so the list is wide. Every recorded birth has coordinates on the map. The world of this prize is mostly a world of people born outside the state that signed it.</p>
+      </div>
+      <p class="lead" id="map-lead"></p>
+      <figure class="viz">
+        <figcaption class="figcap">
+          <h2><span class="fig-no" data-i18n="n6">Fig. 6.</span> <span data-i18n="capMap">Where were they born?</span></h2>
+        </figcaption>
+      <div class="chart" id="map-chart"></div>
+      </figure>
+      <p class="source chart-tech" id="map-source"></p>
+    </section>
+
+    <footer class="methodology" id="method">
+      <h2 data-i18n="methTitle">How the list was made</h2>
+      <ol>
+        <li data-i18n="meth1" data-i18n-html>Sources for the roster: year-by-year lists on the prize pages in <a target="_blank" rel="noopener noreferrer" href="https://de.wikipedia.org/wiki/Internationaler_Lenin-Friedenspreis">German</a>, <a target="_blank" rel="noopener noreferrer" href="https://ru.wikipedia.org/wiki/%D0%9C%D0%B5%D0%B6%D0%B4%D1%83%D0%BD%D0%B0%D1%80%D0%BE%D0%B4%D0%BD%D0%B0%D1%8F_%D0%9B%D0%B5%D0%BD%D0%B8%D0%BD%D1%81%D0%BA%D0%B0%D1%8F_%D0%BF%D1%80%D0%B5%D0%BC%D0%B8%D1%8F_%C2%AB%D0%97%D0%B0_%D1%83%D0%BA%D1%80%D0%B5%D0%BF%D0%BB%D0%B5%D0%BD%D0%B8%D0%B5_%D0%BC%D0%B8%D1%80%D0%B0_%D0%BC%D0%B5%D0%B6%D0%B4%D1%83_%D0%BD%D0%B0%D1%80%D0%BE%D0%B4%D0%B0%D0%BC%D0%B8%C2%BB">Russian</a>, and <a target="_blank" rel="noopener noreferrer" href="https://en.wikipedia.org/wiki/Lenin_Peace_Prize">English</a> Wikipedia; the Yearbook of the Great Soviet Encyclopedia (Ежегодник Большой советской энциклопедии); a database of scanned <em>Pravda</em> archives; and a database of the archive of the Committee on the International Lenin Peace Prizes, 1949–1991 (<a target="_blank" rel="noopener noreferrer" href="https://guides.rusarchives.ru/terms/6/346/mezhdunarodnye-otnosheniya">fond R-9522, 1 inventory, 194 files, extreme dates 1949–1991, State Archive of the Russian Federation</a>).</li>
+        <li data-i18n="meth2" data-i18n-html>The roster follows the German Wikipedia chronology, which footnotes the <em>Pravda</em> decree for each year. Six people named only on the English or Russian page are kept. Picasso and Niemeyer keep the years those pages give them. Where a footnote points to a decree, the issue was read in the scanned <em>Pravda</em> archives. Fond R-9522 would be the fullest FOIA-like holding; that fund was not opened for this project.</li>
+        <li data-i18n="meth3">The prize year is the year named in the decree, not the day the medal was handed over.</li>
+        <li data-i18n="meth4">Stalin prizes for 1951-1955 were announced in December of that year. The 1950 prize was announced on 6 April 1951. Lenin prizes were usually announced around 1 May and named the previous year, or a span such as 1968-1969.</li>
+        <li data-i18n="meth5">Stalin laureates who later exchanged the medal for a Lenin medal are one row, under the Stalin prize.</li>
+        <li data-i18n="meth6">Occupation is the text before the first semicolon in the Wikidata list. Near-synonyms are not merged.</li>
+        <li data-i18n="meth7">Age is the first year of the prize minus the birth year, the age turned during that calendar year.</li>
+        <li data-i18n="meth8">The map places each person at the recorded birth coordinates. Shared points are drawn as a small ring. People with no coordinates are left off.</li>
+        <li data-i18n="meth9">Halldor Laxness, Martin Andersen Nexo, and names found only on incomplete lists are left out. Laxness's 1952 Soviet prize was the World Peace Council literary prize. Nexo sat on the committee and is not in a decree.</li>
+        <li data-i18n="meth10">Biography, occupation, and coordinates come from Wikidata. Arthur Moulton's birth place follows his English Wikipedia infobox. John Hanly Morgan has no Wikidata item; his dates and New Albany birthplace come from a Unitarian Universalist Ministers Association obituary. A few other birth places without Wikidata coordinates (Thakin Kodaw Hmaing, Ragnar Forbech, Udakendawala Siri Saranankara Thero, Peter Ayodele Curtis Joseph, Hikmat Abu Zayd, Gordon Schaffer) are filled from Wikipedia or local gazetteers. Schaffer's place is Clapham, South London, where Wikipedia says he grew up.</li>
+        <li data-i18n="meth11">Headlines in the title wall are generated, not copied from Pravda. The exception is five lines from 19-21 December 1949, the decree on the Stalin Prizes, and «События в Корее» from Pravda, 3 November 1950, no. 307 (11779), which stays in the wall. The date and issue at the side change with the red event then in view. Issue numbers are counted from 18 December 1949, no. 352 (11459), and are not an archival record.</li>
+      </ol>
+    </footer>
+    <section class="footnotes" id="footnotes" aria-labelledby="fn-list-title">
+      <h2 id="fn-list-title" data-i18n="fnListTitle">Footnotes</h2>
+      <ol>
+        <li id="fn-1">
+          <span data-i18n="fn1" data-i18n-html>For example, here are two lists of peace prizes: <a href="https://en.wikipedia.org/wiki/List_of_peace_prizes">List of peace prizes from English Wikipedia</a> and <a href="https://peacebellfoundation.org/peace-prizes/">Peace Prizes, from the Peace Bell Foundation (501(c)(3) non-profit)</a>.</span>
+          <a class="footnotes-back" href="#fnref-1" data-i18n="fnBackLink">To the text</a>
+        </li>
+        <li id="fn-2">
+          <span data-i18n="fn2" data-i18n-html>For example, see Taylor O’Connor’s account of seventy-two peace prizes: descriptions of each, then a generalization and an analysis. <a href="https://everydaypeacebuilding.com/peace-prize-award/">Mapping 72 Peace Prize Award Programs Around the World, by Taylor O’Connor from Everyday Peacebuilding consultancy, 7 September 2023</a>.</span>
+          <a class="footnotes-back" href="#fnref-2" data-i18n="fnBackLink">To the text</a>
+        </li>
+        <li id="fn-3">
+          <span data-i18n="fn3" data-i18n-html>The decree was also published in the official bulletin of state acts of the Soviet Supreme Soviet. <a href="https://docs.historyrussia.org/ru/nodes/521433-o-pereimenovanii-mezhdunarodnyh-stalinskih-premiy-v-mezhdunarodnye-leninskie-premii-locale-nil-za-ukreplenie-mira-mezhdu-narodami-locale-nil-ukaz-prezidiuma-verhovnogo-soveta-sssr-moskva-6-sentyabrya-1956-g#mode/inspect/page/1/zoom/4">Scan: Vedomosti of the Supreme Soviet of the USSR, 1956, no. 18, art. 393, page 258</a>.</span>
+          <a class="footnotes-back" href="#fnref-3" data-i18n="fnBackLink">To the text</a>
+        </li>
+      </ol>
+    </section>
+    <button type="button" class="dev-plain-toggle" id="dev-plain-toggle" aria-pressed="false">dev: drop section colors</button>
+    <button type="button" class="dev-plain-toggle" id="dev-tech-toggle" aria-pressed="false">dev: drop chart tech notes</button>
+    <nav class="dev-hero-mode" id="hero-mode" aria-label="Hero mode">
+      <button type="button" class="dev-plain-toggle" data-hero-mode="wall">hero: wall</button>
+      <button type="button" class="dev-plain-toggle" data-hero-mode="hex">hero: hex</button>
+      <button type="button" class="dev-plain-toggle" data-hero-mode="dove">hero: dove</button>
+    </nav>
+  </div>
+  </div>
+  </div>
+  <div id="tip" hidden></div>
+  <button type="button" class="fn-backdrop" id="fn-backdrop" hidden></button>
+  <div class="fn-drawer" id="fn-drawer" hidden role="dialog" aria-modal="true" aria-labelledby="fn-title">
+    <button type="button" class="fn-drawer-toggle" id="fn-toggle" aria-expanded="false" aria-controls="fn-body">
+      <span id="fn-title" data-i18n="fnTitle">Footnote</span>
+      <svg class="fn-chevron" viewBox="0 0 24 12" aria-hidden="true" focusable="false">
+        <path d="M4 9.5 12 2.5l8 7" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+      </svg>
+    </button>
+    <div class="fn-drawer-body" id="fn-body"></div>
+  </div>
+  <script src="i18n.js"></script>
+  <script src="press-sample.js"></script>
+  <script src="js/data/people.js"></script>
+  <script src="js/data/portraits.js"></script>
+  <script src="js/data/land.js"></script>
+  <script src="js/data/lakes.js"></script>
+  <script src="js/shared/palette.js"></script>
+  <script src="js/shared/hex.js"></script>
+  <script src="js/shared/shape-pack.js"></script>
+  <script src="js/shared/marks.js"></script>
+  <script src="js/shared/world.js"></script>
+  <script src="sections/hero/hero-wall.js"></script>
+  <script src="sections/hero/hero-hex.js"></script>
+  <script src="sections/hero/hero-dove.js"></script>
+  <script src="sections/hero/hero.js"></script>
+  <script src="sections/occupations/occupations.js"></script>
+  <script src="sections/occupations/occupations-world.js"></script>
+  <script src="sections/years/years-narrow.js"></script>
+  <script src="sections/years/years.js"></script>
+  <script src="sections/years/years-world.js"></script>
+  <script src="sections/ages/ages.js"></script>
+  <script src="sections/map/map-narrow.js"></script>
+  <script src="sections/map/map.js"></script>
+  <script src="sections/tip/tip.js"></script>
+  <script src="sections/decree/decree.js"></script>
+  <script src="sections/footnotes/footnotes.js"></script>
+  <script src="sections/press/press.js"></script>
+  <script src="sections/toc/toc.js"></script>
+  <script src="js/shared/section-fade.js"></script>
+  <script src="js/shared/enter.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

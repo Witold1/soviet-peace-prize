@@ -1,0 +1,36 @@
+.methodology {
+  position: relative;
+  margin: 8px 0 0;
+  padding: 22px 22px 18px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  color: #000;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.methodology h2 {
+  position: absolute;
+  top: -0.45rem;
+  left: calc(1rem + 10px);
+  margin: 0;
+  padding: 0 10px;
+  background: var(--bg);
+  color: #000;
+  font-family: "Segoe UI", Helvetica, Arial, sans-serif;
+  font-size: 1rem;
+  font-weight: 500;
+  letter-spacing: 1px;
+  line-height: 1rem;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.methodology ol {
+  margin: 0 0 0 1rem;
+  padding: 0;
+  list-style-type: decimal;
+  list-style-position: outside;
+}
+
+.methodology li + li { margin-top: 0.35rem; }

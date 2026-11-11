@@ -1,0 +1,149 @@
+.press-scroll { margin: 0 0 28px; }
+
+.press-pin {
+  position: sticky;
+  top: 16px;
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100vh - 32px);
+  overflow: hidden;
+}
+
+.press-band {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  margin-right: 0.5rem;
+  min-height: 0;
+}
+
+.press-issue {
+  position: absolute;
+  z-index: 3;
+  top: 0;
+  bottom: 0;
+  right: calc(-0.5 * (var(--pad) + 0.5rem + 1.5rem));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  writing-mode: vertical-rl;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: calc(1 - var(--fade, 0) * 0.55);
+}
+
+.press-issue-date {
+  background: #f3e2b3;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+
+.press-frame {
+  position: relative;
+  min-height: 0;
+  max-height: calc(100vh - 32px);
+  overflow: hidden;
+}
+
+.press-list {
+  --dx: 0px;
+  --dy: 0px;
+  position: relative;
+  display: block;
+  margin: 0;
+  padding: 0 0 8px;
+  list-style: none;
+  line-height: 1.35;
+  text-align: justify;
+  text-align-last: left;
+  text-justify: inter-word;
+  transform-origin: 50% 80%;
+}
+
+.press-reel {
+  position: relative;
+}
+
+.press-reel > .doc {
+  margin: 2rem 0 0;
+  background: #fff;
+  opacity: var(--fade, 0);
+}
+
+/* Invisible decree must not leave a tall empty hole under the headlines. */
+.press-reel > .doc.is-awaiting {
+  height: 0;
+  margin: 0;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.press-line {
+  display: inline;
+  margin: 0 1em 0 0;
+  line-height: inherit;
+  color: #8a8a8a;
+  font-style: italic;
+  font-weight: 400;
+}
+
+.press-line:not(.is-prize) {
+  opacity: calc(1 - var(--fade, 0) * 0.55);
+}
+
+.press-line.is-instability,
+.press-line.is-prize {
+  color: #c41212;
+  font-style: normal;
+  font-weight: 700;
+}
+
+.press-line.is-current {
+  background: #f3e2b3;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+
+.press-heat {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.press-heat-line {
+  position: absolute;
+  margin: 0;
+  color: #c41212;
+  font-style: normal;
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.015em;
+  transform-origin: center center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .press-pin {
+    position: static;
+    height: auto;
+    min-height: 0;
+  }
+
+  .press-frame {
+    overflow: visible;
+    flex: none;
+    height: auto;
+  }
+
+  .press-reel,
+  .press-list {
+    transform: none !important;
+  }
+
+  .press-reel > .doc {
+    opacity: 1;
+  }
+}

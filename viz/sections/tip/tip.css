@@ -1,0 +1,70 @@
+[data-i] { cursor: pointer; }
+[data-i].no-link { cursor: default; }
+[data-mark]:focus { outline: none; }
+
+#tip {
+  position: fixed;
+  z-index: 5;
+  max-width: 280px;
+  padding: 10px 12px;
+  background: #fff;
+  border: 1px solid var(--line);
+  pointer-events: auto;
+}
+
+#tip[hidden] { display: none; }
+
+#tip.has-portrait:not([hidden]) {
+  display: grid;
+  grid-template-columns: 56px minmax(0, 1fr);
+  column-gap: 10px;
+  align-items: start;
+  max-width: 320px;
+}
+
+#tip .face {
+  grid-column: 1;
+  grid-row: 1 / span 20;
+  width: 56px;
+  height: 56px;
+  overflow: hidden;
+  background: #1a1a1a;
+}
+
+#tip .face img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  filter: grayscale(1) contrast(1.05);
+  pointer-events: none;
+}
+
+#tip.has-portrait > :not(.face) {
+  grid-column: 2;
+}
+
+#tip .name {
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+#tip .ru {
+  margin-top: 1px;
+}
+
+#tip .meta { margin-top: 6px; }
+
+#tip .work {
+  margin-top: 4px;
+}
+
+#tip .linkhint {
+  display: inline-block;
+  margin-top: 6px;
+  color: #000;
+  text-decoration-line: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.14em;
+}

@@ -1,0 +1,34 @@
+polygon { cursor: pointer; }
+polygon:focus { outline: none; }
+polygon.no-link { cursor: default; }
+
+.clouds {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 36px 28px;
+}
+
+.group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: max-content;
+}
+
+.group figcaption {
+  margin-top: 10px;
+  text-align: center;
+  line-height: 1.3;
+}
+
+.group figcaption .title {
+  display: block;
+  white-space: nowrap;
+}
+
+.group .count {
+  display: block;
+  margin-top: 2px;
+}

@@ -1,0 +1,134 @@
+.fn {
+  font-size: 0.75em;
+  line-height: 0;
+}
+
+.fn-ref {
+  display: inline-block;
+  margin: 0;
+  padding: 0.15em 0.2em 0.05em;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  line-height: 1;
+  cursor: pointer;
+  vertical-align: baseline;
+  text-decoration-line: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.14em;
+  scroll-margin-top: 72px;
+}
+
+.fn-ref.is-open {
+  position: relative;
+  z-index: 21;
+}
+
+.fn-ref:focus-visible,
+.fn-drawer-toggle:focus-visible {
+  outline: 1px solid #000;
+  outline-offset: 2px;
+}
+
+.fn-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 19;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.fn-backdrop[hidden],
+.fn-drawer[hidden] { display: none; }
+
+.fn-drawer {
+  position: fixed;
+  bottom: 0;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  min-height: min(10rem, 70vh);
+  max-height: min(70vh, 24rem);
+  background: #e2e2e2;
+  border: 1px solid #b0b0b0;
+  border-bottom: 0;
+  border-radius: 10px 10px 0 0;
+}
+
+.fn-drawer-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  margin: 0;
+  padding: 14px 18px 8px;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  text-align: left;
+  cursor: pointer;
+}
+
+.fn-chevron {
+  width: 18px;
+  height: 9px;
+  flex: none;
+  transition: transform 160ms ease;
+}
+
+.fn-drawer.is-open .fn-chevron { transform: rotate(180deg); }
+
+.fn-drawer-body {
+  overflow: auto;
+  padding: 0 18px 18px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fn-chevron { transition: none; }
+}
+
+.footnotes {
+  margin: 56px 0 0;
+  padding-top: 18px;
+  border-top: 1px solid #ccc;
+}
+
+.footnotes h2 {
+  margin: 0 0 12px;
+  font-family: "Segoe UI", Helvetica, Arial, sans-serif;
+  font-size: 1rem;
+  font-weight: 500;
+  letter-spacing: 1px;
+  line-height: 1rem;
+  text-transform: uppercase;
+}
+
+.footnotes ol {
+  margin: 0 0 0 1.25rem;
+  padding: 0;
+  list-style-type: decimal;
+  list-style-position: outside;
+}
+
+.footnotes li { margin: 0; }
+
+.footnotes li + li { margin-top: 0.5rem; }
+
+.footnotes-back {
+  margin-left: 0.35rem;
+  color: #000;
+  text-decoration-line: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.14em;
+  white-space: nowrap;
+}

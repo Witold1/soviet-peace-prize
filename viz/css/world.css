@@ -1,0 +1,56 @@
+/* Cold War “world” product chrome (Fig. 3 / Fig. 4). Drop with the *-world.js scripts. */
+
+:root {
+  --world-first: #3d5a80;
+  --world-second: #b85c38;
+  --world-third: #5f7a3e;
+}
+
+.swatch.world-first { background: var(--world-first); }
+.swatch.world-second { background: var(--world-second); }
+.swatch.world-third { background: var(--world-third); }
+
+.tally .w-first { color: var(--world-first); }
+.tally .w-second { color: var(--world-second); }
+.tally .w-third { color: var(--world-third); }
+
+.split-toolbar {
+  position: relative;
+  margin: 0;
+}
+
+.split-toolbar .legend {
+  margin: 0 0 4px;
+  padding-right: 2rem;
+}
+
+.split-next {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.55rem;
+  height: 1.55rem;
+  margin: 0;
+  padding: 0 0 0.05em;
+  border: 1px solid #222;
+  border-radius: 2px;
+  background: #fff;
+  color: #222;
+  font: inherit;
+  font-size: 1.2rem;
+  font-weight: 600;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.split-next:hover,
+.split-next:focus-visible {
+  background: #222;
+  color: #fff;
+  outline: none;
+}

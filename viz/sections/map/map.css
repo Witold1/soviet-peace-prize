@@ -1,0 +1,5 @@
+.land { fill: #d8d0be; stroke: #5f5a52; stroke-width: 0.85; }
+
+.lake { fill: var(--bg); }
+
+html:not([data-dev-plain]) #births .lake { fill: #d9ead3; }

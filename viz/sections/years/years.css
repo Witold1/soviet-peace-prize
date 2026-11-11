@@ -1,0 +1,64 @@
+.tally {
+  margin: 4px 0 12px;
+  font-family: Georgia, "Palatino Linotype", Palatino, serif;
+  font-size: 26px;
+  line-height: 1.25;
+}
+
+.tally .m { color: var(--male); }
+.tally .f { color: var(--female); }
+
+.swatch.sq {
+  width: 11px;
+  height: 11px;
+  clip-path: none;
+}
+
+.years-scrolly {
+  position: relative;
+  margin: 0 0 28px;
+}
+
+.years-scrolly.is-sticky .years-pin {
+  position: sticky;
+  top: 16px;
+  z-index: 1;
+  max-height: calc(100vh - 32px);
+  overflow: auto;
+  padding-bottom: 8px;
+  background: #fce5cd;
+}
+
+html[data-dev-plain] .years-scrolly.is-sticky .years-pin {
+  background: var(--bg);
+}
+
+.years-steps {
+  pointer-events: none;
+}
+
+.years-step {
+  height: 32vh;
+  min-height: 160px;
+}
+
+.years-step[data-step="span"] {
+  height: 24vh;
+  min-height: 120px;
+}
+
+#year-chart rect[data-mark="1"] {
+  vector-effect: non-scaling-stroke;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .years-scrolly.is-sticky .years-pin {
+    position: static;
+    max-height: none;
+    overflow: visible;
+  }
+
+  .years-steps {
+    display: none;
+  }
+}

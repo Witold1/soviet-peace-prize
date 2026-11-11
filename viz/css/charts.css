@@ -1,0 +1,41 @@
+.chart {
+  overflow-x: auto;
+}
+
+svg.wide {
+  width: 100%;
+  height: auto;
+}
+
+.axis {
+  fill: #000;
+  font-size: 1rem;
+  font-family: "Segoe UI", Helvetica, Arial, sans-serif;
+}
+
+.axis-line { stroke: #ddd; stroke-width: 1; }
+
+.avg-line {
+  stroke: #000;
+  stroke-width: 1;
+  stroke-dasharray: 2 3;
+}
+
+.avg-label, .map-label {
+  fill: #000;
+  font-size: 1rem;
+  font-family: "Segoe UI", Helvetica, Arial, sans-serif;
+}
+
+/* Map + years reflow in JS when narrow. Ages keep the wide beeswarm and scroll. */
+@container page (max-width: 640px) {
+  #map-chart,
+  #year-chart {
+    overflow-x: visible;
+  }
+
+  #age-chart svg.wide {
+    width: 920px;
+    max-width: none;
+  }
+}

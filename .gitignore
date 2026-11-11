@@ -1,0 +1,24 @@
+# Keep the Pages site lean: only viz/, figures/, and data/laureates.csv ship.
+tools/
+scripts/
+
+# Other data workspaces / intermediates (not needed for the viz)
+data/gazette_pilot/
+data/gazette_portraits/
+data/raw_gazette/
+data/extra_laureates.json
+data/place_countries.json
+data/raw_entities.json
+data/raw_qids.json
+data/related_entities.json
+data/README.md
+
+# Local / OS junk
+.DS_Store
+Thumbs.db
+*.pyc
+__pycache__/
+.venv/
+venv/
+.env
+.env.*

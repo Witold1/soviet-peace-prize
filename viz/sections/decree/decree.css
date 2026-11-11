@@ -1,0 +1,335 @@
+.doc {
+  margin: 0 0 1.5rem;
+}
+
+.doc-mid { margin: 0 0 40px; }
+
+.doc blockquote {
+  position: relative;
+  z-index: 1;
+  margin: 0;
+  padding: 0;
+  font-family: Georgia, "Palatino Linotype", Palatino, "Times New Roman", serif;
+  line-height: 1.35;
+  quotes: none;
+}
+
+.ukaz-text {
+  min-width: 0;
+  position: relative;
+}
+
+.ukaz-copy {
+  position: relative;
+  padding: 1.85rem 2.75rem 0.2rem;
+}
+
+.ukaz-copy::before,
+.ukaz-copy::after {
+  position: absolute;
+  font-size: 3rem;
+  font-weight: normal;
+  line-height: 1;
+}
+
+.ukaz-copy::before {
+  content: "«";
+  left: 0;
+  top: 1.55rem;
+}
+
+.ukaz-copy::after {
+  content: "»";
+  right: 0;
+  bottom: -0.15rem;
+}
+
+html[lang="en"] .ukaz-copy::before { content: "\201C"; }
+
+html[lang="en"] .ukaz-copy::after { content: "\201D"; }
+
+.ukaz-head {
+  margin: 0 0 1.1rem;
+  text-align: center;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.ukaz-head p { margin: 0; }
+
+.ukaz-original {
+  position: absolute;
+  top: 0.05rem;
+  right: 0;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.32em;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font-family: "Segoe UI", Helvetica, Arial, sans-serif;
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  line-height: 1.2;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.14em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.ukaz-glass,
+.ukaz-lines {
+  display: block;
+  width: 0.95em;
+  height: 0.95em;
+  flex: none;
+}
+
+.ukaz.is-open .ukaz-glass,
+.ukaz:not(.is-open) .ukaz-lines { display: none; }
+
+.ukaz-original:focus-visible {
+  outline: 1px solid #000;
+  outline-offset: 2px;
+}
+
+.ukaz-loupe {
+  display: none;
+  position: relative;
+  width: min(100%, 25rem);
+  margin: 0.15rem auto 0;
+}
+
+.ukaz-loupe.is-page {
+  --zoom: 0;
+  --side-x: 0.019565;
+  --side-y: 0.033478;
+  --side-w: 0.323913;
+  --side-h: 0.265188;
+  width: min(100%, 28rem);
+}
+
+#decree-1956 .ukaz-loupe.is-page {
+  --side-x: 0.0196;
+  --side-y: 0.4508;
+  --side-w: 0.4858;
+  --side-h: 0.1575;
+}
+
+#decree-1956 .ukaz-view {
+  aspect-ratio: 1836 / 2673;
+}
+
+#decree-1989 .ukaz-loupe.is-page {
+  --side-x: 0.7353;
+  --side-y: 0.1317;
+  --side-w: 0.2358;
+  --side-h: 0.1975;
+}
+
+#decree-1989 .ukaz-view {
+  aspect-ratio: 1798 / 2628;
+}
+
+.ukaz.is-open .ukaz-loupe { display: block; }
+
+.ukaz-scan {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin: 0;
+  border: 1px solid var(--line);
+}
+
+.ukaz-view {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 3680 / 5317;
+  border: 1px solid var(--line);
+  background: #fff;
+}
+
+.ukaz-loupe.is-page.is-column {
+  --zoom: 1;
+}
+
+.ukaz-loupe.is-page .ukaz-scan {
+  position: absolute;
+  left: calc(var(--zoom) * var(--side-x) / var(--side-w) * -100%);
+  top: calc(var(--zoom) * var(--side-y) / var(--side-w) * -100%);
+  width: calc(100% * (1 + var(--zoom) * (1 / var(--side-w) - 1)));
+  height: calc(100% * (1 + var(--zoom) * (1 / var(--side-w) - 1)));
+  max-width: none;
+  border: 0;
+  object-fit: fill;
+  object-position: left top;
+}
+
+.ukaz-zoom {
+  display: none;
+  position: absolute;
+  top: 0.05rem;
+  left: 0;
+  z-index: 1;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font-family: "Segoe UI", Helvetica, Arial, sans-serif;
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  line-height: 1.2;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.14em;
+  text-transform: uppercase;
+  cursor: zoom-out;
+}
+
+.ukaz.is-open.is-column .ukaz-zoom { display: inline; }
+
+.ukaz-zoom:focus-visible,
+.ukaz-side:focus-visible {
+  outline: 1px solid #000;
+  outline-offset: 2px;
+}
+
+.ukaz-side {
+  position: absolute;
+  z-index: 1;
+  /* Track the scan as --zoom grows, so the box stays on the decree. */
+  left: calc(var(--side-x) * (1 - var(--zoom)) * 100%);
+  top: calc(var(--side-y) * (1 - var(--zoom)) * 100%);
+  width: calc((var(--side-w) * (1 - var(--zoom)) + var(--zoom)) * 100%);
+  height: calc((var(--side-h) * (1 - var(--zoom)) + var(--zoom) * var(--side-h) / var(--side-w)) * 100%);
+  margin: 0;
+  padding: 0;
+  border: 1.5px solid #000;
+  box-shadow: inset 0 0 0 1px #fff, 0 0 0 2400px rgba(255, 255, 255, 0.48);
+  background: transparent;
+  cursor: zoom-in;
+}
+
+.ukaz-loupe.is-column .ukaz-side { display: none; }
+
+.ukaz-loupe.is-scrub .ukaz-side {
+  /* Fade only in the last stretch, once the box nearly fills the view. */
+  opacity: max(0, min(1, calc((1 - var(--zoom)) / 0.28)));
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ukaz-view,
+  .ukaz-loupe.is-page .ukaz-scan { transition: none; }
+}
+
+.ukaz-mark,
+.ukaz-lens {
+  position: absolute;
+  z-index: 2;
+  border: 1px solid #000;
+  pointer-events: none;
+  display: none;
+}
+
+.ukaz-mark { box-shadow: inset 0 0 0 1px #fff; }
+
+.ukaz-lens {
+  z-index: 3;
+  background: #fff no-repeat;
+}
+
+.ukaz-mark.is-on,
+.ukaz-lens.is-on { display: block; }
+
+.ukaz.is-open .ukaz-copy { display: none; }
+
+.ukaz.is-open .ukaz-text { padding-top: 1.75rem; }
+
+.ukaz.is-open:not(.is-column):not(.is-zoomed):has(.is-page) .ukaz-original { display: none; }
+
+.ukaz.is-open:not(.is-column):has(.is-page) .ukaz-text { padding-top: 0; }
+
+.ukaz-kicker {
+  margin: 0 0 0.45rem;
+  font-size: 1.6rem;
+  letter-spacing: 0.14em;
+  text-indent: 0.14em;
+  line-height: 1;
+}
+
+.ukaz-body p {
+  margin: 0 0 0.65rem;
+  text-align: justify;
+}
+
+.ukaz-items {
+  margin: 0 0 0.65rem;
+  padding: 0 0 0 1.25rem;
+  list-style: none;
+}
+
+.ukaz-items li { margin: 0; }
+
+.ukaz-signoff { margin-top: 0.35rem; }
+
+.ukaz-sign { margin: 0; }
+
+.ukaz-who { font-weight: 700; }
+
+.ukaz-place { margin: 0.85rem 0 0; }
+
+.ukaz-note {
+  margin: 1.15rem 0 0;
+  padding-top: 0.7rem;
+  border-top: 1px solid var(--line);
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+
+.doc figcaption { margin: 0.75rem 0 0; }
+
+@container page (max-width: 1100px) {
+  .ukaz.is-open .ukaz-text { padding-top: 0; }
+
+  .ukaz-text {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: baseline;
+    column-gap: 0.75rem;
+  }
+
+  .ukaz-original,
+  .ukaz-zoom {
+    position: static;
+    grid-row: 1;
+    margin: 0 0 0.45rem;
+    background: #fff;
+    white-space: nowrap;
+  }
+
+  .ukaz-original { grid-column: 2; }
+
+  .ukaz-zoom {
+    grid-column: 1;
+    justify-self: start;
+  }
+
+  .ukaz-loupe,
+  .ukaz-copy { grid-column: 1 / -1; }
+
+  #decree-1949 .ukaz.is-open:has(.is-scrub) .ukaz-original {
+    position: absolute;
+    top: 0.05rem;
+    right: 0;
+    grid-row: auto;
+    grid-column: auto;
+  }
+}

@@ -1,0 +1,121 @@
+.mast {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px 18px;
+  margin: 0 0 14px;
+}
+
+.display {
+  display: flex;
+  align-items: center;
+  color: #000;
+}
+
+.display button {
+  display: flex;
+  align-items: center;
+  margin: 0;
+  padding: 2px 0 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+}
+
+.display button + button {
+  margin-left: 10px;
+  padding-left: 10px;
+  border-left: 1px solid #000;
+}
+
+.display button svg {
+  display: block;
+  width: 16px;
+  height: 16px;
+  opacity: 0.38;
+}
+
+.display button[aria-current="true"] {
+  cursor: default;
+}
+
+.display button[aria-current="true"] svg {
+  opacity: 1;
+}
+
+.display button:focus-visible {
+  outline: 1px solid #000;
+  outline-offset: 3px;
+}
+
+.lang {
+  display: flex;
+  flex: none;
+  color: #000;
+  font-size: 1rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.lang button {
+  margin: 0;
+  padding: 3px 0 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  cursor: pointer;
+}
+
+.lang button + button {
+  margin-left: 10px;
+  padding-left: 10px;
+  border-left: 1px solid #000;
+}
+
+.lang button[aria-current="true"] {
+  color: #000;
+  font-weight: 700;
+  cursor: default;
+}
+
+h1 {
+  margin: 0 0 16px;
+  max-width: 22em;
+  font-family: Georgia, "Palatino Linotype", Palatino, serif;
+  font-size: 44px;
+  font-weight: normal;
+  line-height: 1.12;
+  letter-spacing: -0.02em;
+}
+
+.opener {
+  margin: 0 0 28px;
+}
+
+.intro {
+  margin: 0 0 56px;
+}
+
+.hook {
+  margin: 0 0 1.25rem;
+}
+
+.hook p { margin: 0 0 0.75rem; }
+
+.hook p:last-child { margin-bottom: 0; }
+
+@media (max-width: 640px) {
+  h1 { font-size: 34px; }
+}
+
+@container page (max-width: 640px) {
+  h1 { font-size: 34px; }
+}
+
