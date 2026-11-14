@@ -31,6 +31,8 @@ function setDisplay(next) {
   syncPress();
   if (typeof layoutYears === "function") layoutYears();
   if (typeof syncYears === "function") syncYears();
+  if (typeof layoutDestalin === "function") layoutDestalin();
+  if (typeof syncDestalin === "function") syncDestalin();
   layoutHero();
   syncHero();
   syncSectionFade();
@@ -57,35 +59,65 @@ function setLang(next) {
   syncToc();
 }
 
-window.addEventListener("scroll", function () {
+function viewNear(el, margin) {
+  if (!el) return false;
+  var rect = el.getBoundingClientRect();
+  var pad = margin == null ? 160 : margin;
+  return rect.bottom > -pad && rect.top < window.innerHeight + pad;
+}
+
+var scrollSyncQueued = false;
+var scrollHeroEl = null;
+var scrollPrizeEl = null;
+var scrollYearsEl = null;
+function runScrollSync() {
+  scrollSyncQueued = false;
+  if (!scrollHeroEl) scrollHeroEl = document.getElementById("all");
+  if (!scrollPrizeEl) scrollPrizeEl = document.getElementById("prize");
+  if (!scrollYearsEl) scrollYearsEl = document.getElementById("years");
   syncToc();
-  syncPress();
-  if (typeof syncYears === "function") syncYears();
-  syncHero();
+  if (viewNear(scrollPrizeEl, 240)) syncPress();
+  if (viewNear(scrollYearsEl, 240) && typeof syncYears === "function") syncYears();
+  if (viewNear(scrollHeroEl, 240)) syncHero();
   syncSectionFade();
+}
+
+window.addEventListener("scroll", function () {
+  if (scrollSyncQueued) return;
+  scrollSyncQueued = true;
+  requestAnimationFrame(runScrollSync);
 }, { passive: true });
+
 var yearNarrowWas = null;
 var mapNarrowWas = null;
+var resizeSyncQueued = false;
 window.addEventListener("resize", function () {
-  var narrow = typeof yearChartNarrow === "function" && yearChartNarrow();
-  if (narrow !== yearNarrowWas) {
-    yearNarrowWas = narrow;
-    renderYears();
-  }
-  var mapNarrow = typeof mapChartNarrow === "function" && mapChartNarrow();
-  if (mapNarrow !== mapNarrowWas) {
-    mapNarrowWas = mapNarrow;
-    renderMap();
-  }
-  if (typeof centerAgeChartScroll === "function") centerAgeChartScroll();
-  layoutPress();
-  syncPress();
-  if (typeof layoutYears === "function") layoutYears();
-  if (typeof syncYears === "function") syncYears();
-  layoutHero();
-  syncHero();
-  syncSectionFade();
-  syncToc();
+  if (resizeSyncQueued) return;
+  resizeSyncQueued = true;
+  requestAnimationFrame(function () {
+    resizeSyncQueued = false;
+    var narrow = typeof yearChartNarrow === "function" && yearChartNarrow();
+    if (narrow !== yearNarrowWas) {
+      yearNarrowWas = narrow;
+      renderYears();
+    }
+    var mapNarrow = typeof mapChartNarrow === "function" && mapChartNarrow();
+    if (mapNarrow !== mapNarrowWas) {
+      mapNarrowWas = mapNarrow;
+      renderMap();
+    }
+    if (typeof centerAgeChartScroll === "function") centerAgeChartScroll();
+    layoutPress();
+    syncPress();
+    if (typeof layoutYears === "function") layoutYears();
+    if (typeof syncYears === "function") syncYears();
+    if (typeof layoutDestalin === "function") layoutDestalin();
+    if (typeof syncDestalin === "function") syncDestalin();
+    layoutHero();
+    syncHero();
+    syncSectionFade();
+    syncToc();
+  });
 });
 
 (function () {

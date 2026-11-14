@@ -107,6 +107,8 @@ html[lang="en"] .ukaz-copy::after { content: "\201D"; }
 
 .ukaz-loupe.is-page {
   --zoom: 0;
+  /* Pull a little page above the box into the zoomed frame (not flush to the top). */
+  --side-ahead: 0.028;
   --side-x: 0.019565;
   --side-y: 0.033478;
   --side-w: 0.323913;
@@ -114,15 +116,319 @@ html[lang="en"] .ukaz-copy::after { content: "\201D"; }
   width: min(100%, 28rem);
 }
 
-#decree-1956 .ukaz-loupe.is-page {
+#ukaz-loupe-death {
+  --side-x: 0.425;
+  --side-y: 0.028;
+  --side-w: 0.555;
+  --side-h: 0.149;
+}
+
+#ukaz-loupe-death .ukaz-view {
+  aspect-ratio: 1823 / 2653;
+}
+
+#ukaz-loupe-beria {
+  --side-x: 0.02;
+  --side-y: 0.125;
+  --side-w: 0.56;
+  --side-h: 0.30;
+}
+
+#ukaz-loupe-beria .ukaz-view {
+  aspect-ratio: 1840 / 2669;
+}
+
+#ukaz-loupe-malenkov {
+  --side-x: 0.36;
+  --side-y: 0.008;
+  --side-w: 0.62;
+  --side-h: 0.145;
+}
+
+#ukaz-loupe-malenkov .ukaz-view {
+  aspect-ratio: 1830 / 2648;
+}
+
+#ukaz-loupe-cult {
+  --side-x: 0.015;
+  --side-y: 0.14;
+  --side-w: 0.97;
+  --side-h: 0.15;
+}
+
+#ukaz-loupe-cult .ukaz-view {
+  aspect-ratio: 1817 / 2661;
+}
+
+#ukaz-loupe-1956 {
   --side-x: 0.0196;
   --side-y: 0.4508;
   --side-w: 0.4858;
   --side-h: 0.1575;
 }
 
-#decree-1956 .ukaz-view {
+#ukaz-loupe-1956 .ukaz-view {
   aspect-ratio: 1836 / 2673;
+}
+
+/* Page-only destalin zooms: no transcription column. */
+.destalin-page-ukaz .ukaz:not(:has(.ukaz-copy)) .ukaz-text {
+  padding-top: 0;
+}
+
+.destalin-page-ukaz .ukaz:not(:has(.ukaz-copy)).is-column .ukaz-zoom {
+  display: inline;
+}
+
+.destalin {
+  position: relative;
+  display: block;
+  margin: 0 0.5rem 0 0;
+}
+
+.destalin-issue {
+  margin: 0 0 0.55rem;
+  text-align: center;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.destalin-stage {
+  --destalin-card: min(28rem, 92cqi);
+  --destalin-gap: 0.75rem;
+  position: relative;
+  min-width: 0;
+  overflow: hidden;
+  container-type: inline-size;
+  container-name: destalin;
+}
+
+.destalin-carousel {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  justify-content: stretch;
+  justify-items: stretch;
+  align-items: start;
+  width: 100%;
+}
+
+.destalin.is-rushing .destalin-panel.is-current .destalin-page {
+  opacity: 0.18;
+}
+
+.destalin.is-rushing .destalin-panel.is-prev {
+  display: none;
+}
+
+.destalin-rush {
+  display: none;
+  position: absolute;
+  z-index: 2;
+  overflow: hidden;
+  pointer-events: none;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  background: transparent;
+  box-sizing: border-box;
+  transform: none;
+}
+
+.destalin.is-rushing .destalin-rush {
+  display: block;
+}
+
+.destalin-rush-strip {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  gap: 0.45rem;
+  width: max-content;
+  height: 100%;
+  will-change: transform;
+  transform: translate3d(0, 0, 0);
+}
+
+.destalin-rush-ghost {
+  --tilt: 0deg;
+  --ghost-blur: 0.35px;
+  --soft-blur: 2.1px;
+  --soft-mask: radial-gradient(circle at 50% 40%, #000 0%, transparent 70%);
+  position: relative;
+  flex: none;
+  overflow: hidden;
+  height: 100%;
+  background: rgba(235, 228, 212, 0.55);
+  opacity: 0.88;
+  transform: rotate(var(--tilt));
+  transform-origin: 50% 55%;
+}
+
+.destalin-rush-ghost img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: var(--ghost-pos, top center);
+}
+
+.destalin-rush-ghost .destalin-rush-base {
+  filter: blur(var(--ghost-blur));
+}
+
+.destalin-rush-ghost .destalin-rush-soft {
+  position: absolute;
+  inset: -4%;
+  width: 108%;
+  height: 108%;
+  filter: blur(var(--soft-blur));
+  opacity: 0.92;
+  -webkit-mask-image: var(--soft-mask);
+  mask-image: var(--soft-mask);
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+}
+
+.destalin-panel {
+  display: none;
+  flex-direction: column;
+  align-items: stretch;
+  grid-area: 1 / 1;
+  width: 100%;
+  min-width: 0;
+  pointer-events: none;
+}
+
+.destalin-panel.is-current {
+  display: flex;
+  position: relative;
+  z-index: 1;
+  pointer-events: auto;
+}
+
+.destalin-panel.is-prev {
+  display: flex;
+  z-index: 0;
+}
+
+.destalin-panel.is-prev .destalin-page {
+  opacity: 0.11;
+}
+
+.destalin-panel.is-prev > .source {
+  visibility: hidden;
+}
+
+.destalin-panel .destalin-page {
+  width: min(100%, var(--destalin-card));
+  margin-inline: auto;
+  /* Keep settled pages upright so the loupe matches 1949/1989; rush ghosts still tilt. */
+  transform: none;
+}
+
+.destalin-page {
+  position: relative;
+  border: 1px solid var(--line);
+  background: #fff;
+}
+
+.destalin-page .ukaz-scan {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin: 0;
+  border: 0;
+}
+
+.destalin-page-ukaz {
+  background: #fff;
+}
+
+.destalin-page-ukaz .ukaz {
+  margin: 0;
+}
+
+.destalin-page-ukaz .ukaz-loupe.is-page {
+  width: 100%;
+}
+
+.destalin-panel > .source {
+  width: 100%;
+  margin-top: 0.75rem;
+}
+
+.destalin-next {
+  position: absolute;
+  z-index: 2;
+  top: 0;
+  bottom: 0;
+  right: calc(-0.5 * (var(--pad) + 0.5rem + 1.5rem));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  width: auto;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font-family: "Segoe UI", Helvetica, Arial, sans-serif;
+  font-weight: 500;
+  line-height: 1.15;
+  cursor: pointer;
+}
+
+.destalin-next-label {
+  writing-mode: vertical-rl;
+  font-size: 1rem;
+  font-weight: 400;
+  letter-spacing: normal;
+  text-align: center;
+  white-space: nowrap;
+  max-height: none;
+}
+
+.destalin-next-chevron {
+  flex: none;
+  font-size: clamp(1.5rem, 4cqi, 2.1rem);
+  line-height: 1;
+}
+
+.destalin-next:not(.is-why) .destalin-next-label {
+  display: none;
+}
+
+.destalin-next:focus-visible {
+  outline: 1px solid #000;
+  outline-offset: 2px;
+}
+
+.destalin-next:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .destalin-rush-strip {
+    will-change: auto;
+  }
+
+  .destalin-rush-ghost,
+  .destalin-rush-ghost .destalin-rush-base,
+  .destalin-rush-ghost .destalin-rush-soft {
+    transform: none;
+    filter: none;
+  }
+
+  .destalin.is-rushing .destalin-rush {
+    display: none;
+  }
+
+  .destalin.is-rushing .destalin-panel.is-current .destalin-page {
+    opacity: 1;
+  }
 }
 
 #decree-1989 .ukaz-loupe.is-page {
@@ -161,7 +467,7 @@ html[lang="en"] .ukaz-copy::after { content: "\201D"; }
 .ukaz-loupe.is-page .ukaz-scan {
   position: absolute;
   left: calc(var(--zoom) * var(--side-x) / var(--side-w) * -100%);
-  top: calc(var(--zoom) * var(--side-y) / var(--side-w) * -100%);
+  top: calc(var(--zoom) * max(0, var(--side-y) - var(--side-ahead)) / var(--side-w) * -100%);
   width: calc(100% * (1 + var(--zoom) * (1 / var(--side-w) - 1)));
   height: calc(100% * (1 + var(--zoom) * (1 / var(--side-w) - 1)));
   max-width: none;

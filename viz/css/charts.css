@@ -30,7 +30,8 @@ svg.wide {
 /* Map + years reflow in JS when narrow. Ages keep the wide beeswarm and scroll. */
 @container page (max-width: 640px) {
   #map-chart,
-  #year-chart {
+  #year-chart,
+  #announce-chart {
     overflow-x: visible;
   }
 

@@ -12,7 +12,11 @@ function scrollyXMax(viewport) {
 
 function scrollyXInBand(viewport) {
   // Prefer the figure/section so the caption counts as “in view” too.
-  const host = viewport.closest("figure.viz, figure, section") || viewport;
+  var host = viewport._scrollyHost;
+  if (!host) {
+    host = viewport.closest("figure.viz, figure, section") || viewport;
+    viewport._scrollyHost = host;
+  }
   const rect = host.getBoundingClientRect();
   return rect.top < 120 && rect.bottom > 140;
 }

@@ -173,9 +173,16 @@ function heroDoveLayout() {
     })
   };
 
+  var cellPx = cell.toFixed(2) + "px";
+  heroMarks.forEach(function (item) {
+    item.el.style.width = cellPx;
+    item.el.style.height = cellPx;
+  });
+
   heroTravel = Math.round(Math.min(180, Math.max(110, window.innerHeight * 0.18)));
   heroHold = Math.round(Math.min(140, Math.max(72, window.innerHeight * 0.1)));
-  section.style.height = (heroCaptionSpace(section) + pin.offsetHeight + heroTravel + heroHold) + "px";
+  heroCacheMetrics(section, pin, gridH);
+  heroSetSectionHeight(section, gridH, heroTravel + heroHold);
 }
 
 function heroDoveSync() {
@@ -193,7 +200,7 @@ function heroDoveSync() {
   var totalTravel = heroTravel + heroHold;
   var passed = Math.min(
     totalTravel,
-    Math.max(0, 28 - section.getBoundingClientRect().top - heroCaptionSpace(section))
+    Math.max(0, 28 - section.getBoundingClientRect().top - heroCaptionCached)
   );
   var raw = heroTravel ? Math.min(1, passed / heroTravel) : 0;
   var t = heroSmooth((raw - 0.06) / 0.78);
@@ -201,31 +208,31 @@ function heroDoveSync() {
   var tileT = heroSmooth((t - 0.12) / 0.7);
   var countT = heroSmooth((raw - 0.58) / 0.2);
   var silT = heroSmooth((t - 0.2) / 0.65);
+  var scrubKey = passed.toFixed(1) + ":" + t.toFixed(3);
+  if (scrubKey === heroScrubKey) return;
+  heroScrubKey = scrubKey;
+
   var cell = heroLayout.cell;
   var tile = heroLayout.tile;
   var board = document.getElementById("hero-board");
-  var pin = document.getElementById("hero-pin");
-  if (board) {
-    board.style.height = heroLerp(heroLayout.gridH, heroLayout.cloudH, t).toFixed(2) + "px";
-  }
+  var boardH = heroLerp(heroLayout.gridH, heroLayout.cloudH, t);
+  if (board) board.style.height = boardH.toFixed(2) + "px";
 
+  var faceOpacity = (1 - faceT).toFixed(3);
+  var tileOpacity = tileT.toFixed(3);
   heroMarks.forEach(function (item, index) {
     var point = heroLayout.points[index];
     var size = heroLerp(cell, tile, t);
     var cx = heroLerp(point.x0, point.x1, t);
     var cy = heroLerp(point.y0, point.y1, t);
-    var el = item.el;
-    el.style.width = size.toFixed(2) + "px";
-    el.style.height = size.toFixed(2) + "px";
-    el.style.transform = "translate(" + (cx - size / 2).toFixed(2) + "px," + (cy - size / 2).toFixed(2) + "px)";
-    item.face.style.opacity = (1 - faceT).toFixed(3);
-    if (item.tile) item.tile.style.opacity = tileT.toFixed(3);
+    var scale = size / cell;
+    item.el.style.transform =
+      "translate(" + (cx - cell / 2).toFixed(2) + "px," + (cy - cell / 2).toFixed(2) + "px) scale(" + scale.toFixed(4) + ")";
+    item.face.style.opacity = faceOpacity;
+    if (item.tile) item.tile.style.opacity = tileOpacity;
   });
 
   if (silhouette) silhouette.style.opacity = (silT * 0.28).toFixed(3);
   if (countEl) countEl.style.opacity = countT.toFixed(3);
-  if (pin) {
-    var remain = Math.max(0, totalTravel - passed);
-    section.style.height = (heroCaptionSpace(section) + pin.offsetHeight + remain) + "px";
-  }
+  heroSetSectionHeight(section, boardH, Math.max(0, totalTravel - passed));
 }

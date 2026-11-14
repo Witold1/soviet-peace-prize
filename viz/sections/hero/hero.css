@@ -91,7 +91,9 @@ svg.hero {
   top: 0;
   z-index: 1;
   aspect-ratio: auto;
-  will-change: transform, width, height;
+  transform-origin: center center;
+  will-change: transform;
+  contain: layout style;
 }
 
 .hero.portraits .mark.portrait {

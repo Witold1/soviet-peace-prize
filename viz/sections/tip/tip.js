@@ -125,7 +125,7 @@ function fillPlaceTip(group) {
 }
 
 function restoreMark(mark) {
-  if (mark.dataset.kind === "medal" || mark.dataset.kind === "portrait") {
+  if (mark.dataset.kind === "medal" || mark.dataset.kind === "portrait" || mark.dataset.kind === "announce") {
     mark.classList.remove("is-hot");
     var tile = mark.querySelector(".tile");
     if (tile && tile.dataset.fill) tile.style.background = tile.dataset.fill;
@@ -138,6 +138,14 @@ function restoreMark(mark) {
 function activate(mark, x, y) {
   if (current && current !== mark) restoreMark(current);
   current = mark;
+  if (mark.dataset.kind === "announce") {
+    mark.classList.add("is-hot");
+    if (typeof fillAnnounceTip === "function") {
+      fillAnnounceTip(ANNOUNCE_EVENTS[Number(mark.dataset.announce)]);
+    }
+    placeTip(x, y);
+    return;
+  }
   if (mark.dataset.kind === "medal" || mark.dataset.kind === "portrait") {
     mark.classList.add("is-hot");
     var tile = mark.querySelector(".tile");

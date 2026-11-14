@@ -1,10 +1,18 @@
 var pressRows = [];
+var pressEvents = [];
 var pressTravel = 0;
 var pressStory = 0;
 var pressEventTravel = 0;
 var pressContentTravel = 0;
 var pressLift = 0;
 var pressStep = 80;
+var pressCaptionCached = 0;
+var pressSlack = 0;
+var pressCurrent = null;
+var pressZoomLast = "";
+var pressRevealQ = -1;
+var pressShiftLast = "";
+var pressIssueTopLast = "";
 
 function pressReduced() {
   return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -83,6 +91,12 @@ function renderPress() {
     list.appendChild(document.createTextNode(" "));
     pressRows.push(line);
   });
+  pressEvents = redEvents();
+  pressCurrent = null;
+  pressZoomLast = "";
+  pressRevealQ = -1;
+  pressShiftLast = "";
+  pressIssueTopLast = "";
   bindDecreeLayout();
   layoutPress();
   syncPress();
@@ -120,14 +134,20 @@ function layoutPress() {
     return;
   }
   reel.style.transform = "none";
-  var events = redEvents();
-  pressEventTravel = events.length * pressStep;
-  pressContentTravel = Math.max(0, reel.scrollHeight - frame.clientHeight);
+  pressEvents = redEvents();
+  pressEventTravel = pressEvents.length * pressStep;
+  pressSlack = frame.clientHeight - reel.scrollHeight;
+  pressContentTravel = Math.max(0, -pressSlack);
   pressStory = Math.max(pressEventTravel, pressContentTravel, pressFadeStart() + pressFadeDistance());
   pressTravel = pressStory + pressPageHold() + pressZoomDistance() + pressZoomHold();
   var pinH = pin.offsetHeight;
+  pressCaptionCached = pressCaptionSpace(section);
+  pressZoomLast = "";
+  pressRevealQ = -1;
+  pressShiftLast = "";
+  pressIssueTopLast = "";
   awaitDecree(0);
-  section.style.height = (pressCaptionSpace(section) + pinH + pressTravel) + "px";
+  section.style.height = (pressCaptionCached + pinH + pressTravel) + "px";
 }
 
 function redEvents() {
@@ -142,7 +162,7 @@ function syncPress() {
   var reel = document.getElementById("press-reel");
   if (!section || !frame || !reel || !pressRows.length) return;
   if (pressReduced()) {
-    var resting = redEvents()[0];
+    var resting = pressEvents[0];
     markInstability(resting);
     syncIssue(resting ? resting.dataset.iso : pressRows[0].dataset.iso);
     setFade(frame, 0);
@@ -150,26 +170,29 @@ function syncPress() {
     syncDecreeZoom(0, false);
     return;
   }
-  var passed = Math.min(pressTravel, Math.max(0, 16 - section.getBoundingClientRect().top - pressCaptionSpace(section)));
-  var slack = frame.clientHeight - reel.scrollHeight;
-  var base = slack > 0 ? slack / 2 : 0;
+  var passed = Math.min(pressTravel, Math.max(0, 16 - section.getBoundingClientRect().top - pressCaptionCached));
+  var base = pressSlack > 0 ? pressSlack / 2 : 0;
   var storyPassed = Math.min(pressStory, passed);
   var revealStart = pressFadeStart();
   var span = Math.max(pressFadeDistance(), pressStory - revealStart);
   var reveal = Math.min(1, Math.max(0, (storyPassed - revealStart) / span));
   var shift = base - pressContentTravel * reveal;
-  reel.style.transform = shift ? "translateY(" + shift + "px)" : "none";
-  var events = redEvents();
-  var index = 0;
-  if (events.length) {
-    index = passed >= pressTravel ? events.length - 1 : Math.min(events.length - 1, Math.floor(passed / pressStep));
+  var shiftCss = shift ? "translateY(" + shift.toFixed(2) + "px)" : "none";
+  var shiftChanged = shiftCss !== pressShiftLast;
+  if (shiftChanged) {
+    pressShiftLast = shiftCss;
+    reel.style.transform = shiftCss;
   }
-  var currentEvent = events[index] || null;
+  var index = 0;
+  if (pressEvents.length) {
+    index = passed >= pressTravel ? pressEvents.length - 1 : Math.min(pressEvents.length - 1, Math.floor(passed / pressStep));
+  }
+  var currentEvent = pressEvents[index] || null;
   markInstability(currentEvent);
   syncIssue(currentEvent ? currentEvent.dataset.iso : pressRows[0].dataset.iso);
   clearAroundPrize(frame, reel, reveal);
   awaitDecree(reveal);
-  placeIssue(document.getElementById("press-list"));
+  if (shiftChanged || !pressIssueTopLast) placeIssue(document.getElementById("press-list"));
   var zoomStart = pressStory + pressPageHold();
   var zoom = Math.min(1, Math.max(0, (passed - zoomStart) / pressZoomDistance()));
   syncDecreeZoom(zoom, true);
@@ -207,18 +230,26 @@ function syncDecreeZoom(zoom, scrub) {
   var quote = loupe && loupe.closest(".ukaz");
   if (!loupe) return;
   if (!scrub) {
+    pressZoomLast = "";
     loupe.style.removeProperty("--zoom");
     loupe.classList.remove("is-scrub");
     if (quote) quote.classList.remove("is-zoomed");
     return;
   }
+  var value = zoom.toFixed(3);
+  var zoomed = zoom >= 0.84 ? "1" : "0";
+  var key = value + ":" + zoomed;
+  if (key === pressZoomLast) return;
+  pressZoomLast = key;
   loupe.classList.add("is-scrub");
-  loupe.style.setProperty("--zoom", zoom.toFixed(3));
+  loupe.style.setProperty("--zoom", value);
   if (quote) quote.classList.toggle("is-zoomed", zoom >= 0.84);
 }
 
 function setFade(frame, fade) {
   var value = fade.toFixed(3);
+  if (frame.dataset.fade === value) return;
+  frame.dataset.fade = value;
   frame.style.setProperty("--fade", value);
   if (frame.parentElement) frame.parentElement.style.setProperty("--fade", value);
 }
@@ -232,24 +263,28 @@ function clearAroundPrize(frame, reel, reveal) {
   var decree = document.getElementById("decree-1949");
   var prize = document.getElementById("press-prize");
   var fade = reveal;
+  var revealQ = Math.round(fade * 100) / 100;
   if (fade && decree && prize && decree.parentElement === reel) {
-    var prizeRect = prize.getBoundingClientRect();
-    var decreeRect = decree.getBoundingClientRect();
-    var list = document.getElementById("press-list");
-    var narrow = frame.clientWidth < 1100;
-    var anchor = narrow && list ? list.getBoundingClientRect().bottom : prizeRect.bottom;
-    var naturalGap = decreeRect.top - anchor - pressLift;
-    var room = narrow ? 10 : 36;
-    var lift = -Math.max(0, naturalGap - room) * fade;
-    var frameTop = frame.getBoundingClientRect().top;
-    var nextTop = decreeRect.top - pressLift + lift;
-    if (nextTop < frameTop + 8) lift += frameTop + 8 - nextTop;
-    pressLift = lift;
-    decree.style.transform = lift ? "translateY(" + lift.toFixed(2) + "px)" : "";
-  } else {
+    if (revealQ !== pressRevealQ) {
+      var prizeRect = prize.getBoundingClientRect();
+      var decreeRect = decree.getBoundingClientRect();
+      var list = document.getElementById("press-list");
+      var narrow = frame.clientWidth < 1100;
+      var anchor = narrow && list ? list.getBoundingClientRect().bottom : prizeRect.bottom;
+      var naturalGap = decreeRect.top - anchor - pressLift;
+      var room = narrow ? 10 : 36;
+      var lift = -Math.max(0, naturalGap - room) * fade;
+      var frameTop = frame.getBoundingClientRect().top;
+      var nextTop = decreeRect.top - pressLift + lift;
+      if (nextTop < frameTop + 8) lift += frameTop + 8 - nextTop;
+      pressLift = lift;
+      decree.style.transform = lift ? "translateY(" + lift.toFixed(2) + "px)" : "";
+    }
+  } else if (pressLift || (decree && decree.style.transform)) {
     pressLift = 0;
     if (decree) decree.style.transform = "";
   }
+  pressRevealQ = revealQ;
   if (decree) decree.style.pointerEvents = fade <= 0 && decree.parentElement === reel ? "none" : "";
   setFade(frame, fade);
 }
@@ -259,6 +294,7 @@ function placeIssue(list) {
   var frame = document.getElementById("press-frame");
   if (!issue) return;
   if (!list || !frame) {
+    pressIssueTopLast = "";
     issue.style.top = "";
     issue.style.bottom = "";
     issue.style.transform = "";
@@ -273,13 +309,17 @@ function placeIssue(list) {
   var visibleTop = Math.max(listRect.top, frameRect.top);
   var visibleBottom = Math.min(listRect.bottom, frameRect.bottom);
   var mid = visibleBottom > visibleTop ? (visibleTop + visibleBottom) / 2 : frameRect.top + frameRect.height / 2;
-  var half = issue.getBoundingClientRect().height / 2;
+  var half = issue.offsetHeight / 2;
   mid = Math.max(frameRect.top + half, Math.min(mid, frameRect.bottom - half));
-  issue.style.top = (mid - bandRect.top) + "px";
+  var top = (mid - bandRect.top).toFixed(1) + "px";
+  if (top === pressIssueTopLast) return;
+  pressIssueTopLast = top;
+  issue.style.top = top;
 }
 
 function markInstability(current) {
-  pressRows.forEach(function (row) {
-    row.classList.toggle("is-current", row === current);
-  });
+  if (current === pressCurrent) return;
+  if (pressCurrent) pressCurrent.classList.remove("is-current");
+  if (current) current.classList.add("is-current");
+  pressCurrent = current;
 }

@@ -2,6 +2,9 @@ var heroMarks = [];
 var heroLayout = null;
 var heroTravel = 0;
 var heroHold = 0;
+var heroCaptionCached = 0;
+var heroPinChrome = 0;
+var heroScrubKey = "";
 var HERO_MODE_KEY = "laureates-hero-mode";
 
 function heroReduced() {
@@ -26,6 +29,18 @@ function heroCaptionSpace(section) {
   if (!cap) return 0;
   var style = getComputedStyle(cap);
   return cap.offsetHeight + parseFloat(style.marginTop) + parseFloat(style.marginBottom);
+}
+
+function heroCacheMetrics(section, pin, boardH) {
+  heroCaptionCached = section ? heroCaptionSpace(section) : 0;
+  heroPinChrome = pin ? Math.max(0, pin.offsetHeight - boardH) : 0;
+  heroScrubKey = "";
+}
+
+function heroSetSectionHeight(section, boardH, remain) {
+  if (!section) return;
+  var next = (heroCaptionCached + heroPinChrome + boardH + remain).toFixed(2) + "px";
+  if (section.style.height !== next) section.style.height = next;
 }
 
 function heroColumns(width) {
