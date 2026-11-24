@@ -35,8 +35,23 @@ function fitCaptionTitle(title, limit) {
   title.appendChild(document.createTextNode(best.bottom));
 }
 
+function occChartNarrow() {
+  var el = document.getElementById("clouds");
+  if (el && el.clientWidth > 0) return el.clientWidth < 640;
+  return document.documentElement.getAttribute("data-display") === "phone";
+}
+
+function occHexSize() {
+  if (occChartNarrow()) return 9;
+  // Slightly smaller on mid widths so six clouds stay one row for Fig. 3a.
+  var el = document.getElementById("clouds");
+  var w = el && el.clientWidth > 0 ? el.clientWidth : 900;
+  return w < 900 ? 10 : 12;
+}
+
 function occSplitKey(person) {
-  return person.occupationClass;
+  var pravda = typeof pravdaOccClass === "function" ? pravdaOccClass(person) : null;
+  return pravda || person.occupationClass;
 }
 
 function occSplitLabel(key) {
@@ -45,7 +60,7 @@ function occSplitLabel(key) {
 
 function occSplitGroups() {
   const buckets = new Map();
-  for (const person of PEOPLE) {
+  for (const person of PEOPLE_SEEN) {
     const key = occSplitKey(person);
     if (!buckets.has(key)) buckets.set(key, []);
     buckets.get(key).push(person);
@@ -78,7 +93,7 @@ function renderOccupations() {
   if (typeof beforeRenderOccupations === "function") beforeRenderOccupations();
 
   const groups = occSplitGroups();
-  const women = PEOPLE.filter(function (person) { return person.gender === "female"; });
+  const women = PEOPLE_SEEN.filter(function (person) { return person.gender === "female"; });
   const largest = groups.slice().sort(function (a, b) {
     return b.people.length - a.people.length;
   })[0];
@@ -90,7 +105,7 @@ function renderOccupations() {
 
   const mode = typeof occSplitMode === "function" ? occSplitMode() : "occupation";
   document.getElementById("split-lead").textContent = splitLead({
-    n: PEOPLE.length,
+    n: PEOPLE_SEEN.length,
     clouds: groups.length,
     mode: mode
   });
@@ -99,7 +114,7 @@ function renderOccupations() {
     key: largest.key,
     occupation: largest.key,
     count: largest.people.length,
-    n: PEOPLE.length,
+    n: PEOPLE_SEEN.length,
     womenHere: largestWomen,
     women: women.length,
     otherWomen: women.length - largestWomen,
@@ -116,9 +131,10 @@ function renderOccupations() {
   for (const group of groups) {
     const figure = document.createElement("figure");
     figure.className = "group";
+    if (mode === "occupation") figure.dataset.occKey = group.key;
     const svg = renderCloud(
       group.people,
-      12,
+      occHexSize(),
       function (person) { return person.gender === "female" ? FEMALE : MALE; },
       function (person) { return person.gender === "female" ? FEMALE_HOT : MALE_HOT; }
     );
@@ -128,17 +144,199 @@ function renderOccupations() {
     svg.setAttribute("width", svg.dataset.w);
     svg.setAttribute("height", svg.dataset.h);
     const caption = document.createElement("figcaption");
-    const title = document.createElement("span");
-    title.className = "title";
-    title.textContent = occSplitLabel(group.key);
-    caption.appendChild(title);
-    const count = document.createElement("span");
-    count.className = "count";
-    count.textContent = String(group.people.length);
-    caption.appendChild(count);
+    const line = document.createElement("span");
+    line.className = "caption-line";
+    line.textContent = cloudCaption(group.people.length, group.key);
+    caption.appendChild(line);
     figure.appendChild(svg);
     figure.appendChild(caption);
     clouds.appendChild(figure);
-    fitCaptionTitle(title, Number(svg.dataset.w));
+    if (occChartNarrow()) {
+      // Let CSS wrap inside the grid cell; balanced <br> splits fight the column.
+      line.style.whiteSpace = "normal";
+    } else {
+      fitCaptionTitle(line, Number(svg.dataset.w));
+    }
   }
+
+  prepareOccCloudEntrance();
+
+  var chordViz = document.getElementById("occ-chord-viz");
+  if (chordViz) chordViz.hidden = mode !== "occupation";
+  if (mode === "occupation" && typeof renderOccChord === "function") {
+    renderOccChord();
+  }
+}
+
+var occCloudSeen = false;
+var occCloudObserver = null;
+
+function occCloudReduced() {
+  return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+}
+
+function occCloudViz() {
+  var clouds = document.getElementById("clouds");
+  return clouds ? clouds.closest(".viz") : null;
+}
+
+function occCloudHash(n) {
+  // Stable pseudo-random in [-1, 1] from an integer seed.
+  var x = Math.sin(n * 127.1 + 311.7) * 43758.5453;
+  return (x - Math.floor(x)) * 2 - 1;
+}
+
+function prepareOccCloudEntrance() {
+  var clouds = document.getElementById("clouds");
+  var viz = occCloudViz();
+  if (!clouds) return;
+
+  if (occCloudReduced()) {
+    clouds.classList.add("is-in");
+    clouds.classList.remove("is-pending");
+    if (viz) {
+      viz.classList.add("is-occ-in");
+      viz.classList.remove("is-occ-pending");
+    }
+    return;
+  }
+
+  // Already played once this session — keep final paints on re-render (lang / split).
+  if (occCloudSeen) {
+    clouds.classList.add("is-in");
+    clouds.classList.remove("is-pending");
+    if (viz) {
+      viz.classList.add("is-occ-in");
+      viz.classList.remove("is-occ-pending");
+    }
+    return;
+  }
+
+  clouds.classList.add("is-pending");
+  clouds.classList.remove("is-in");
+  if (viz) {
+    viz.classList.add("is-occ-pending");
+    viz.classList.remove("is-occ-in");
+  }
+
+  // Same randomization as the top-rain version, but clustered at top-center
+  // of Fig. 3 so we can compare the two origins.
+  var flock = clouds.getBoundingClientRect();
+  var originX = flock.left + flock.width / 2;
+  var originY = flock.top - Math.max(56, Math.min(120, flock.height * 0.18));
+
+  var figures = clouds.querySelectorAll(".group");
+  var seed = 0;
+  figures.forEach(function (figure, groupIndex) {
+    var polys = figure.querySelectorAll("polygon");
+    var groupN = polys.length || 1;
+    polys.forEach(function (poly, index) {
+      var finalFill = poly.getAttribute("fill") || poly.style.fill || MALE;
+      poly.dataset.finalFill = finalFill;
+      poly.style.fill = GOLD;
+      poly.removeAttribute("fill");
+
+      var box = poly.getBoundingClientRect();
+      var cx = box.left + box.width / 2;
+      var cy = box.top + box.height / 2;
+      var jx = occCloudHash(seed++) * 48;
+      var jy = occCloudHash(seed++) * 36;
+      var dx = originX + jx - cx;
+      var dy = originY + jy - cy;
+      var scale = 0.22 + (occCloudHash(seed++) * 0.5 + 0.5) * 0.28;
+      var delay = Math.min(
+        1.05,
+        groupIndex * 0.07 +
+          (index / groupN) * 0.28 +
+          (occCloudHash(seed++) * 0.5 + 0.5) * 0.42
+      );
+      poly.dataset.enterDelay = delay.toFixed(3);
+
+      poly.style.transformBox = "fill-box";
+      poly.style.transformOrigin = "center";
+      poly.style.transform =
+        "translate(" + dx.toFixed(1) + "px, " + dy.toFixed(1) + "px) scale(" + scale.toFixed(3) + ")";
+      poly.style.opacity = "0";
+      poly.style.transition = "none";
+    });
+  });
+
+  ensureOccCloudObserver();
+}
+
+function playOccCloudEntrance() {
+  var clouds = document.getElementById("clouds");
+  var viz = occCloudViz();
+  if (!clouds || occCloudSeen || occCloudReduced()) return;
+  occCloudSeen = true;
+  clouds.classList.remove("is-pending");
+  clouds.classList.add("is-in");
+  if (viz) {
+    viz.classList.remove("is-occ-pending");
+    viz.classList.add("is-occ-in");
+  }
+
+  var polys = clouds.querySelectorAll("polygon");
+  var seed = 17;
+  var settleMs = 0;
+  polys.forEach(function (poly) {
+    var delay = Number(poly.dataset.enterDelay || 0);
+    var dur = 0.78 + (occCloudHash(seed++) * 0.5 + 0.5) * 0.4;
+    settleMs = Math.max(settleMs, (delay + dur + 0.75) * 1000);
+    poly.style.transition =
+      "transform " + dur.toFixed(2) + "s cubic-bezier(0.22, 1, 0.36, 1) " + delay.toFixed(3) + "s," +
+      " opacity 0.4s ease " + delay.toFixed(3) + "s," +
+      " fill 0.75s ease " + (delay + 0.48).toFixed(3) + "s";
+  });
+
+  requestAnimationFrame(function () {
+    requestAnimationFrame(function () {
+      polys.forEach(function (poly) {
+        poly.style.transform = "translate(0px, 0px) scale(1)";
+        poly.style.opacity = "1";
+        poly.style.fill = poly.dataset.finalFill || MALE;
+      });
+    });
+  });
+
+  // Drop compositor transforms after the flock lands — leftover identity
+  // transforms can keep SVG layer bounds clipping oddly in some browsers.
+  window.setTimeout(function () {
+    polys.forEach(function (poly) {
+      poly.style.transition = "";
+      poly.style.transform = "";
+      poly.style.transformBox = "";
+      poly.style.transformOrigin = "";
+      poly.style.opacity = "";
+      var finalFill = poly.dataset.finalFill;
+      if (finalFill) {
+        poly.setAttribute("fill", finalFill);
+        poly.style.fill = "";
+      }
+      delete poly.dataset.enterDelay;
+      delete poly.dataset.finalFill;
+    });
+  }, settleMs + 80);
+}
+
+function ensureOccCloudObserver() {
+  var clouds = document.getElementById("clouds");
+  if (!clouds || occCloudReduced()) return;
+
+  if (!("IntersectionObserver" in window)) {
+    playOccCloudEntrance();
+    return;
+  }
+
+  if (occCloudObserver) {
+    occCloudObserver.disconnect();
+  }
+  occCloudObserver = new IntersectionObserver(function (entries) {
+    entries.forEach(function (entry) {
+      if (!entry.isIntersecting) return;
+      playOccCloudEntrance();
+      if (occCloudObserver) occCloudObserver.unobserve(entry.target);
+    });
+  }, { threshold: 0.18, rootMargin: "0px 0px -8% 0px" });
+  occCloudObserver.observe(clouds);
 }

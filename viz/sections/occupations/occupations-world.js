@@ -8,7 +8,9 @@ function occSplitMode() {
 }
 
 function occSplitKey(person) {
-  return OCC_SPLIT === "world" ? worldOf(person) : person.occupationClass;
+  if (OCC_SPLIT === "world") return worldOf(person);
+  var pravda = typeof pravdaOccClass === "function" ? pravdaOccClass(person) : null;
+  return pravda || person.occupationClass;
 }
 
 function occSplitLabel(key) {
@@ -17,7 +19,7 @@ function occSplitLabel(key) {
 
 function occSplitGroups() {
   const buckets = new Map();
-  for (const person of PEOPLE) {
+  for (const person of PEOPLE_SEEN) {
     const key = occSplitKey(person);
     if (!buckets.has(key)) buckets.set(key, []);
     buckets.get(key).push(person);

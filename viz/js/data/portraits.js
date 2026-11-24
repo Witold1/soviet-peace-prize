@@ -161,3 +161,13 @@ var PORTRAITS = {
   164: "portraits/1985-1986 1987_121 Petar Tanchev 164.jpg",
   166: "portraits/1990 1990_151 Nelson Mandela 166.jpg",
 };
+
+// Charts before the ghost section use faces we can show.
+// The six without one stay in PEOPLE / PEOPLE_GHOST for the closing section.
+var PEOPLE_SEEN = PEOPLE.filter(function (person) {
+  return !!(typeof PORTRAITS === "object" && PORTRAITS && PORTRAITS[person.i]);
+});
+var PEOPLE_GHOST = PEOPLE.filter(function (person) {
+  return !(typeof PORTRAITS === "object" && PORTRAITS && PORTRAITS[person.i]);
+});
+

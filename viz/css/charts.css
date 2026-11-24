@@ -3,8 +3,20 @@
 }
 
 svg.wide {
+  display: block;
   width: 100%;
   height: auto;
+  margin: 0 auto;
+}
+
+#year-chart {
+  display: flex;
+  justify-content: center;
+}
+
+#year-chart svg.wide {
+  width: 100%;
+  max-width: 100%;
 }
 
 .axis {
@@ -27,16 +39,32 @@ svg.wide {
   font-family: "Segoe UI", Helvetica, Arial, sans-serif;
 }
 
-/* Map + years reflow in JS when narrow. Ages keep the wide beeswarm and scroll. */
+/* Map + years reflow in JS when narrow. Ages + announce keep a wide SVG and scroll. */
 @container page (max-width: 640px) {
   #map-chart,
-  #year-chart,
-  #announce-chart {
+  #year-chart {
     overflow-x: visible;
   }
 
-  #age-chart svg.wide {
+  #age-chart svg.wide,
+  #alive-chart svg.wide {
     width: 920px;
     max-width: none;
   }
+
+  #announce-chart svg.wide {
+    width: 996px;
+    max-width: none;
+  }
+}
+
+html[data-display="phone"] #age-chart svg.wide,
+html[data-display="phone"] #alive-chart svg.wide {
+  width: 920px;
+  max-width: none;
+}
+
+html[data-display="phone"] #announce-chart svg.wide {
+  width: 996px;
+  max-width: none;
 }

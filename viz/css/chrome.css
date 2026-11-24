@@ -13,6 +13,10 @@
   color: #000;
 }
 
+.display[hidden] {
+  display: none;
+}
+
 .display button {
   display: flex;
   align-items: center;
@@ -24,7 +28,11 @@
   cursor: pointer;
 }
 
-.display button + button {
+.display button[hidden] {
+  display: none;
+}
+
+.display button:not([hidden]) + button:not([hidden]) {
   margin-left: 10px;
   padding-left: 10px;
   border-left: 1px solid #000;
@@ -50,9 +58,17 @@
   outline-offset: 3px;
 }
 
+/* Below tablet shell width every display mode is the same screen. */
+@media (max-width: 767px) {
+  .display {
+    display: none;
+  }
+}
+
 .lang {
   display: flex;
   flex: none;
+  margin-left: auto;
   color: #000;
   font-size: 1rem;
   font-weight: 500;

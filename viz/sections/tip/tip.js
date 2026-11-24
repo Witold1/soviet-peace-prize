@@ -62,7 +62,9 @@ function fillTip(person, options) {
   tip.appendChild(meta);
   const occ = document.createElement("div");
   occ.className = "meta";
-  occ.textContent = titleOcc(person.occupation);
+  occ.textContent = typeof tipOccupationLine === "function"
+    ? tipOccupationLine(person)
+    : titleOcc(person.occupation);
   tip.appendChild(occ);
   const workValue = workText(person);
   if (workValue) {
@@ -125,8 +127,22 @@ function fillPlaceTip(group) {
 }
 
 function restoreMark(mark) {
-  if (mark.dataset.kind === "medal" || mark.dataset.kind === "portrait" || mark.dataset.kind === "announce") {
+  if (
+    mark.dataset.kind === "medal" ||
+    mark.dataset.kind === "portrait" ||
+    mark.dataset.kind === "announce" ||
+    mark.dataset.kind === "announce-note"
+  ) {
     mark.classList.remove("is-hot");
+    if (mark.dataset.kind === "announce") {
+      var root = mark.closest("#announce-chart") || mark.closest(".announce-marks");
+      if (root) {
+        var coldLink = root.querySelector('.announce-link[data-announce="' + mark.dataset.announce + '"]');
+        if (coldLink) coldLink.classList.remove("is-hot");
+        var coldPrize = root.querySelector('.announce-prize-mark[data-announce="' + mark.dataset.announce + '"]');
+        if (coldPrize) coldPrize.classList.remove("is-hot");
+      }
+    }
     var tile = mark.querySelector(".tile");
     if (tile && tile.dataset.fill) tile.style.background = tile.dataset.fill;
     return;
@@ -140,8 +156,23 @@ function activate(mark, x, y) {
   current = mark;
   if (mark.dataset.kind === "announce") {
     mark.classList.add("is-hot");
+    var hotRoot = mark.closest("#announce-chart") || mark.closest(".announce-marks");
+    if (hotRoot) {
+      var hotLink = hotRoot.querySelector('.announce-link[data-announce="' + mark.dataset.announce + '"]');
+      if (hotLink) hotLink.classList.add("is-hot");
+      var hotPrize = hotRoot.querySelector('.announce-prize-mark[data-announce="' + mark.dataset.announce + '"]');
+      if (hotPrize) hotPrize.classList.add("is-hot");
+    }
     if (typeof fillAnnounceTip === "function") {
       fillAnnounceTip(ANNOUNCE_EVENTS[Number(mark.dataset.announce)]);
+    }
+    placeTip(x, y);
+    return;
+  }
+  if (mark.dataset.kind === "announce-note") {
+    mark.classList.add("is-hot");
+    if (typeof fillAnnounceNoteTip === "function") {
+      fillAnnounceNoteTip(mark.dataset.note);
     }
     placeTip(x, y);
     return;

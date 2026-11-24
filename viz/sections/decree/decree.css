@@ -44,6 +44,36 @@
   bottom: -0.15rem;
 }
 
+@media (max-width: 640px) {
+  .ukaz-copy {
+    padding: 1.35rem 1.15rem 0.15rem;
+  }
+
+  .ukaz-copy::before,
+  .ukaz-copy::after {
+    font-size: 2.1rem;
+  }
+
+  .ukaz-copy::before {
+    top: 1.2rem;
+  }
+}
+
+@container page (max-width: 640px) {
+  .ukaz-copy {
+    padding: 1.35rem 1.15rem 0.15rem;
+  }
+
+  .ukaz-copy::before,
+  .ukaz-copy::after {
+    font-size: 2.1rem;
+  }
+
+  .ukaz-copy::before {
+    top: 1.2rem;
+  }
+}
+
 html[lang="en"] .ukaz-copy::before { content: "\201C"; }
 
 html[lang="en"] .ukaz-copy::after { content: "\201D"; }
@@ -464,7 +494,8 @@ html[lang="en"] .ukaz-copy::after { content: "\201D"; }
   --zoom: 1;
 }
 
-.ukaz-loupe.is-page .ukaz-scan {
+.ukaz-loupe.is-page .ukaz-view > .ukaz-scan,
+.ukaz-loupe.is-page .ukaz-sheet {
   position: absolute;
   left: calc(var(--zoom) * var(--side-x) / var(--side-w) * -100%);
   top: calc(var(--zoom) * max(0, var(--side-y) - var(--side-ahead)) / var(--side-w) * -100%);
@@ -474,6 +505,107 @@ html[lang="en"] .ukaz-copy::after { content: "\201D"; }
   border: 0;
   object-fit: fill;
   object-position: left top;
+}
+
+.ukaz-loupe.is-page .ukaz-sheet .ukaz-scan {
+  position: absolute;
+  inset: 0;
+  left: auto;
+  top: auto;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  border: 0;
+  object-fit: fill;
+  object-position: left top;
+}
+
+.ukaz-annots {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.ukaz-annot {
+  position: absolute;
+  left: calc(var(--x) * 100%);
+  top: calc(var(--y) * 100%);
+  width: calc(var(--w) * 100%);
+  height: calc(var(--h) * 100%);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0.05em;
+  background: transparent;
+  color: #1a1a1a;
+  opacity: 1;
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.ukaz-annot::before {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  background-color: #ffe14a;
+  opacity: 0.46;
+  mix-blend-mode: multiply;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.ukaz-annot-text {
+  position: absolute;
+  z-index: 1;
+  left: -0.15em;
+  right: -0.15em;
+  top: 50%;
+  display: block;
+  margin: 0;
+  padding: 0.35em 0.45em;
+  border: 0;
+  background: rgba(255, 250, 230, 0.94);
+  box-shadow: 0 1px 0 rgba(40, 40, 38, 0.06);
+  color: #1c1c1b;
+  font-family: Georgia, "Palatino Linotype", Palatino, serif;
+  font-size: clamp(0.72rem, 2.1vw, 0.88rem);
+  font-weight: 600;
+  line-height: 1.3;
+  text-align: left;
+  text-wrap: pretty;
+  transform: translateY(-50%);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+
+.ukaz-annot:hover::before,
+.ukaz-annot:focus-visible::before {
+  opacity: 0.62;
+}
+
+.ukaz-annot:focus-visible {
+  outline: 1px solid rgba(120, 90, 0, 0.55);
+  outline-offset: 2px;
+}
+
+.ukaz-annot.is-active {
+  z-index: 2;
+}
+
+.ukaz-annot.is-active::before {
+  opacity: 0.68;
+}
+
+.ukaz-annot.is-active .ukaz-annot-text {
+  opacity: 1;
+}
+
+/* 1949 founding decree: guided markers replace the transcription toggle as the main path. */
+#decree-1949 .ukaz.is-open .ukaz-original {
+  display: none;
 }
 
 .ukaz-zoom {
@@ -533,7 +665,8 @@ html[lang="en"] .ukaz-copy::after { content: "\201D"; }
 
 @media (prefers-reduced-motion: reduce) {
   .ukaz-view,
-  .ukaz-loupe.is-page .ukaz-scan { transition: none; }
+  .ukaz-loupe.is-page .ukaz-scan,
+  .ukaz-loupe.is-page .ukaz-sheet { transition: none; }
 }
 
 .ukaz-mark,

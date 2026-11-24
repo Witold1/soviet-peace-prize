@@ -1,4 +1,6 @@
 var YEAR_MARKS = [];
+var YEAR_AXIS_LABELS = [];
+var YEAR_AXIS = null;
 var YEAR_SCROLL = {
   women: 0,
   year: "",
@@ -7,8 +9,15 @@ var YEAR_SCROLL = {
   mode: "mid",
   progress: 0
 };
-var YEAR_PROGRESS_Q = -1;
+var YEAR_MORPH_Q = -1;
 var YEARS_MODE_KEY = "laureates-years-mode";
+// Fig. 1 style: scroll latches targets; RAF tweens visuals (no per-pixel scrub).
+var yearVisualMorph = 0;
+var yearTargetMorph = 0;
+var yearAnimRaf = 0;
+var yearAnimTs = 0;
+var yearMorphing = false;
+var YEAR_MORPH_MS = 720;
 
 function yearsStickyTop() {
   return 16;
@@ -51,7 +60,7 @@ function setYearsMode(next) {
   } catch (err) {}
   document.documentElement.setAttribute("data-years-mode", mode);
   syncYearsModeControls();
-  YEAR_PROGRESS_Q = -1;
+  yearResetMotion();
   layoutYears();
   syncYears();
   refreshYearCopy();
@@ -69,10 +78,6 @@ function syncYearsModeControls() {
 
 function yearsUseSticky() {
   return !yearsReduced() && yearsMode() === "scroll";
-}
-
-function yearModeFromProgress(progress) {
-  return progress >= 0.18 ? "span" : "mid";
 }
 
 function yearMorphGate() {
@@ -108,6 +113,10 @@ function yearSourceKey() {
   return YEAR_SCROLL.mode === "span" ? "srcYearSpan" : "srcYear";
 }
 
+function yearCaptionKey() {
+  return "capYear";
+}
+
 function layoutYears() {
   var scrolly = document.getElementById("years-scrolly");
   var steps = document.getElementById("years-steps");
@@ -117,47 +126,32 @@ function layoutYears() {
   if (scrolly) scrolly.classList.toggle("is-sticky", sticky);
 }
 
-function syncYears() {
-  var scrolly = document.getElementById("years-scrolly");
-  var pin = document.getElementById("years-pin");
-  if (!scrolly || !pin) return;
-
-  var progress = 0;
-  if (yearsUseSticky()) {
-    var travel = Math.max(0, scrolly.offsetHeight - pin.offsetHeight);
-    var top = yearsStickyTop();
-    var passed = Math.min(travel, Math.max(0, top - scrolly.getBoundingClientRect().top));
-    progress = travel > 0 ? passed / travel : 0;
-    scrubYearsPinScroll(pin, progress);
-  } else {
-    pin.scrollTop = 0;
-    if (!yearsReduced() && yearsMode() === "stretched") progress = 1;
+function yearStopAnim() {
+  if (yearAnimRaf) {
+    cancelAnimationFrame(yearAnimRaf);
+    yearAnimRaf = 0;
   }
-
-  applyYearProgress(progress);
+  yearAnimTs = 0;
+  yearMorphing = false;
 }
 
-function scrubYearsPinScroll(pin, progress) {
-  if (!yearChartNarrow()) return;
-  var maxScroll = pin.scrollHeight - pin.clientHeight;
-  var next = maxScroll > 8 ? Math.min(1, Math.max(0, progress)) * maxScroll : 0;
-  if (Math.abs(pin.scrollTop - next) > 0.5) pin.scrollTop = next;
+function yearResetMotion() {
+  yearStopAnim();
+  yearVisualMorph = 0;
+  yearTargetMorph = 0;
+  YEAR_MORPH_Q = -1;
 }
 
-function applyYearProgress(progress) {
-  var t = Math.min(1, Math.max(0, progress));
-  var q = Math.round(t * 500) / 500;
-  if (q === YEAR_PROGRESS_Q) return;
-  YEAR_PROGRESS_Q = q;
-  YEAR_SCROLL.progress = t;
-  var morph = Math.min(1, t / yearMorphGate());
-  var morphKey = morph.toFixed(3);
-
+function applyYearMorph(morphT) {
+  var morphQ = morphT >= 1 ? 1 : Math.round(Math.min(1, Math.max(0, morphT)) * 100) / 100;
+  if (morphQ === YEAR_MORPH_Q) return;
+  YEAR_MORPH_Q = morphQ;
+  var morphKey = morphQ.toFixed(3);
   YEAR_MARKS.forEach(function (mark) {
-    var x = (mark.midX + (mark.spanX - mark.midX) * morph).toFixed(2);
-    var y = (mark.midY + (mark.spanY - mark.midY) * morph).toFixed(2);
-    var w = (mark.midW + (mark.spanW - mark.midW) * morph).toFixed(2);
-    var h = (mark.midH + (mark.spanH - mark.midH) * morph).toFixed(2);
+    var x = (mark.midX + (mark.spanX - mark.midX) * morphQ).toFixed(2);
+    var y = (mark.midY + (mark.spanY - mark.midY) * morphQ).toFixed(2);
+    var w = (mark.midW + (mark.spanW - mark.midW) * morphQ).toFixed(2);
+    var h = (mark.midH + (mark.spanH - mark.midH) * morphQ).toFixed(2);
     mark.el.setAttribute("x", x);
     mark.el.setAttribute("y", y);
     mark.el.setAttribute("width", w);
@@ -170,14 +164,114 @@ function applyYearProgress(progress) {
       mark.hatch.setAttribute("opacity", mark.isSpan ? morphKey : "0");
     }
   });
+}
 
-  if (typeof applyAnnounceProgress === "function") applyAnnounceProgress(morph);
-
-  var mode = yearModeFromProgress(t);
+function yearApplyVisual() {
+  applyYearMorph(yearVisualMorph);
+  var mode = yearVisualMorph >= 0.5 ? "span" : "mid";
   if (mode !== YEAR_SCROLL.mode) {
     YEAR_SCROLL.mode = mode;
     refreshYearCopy();
   }
+}
+
+function yearAnimTick(ts) {
+  yearAnimRaf = 0;
+  if (!yearAnimTs) yearAnimTs = ts;
+  var dt = Math.min(0.032, (ts - yearAnimTs) / 1000);
+  yearAnimTs = ts;
+  var morphStep = dt / (YEAR_MORPH_MS / 1000);
+
+  var md = yearTargetMorph - yearVisualMorph;
+  if (Math.abs(md) <= morphStep) yearVisualMorph = yearTargetMorph;
+  else yearVisualMorph += md < 0 ? -morphStep : morphStep;
+
+  yearApplyVisual();
+
+  var done = yearVisualMorph === yearTargetMorph;
+  yearMorphing = !done;
+  if (!done) {
+    yearAnimRaf = requestAnimationFrame(yearAnimTick);
+  } else {
+    yearAnimTs = 0;
+    yearResampleScroll();
+  }
+}
+
+function yearScrollProgress() {
+  var scrolly = document.getElementById("years-scrolly");
+  var pin = document.getElementById("years-pin");
+  if (!scrolly || !pin || !yearsUseSticky()) return YEAR_SCROLL.progress || 0;
+  var travel = Math.max(0, scrolly.offsetHeight - pin.offsetHeight);
+  var top = yearsStickyTop();
+  var passed = Math.min(travel, Math.max(0, top - scrolly.getBoundingClientRect().top));
+  return travel > 0 ? passed / travel : 0;
+}
+
+function yearResampleScroll() {
+  if (!yearsUseSticky() || yearMorphing) return;
+  yearDriveFromScroll(yearScrollProgress());
+}
+
+function yearSetTargets(wantMorph) {
+  var morph = wantMorph ? 1 : 0;
+  if (morph === yearTargetMorph) return;
+  yearTargetMorph = morph;
+
+  if (yearsReduced()) {
+    yearStopAnim();
+    yearVisualMorph = morph;
+    yearApplyVisual();
+    return;
+  }
+
+  if (Math.abs(yearTargetMorph - yearVisualMorph) < 0.0005) {
+    yearVisualMorph = yearTargetMorph;
+    yearMorphing = false;
+    yearApplyVisual();
+    return;
+  }
+
+  yearMorphing = true;
+  if (!yearAnimRaf) {
+    yearAnimTs = 0;
+    yearAnimRaf = requestAnimationFrame(yearAnimTick);
+  }
+}
+
+function yearDriveFromScroll(progress) {
+  // Like Fig. 1: ignore scroll while a tween is in flight so layout cannot fight itself.
+  if (yearMorphing) return;
+  YEAR_SCROLL.progress = progress;
+  var morphGate = yearMorphGate();
+  var wantMorph = yearTargetMorph >= 0.5
+    ? progress >= morphGate * 0.45
+    : progress >= morphGate * 0.82;
+  yearSetTargets(wantMorph);
+}
+
+function syncYears() {
+  var scrolly = document.getElementById("years-scrolly");
+  var pin = document.getElementById("years-pin");
+  if (!scrolly || !pin) return;
+
+  if (yearsUseSticky()) {
+    var progress = yearScrollProgress();
+    scrubYearsPinScroll(pin, progress);
+    yearDriveFromScroll(progress);
+  } else {
+    pin.scrollTop = 0;
+    if (yearsReduced()) yearSetTargets(0);
+    else if (yearsMode() === "stretched") yearSetTargets(1);
+    else yearSetTargets(0);
+  }
+}
+
+function scrubYearsPinScroll(pin, progress) {
+  if (!yearChartNarrow()) return;
+  var maxScroll = pin.scrollHeight - pin.clientHeight;
+  var next = maxScroll > 8 ? Math.min(1, Math.max(0, progress)) * maxScroll : 0;
+  if (Math.abs(pin.scrollTop - next) > 0.5) pin.scrollTop = next;
 }
 
 function refreshYearCopy() {
@@ -193,12 +287,19 @@ function refreshYearCopy() {
       canScroll: yearsUseSticky()
     });
   }
+  var cap = document.getElementById("cap-year");
+  if (cap) {
+    var capKey = yearCaptionKey();
+    cap.setAttribute("data-i18n", capKey);
+    cap.textContent = t(capKey);
+  }
   var source = document.getElementById("year-source");
   if (source) {
     var key = yearSourceKey();
     source.setAttribute("data-i18n", key);
     source.textContent = t(key);
   }
+  syncYearColorChrome();
 }
 
 function syncYearColorChrome() {
@@ -221,8 +322,8 @@ function syncYearColorChrome() {
 function renderYearTally() {
   var tally = document.getElementById("year-tally");
   tally.replaceChildren();
-  var menCount = PEOPLE.filter(function (person) { return person.gender === "male"; }).length;
-  var womenCount = PEOPLE.length - menCount;
+  var menCount = PEOPLE_SEEN.filter(function (person) { return person.gender === "male"; }).length;
+  var womenCount = PEOPLE_SEEN.length - menCount;
   tally.append(tallyBefore());
   var menEl = document.createElement("span");
   menEl.className = "m";
@@ -241,11 +342,13 @@ function renderYears() {
   syncYearColorChrome();
   document.getElementById("year-chart").replaceChildren();
   YEAR_MARKS = [];
-  YEAR_PROGRESS_Q = -1;
+  YEAR_AXIS_LABELS = [];
+  YEAR_AXIS = null;
+  yearResetMotion();
   renderYearTally();
 
   const byYear = new Map();
-  PEOPLE.forEach(function (person) {
+  PEOPLE_SEEN.forEach(function (person) {
     if (!byYear.has(person.year)) byYear.set(person.year, []);
     byYear.get(person.year).push(person);
   });
@@ -269,8 +372,6 @@ function renderYears() {
   if (yearChartNarrow()) renderYearsStacked(cohorts);
   else renderYearsTimeline(cohorts);
 
-  if (typeof renderAnnounceYears === "function") renderAnnounceYears();
-
   layoutYears();
   syncYears();
 }
@@ -278,18 +379,28 @@ function renderYears() {
 function renderYearsTimeline(cohorts) {
   const minYear = 1950;
   const maxYear = 1990;
-  const plotW = 900;
-  const step = 18;
-  const size = 14;
+  const plotW = 960;
+  const step = 22;
+  const size = 18;
   const maxStack = Math.max.apply(null, cohorts.map(function (entry) { return entry[1].length; }));
-  const padL = 28;
-  const padR = 24;
-  const padT = 12;
-  const padB = 36;
+  const padL = 20;
+  const padR = 16;
+  const padT = 8;
+  const padB = 34;
   const plotH = maxStack * step;
   const width = padL + plotW + padR;
   const height = padT + plotH + padB;
   const axisY = padT + plotH;
+  const labelY = axisY + 18;
+  YEAR_AXIS = {
+    axisY: axisY,
+    labelY0: labelY,
+    labelY1: labelY,
+    width: width,
+    height0: height,
+    height1: height,
+    svg: null
+  };
 
   function xYear(year) {
     return padL + (year - minYear) / (maxYear - minYear) * plotW;
@@ -301,6 +412,7 @@ function renderYearsTimeline(cohorts) {
   svg.setAttribute("role", "img");
   svg.setAttribute("aria-label", t(yearChartAriaKey()));
   svg.appendChild(yearHatchDefs());
+  YEAR_AXIS.svg = svg;
 
   const stalinGroup = svgEl("g");
   stalinGroup.setAttribute("class", "era-stalin");
@@ -315,8 +427,10 @@ function renderYearsTimeline(cohorts) {
   axis.setAttribute("x2", padL + plotW);
   axis.setAttribute("y1", axisY);
   axis.setAttribute("y2", axisY);
-  axis.setAttribute("class", "axis-line");
+  axis.setAttribute("class", "axis-line year-axis-baseline");
   svg.appendChild(axis);
+  YEAR_AXIS.baseline = axis;
+  YEAR_AXIS.ticks = [];
 
   for (let tick = minYear; tick <= maxYear; tick += 5) {
     const x = xYear(tick);
@@ -325,15 +439,17 @@ function renderYearsTimeline(cohorts) {
     tickLine.setAttribute("x2", x);
     tickLine.setAttribute("y1", axisY);
     tickLine.setAttribute("y2", axisY + 5);
-    tickLine.setAttribute("class", "axis-line");
+    tickLine.setAttribute("class", "axis-line year-axis-tick");
     svg.appendChild(tickLine);
+    YEAR_AXIS.ticks.push(tickLine);
     const label = svgEl("text");
     label.setAttribute("x", x);
-    label.setAttribute("y", axisY + 20);
+    label.setAttribute("y", labelY);
     label.setAttribute("text-anchor", "middle");
-    label.setAttribute("class", "axis");
+    label.setAttribute("class", "axis year-axis-label");
     label.textContent = String(tick);
     svg.appendChild(label);
+    YEAR_AXIS_LABELS.push({ el: label, y0: labelY, y1: labelY });
   }
 
   cohorts.forEach(function (entry) {

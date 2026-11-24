@@ -1,10 +1,10 @@
 function renderAges() {
   document.getElementById("age-chart").replaceChildren();
-  const youngestAge = Math.min.apply(null, PEOPLE.map(function (person) { return person.age; }));
-  const oldestAge = Math.max.apply(null, PEOPLE.map(function (person) { return person.age; }));
-  const youngest = PEOPLE.filter(function (person) { return person.age === youngestAge; });
-  const oldest = PEOPLE.filter(function (person) { return person.age === oldestAge; });
-  const mean = PEOPLE.reduce(function (sum, person) { return sum + person.age; }, 0) / PEOPLE.length;
+  const youngestAge = Math.min.apply(null, PEOPLE_SEEN.map(function (person) { return person.age; }));
+  const oldestAge = Math.max.apply(null, PEOPLE_SEEN.map(function (person) { return person.age; }));
+  const youngest = PEOPLE_SEEN.filter(function (person) { return person.age === youngestAge; });
+  const oldest = PEOPLE_SEEN.filter(function (person) { return person.age === oldestAge; });
+  const mean = PEOPLE_SEEN.reduce(function (sum, person) { return sum + person.age; }, 0) / PEOPLE_SEEN.length;
   const meanText = (Math.round(mean * 10) / 10).toFixed(1);
 
   document.getElementById("age-lead").textContent = ageLead({
@@ -34,7 +34,7 @@ function renderAgesBeeswarm(mean, meanText) {
     return padL + (age - minAge) / (maxAge - minAge) * plotW;
   }
 
-  const ordered = PEOPLE.slice().sort(function (a, b) {
+  const ordered = PEOPLE_SEEN.slice().sort(function (a, b) {
     return a.age - b.age || sortName(a).localeCompare(sortName(b), lang);
   });
   const placed = [];

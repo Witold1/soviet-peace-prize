@@ -1,3 +1,15 @@
+// Yellow-marker guide on the 1949 founding decree (page fractions).
+var DECREE_1949_ANNOTS = [
+  { id: "title", x: 0.036, y: 0.0685, w: 0.300, h: 0.0465, textKey: "decreeAnnotTitle" },
+  { id: "anyone", x: 0.0260, y: 0.1337, w: 0.3110, h: 0.0235, textKey: "decreeAnnotAnyone" },
+  { id: "gifts", x: 0.0390, y: 0.1799, w: 0.2915, h: 0.0164, textKey: "decreeAnnotGifts" },
+  { id: "birthday", x: 0.0309, y: 0.2364, w: 0.3045, h: 0.0148, textKey: "decreeAnnotBirthday" }
+];
+
+var decreeAnnotActive = "";
+var decreeAnnotPinned = false;
+var decreeAnnotBuilt = false;
+
 function syncPageZoom() {
   document.querySelectorAll(".ukaz-loupe.is-page").forEach(function (loupe) {
     var quote = loupe.closest(".ukaz");
@@ -15,9 +27,98 @@ function syncPageZoom() {
   });
 }
 
+function decreeAnnotById(id) {
+  for (var i = 0; i < DECREE_1949_ANNOTS.length; i++) {
+    if (DECREE_1949_ANNOTS[i].id === id) return DECREE_1949_ANNOTS[i];
+  }
+  return DECREE_1949_ANNOTS[0];
+}
+
+function renderDecreeAnnots() {
+  var root = document.getElementById("ukaz-annots");
+  if (!root) return;
+  root.textContent = "";
+  DECREE_1949_ANNOTS.forEach(function (item) {
+    var btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "ukaz-annot";
+    btn.dataset.annot = item.id;
+    btn.style.setProperty("--x", item.x);
+    btn.style.setProperty("--y", item.y);
+    btn.style.setProperty("--w", item.w);
+    btn.style.setProperty("--h", item.h);
+    var text = document.createElement("span");
+    text.className = "ukaz-annot-text";
+    text.textContent = t(item.textKey);
+    btn.appendChild(text);
+    btn.setAttribute("aria-label", t(item.textKey));
+    btn.addEventListener("click", function (event) {
+      event.preventDefault();
+      event.stopPropagation();
+      decreeAnnotPinned = true;
+      setDecreeAnnot(item.id, true);
+    });
+    root.appendChild(btn);
+  });
+  decreeAnnotBuilt = true;
+  syncDecreeAnnotChrome();
+}
+
+function setDecreeAnnot(id, force) {
+  var next = id || "";
+  if (force && decreeAnnotActive === next) next = "";
+  decreeAnnotActive = next;
+  decreeAnnotPinned = !!next;
+  syncDecreeAnnotChrome();
+}
+
+function syncDecreeAnnotChrome() {
+  var root = document.getElementById("ukaz-annots");
+  if (!root) return;
+  if (!decreeAnnotBuilt) renderDecreeAnnots();
+  root.querySelectorAll(".ukaz-annot").forEach(function (btn) {
+    var row = decreeAnnotById(btn.dataset.annot);
+    var on = !!decreeAnnotActive && btn.dataset.annot === decreeAnnotActive;
+    var label = t(row.textKey);
+    btn.classList.toggle("is-active", on);
+    btn.setAttribute("aria-pressed", on ? "true" : "false");
+    btn.setAttribute("aria-label", label);
+    var text = btn.querySelector(".ukaz-annot-text");
+    if (text) text.textContent = label;
+  });
+}
+
+function syncDecreeAnnotProgress(zoom, front) {
+  var root = document.getElementById("ukaz-annots");
+  if (!root) return;
+  if (!decreeAnnotBuilt) renderDecreeAnnots();
+  // Markers only after the zoom settles — not while the crop is still moving in.
+  var show = !!front && zoom >= 0.9;
+  root.hidden = !show;
+  if (!show) {
+    decreeAnnotPinned = false;
+    decreeAnnotActive = "";
+    syncDecreeAnnotChrome();
+    return;
+  }
+  syncDecreeAnnotChrome();
+}
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", renderDecreeAnnots);
+} else {
+  renderDecreeAnnots();
+}
+
 function relayoutDecree(quote, target) {
   if (!quote.closest("#decree-1949") || typeof layoutPress !== "function") return;
   var decree = document.getElementById("decree-1949");
+  // Inside the press stage the decree is sticky/absolute, so window scroll
+  // does not move it — chasing its top would jump the page (esp. on phone).
+  if (decree && decree.closest(".press-stage")) {
+    if (typeof syncPress === "function") syncPress();
+    return;
+  }
   layoutPress();
   syncPress();
   if (!decree || target == null) return;
@@ -87,6 +188,12 @@ document.querySelectorAll(".ukaz-loupe").forEach(function (loupe) {
   }
 
   function placeLens(clientX, clientY) {
+    // Inside the press sticky stage the floating loupe spills the zoom box;
+    // scroll zoom + the side crop already carry the reading.
+    if (loupe.closest(".press-stage")) {
+      hideLens();
+      return;
+    }
     var rect = img.getBoundingClientRect();
     var viewEl = loupe.querySelector(".ukaz-view");
     var limit = viewEl ? viewEl.getBoundingClientRect() : rect;

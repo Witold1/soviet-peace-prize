@@ -1,23 +1,19 @@
 .hero-scroll {
   margin: 0 0 28px;
+  overflow-anchor: none;
 }
 
 .hero-pin {
-  position: sticky;
-  top: 28px;
+  position: relative;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
   padding-top: 0;
+  box-sizing: border-box;
 }
 
 html[data-hero-mode="wall"] #all {
   margin: 0 0 40px;
-}
-
-html[data-hero-mode="wall"] .hero-pin {
-  position: static;
-  padding-top: 0;
 }
 
 html[data-hero-mode="wall"] .hero-count {
@@ -31,14 +27,14 @@ html[data-hero-mode="wall"] .hero-count {
 }
 
 .hero-count {
-  margin: 6px auto 0;
+  margin: 10px auto 0;
   max-width: 28rem;
   text-align: center;
   font-family: Georgia, "Palatino Linotype", Palatino, serif;
   font-size: 1.02rem;
-  line-height: 1.4;
+  line-height: 1.35;
   letter-spacing: -0.01em;
-  color: #222;
+  color: #1a1a1a;
   opacity: 0;
   pointer-events: none;
 }
@@ -167,6 +163,7 @@ svg.hero {
   opacity: 0;
   pointer-events: none;
   background: var(--gold);
+  /* Regular only when the mark box is 2:√3 (see HERO_HEX_ASPECT). */
   clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
 }
 
@@ -197,11 +194,6 @@ svg.hero {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .hero-pin {
-    position: static;
-    min-height: 0;
-  }
-
   .hero-count,
   .hero-silhouette {
     display: none;

@@ -44,6 +44,25 @@ h2 {
   margin-bottom: 0;
 }
 
+.ghost-list {
+  margin: 0.85rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ghost-list li {
+  margin: 0 0 0.35rem;
+  line-height: 1.35;
+}
+
+.ghost-list a {
+  color: inherit;
+}
+
+.ghost-meta {
+  opacity: 0.72;
+}
+
 .lead {
   margin: 0 0 8px;
 }
@@ -69,8 +88,10 @@ h2 {
 
 .swatch {
   display: inline-block;
-  width: 13px;
-  height: 15px;
+  /* Flat-top regular hex: width:height = 2:√3 */
+  width: 15px;
+  height: 13px;
+  flex: none;
   clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
 }
 

@@ -1,7 +1,8 @@
 [data-i] { cursor: pointer; }
 [data-i].no-link { cursor: default; }
 [data-mark]:focus { outline: none; }
-[data-kind="announce"] { cursor: pointer; }
+[data-kind="announce"],
+[data-kind="announce-note"] { cursor: pointer; }
 
 #tip {
   position: fixed;

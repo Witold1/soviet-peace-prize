@@ -315,7 +315,7 @@ function renderMap() {
 
   const missing = [];
   const byPoint = new Map();
-  PEOPLE.forEach(function (person) {
+  PEOPLE_SEEN.forEach(function (person) {
     if (person.birthLat == null || person.birthLon == null) {
       missing.push(person);
       return;
@@ -332,7 +332,7 @@ function renderMap() {
       sharedPeople += people.length;
     }
   });
-  const plotted = PEOPLE.length - missing.length;
+  const plotted = PEOPLE_SEEN.length - missing.length;
   const narrow = mapChartNarrow();
   document.getElementById("map-lead").textContent = mapLead({
     plotted: plotted,

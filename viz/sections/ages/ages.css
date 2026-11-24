@@ -4,3 +4,16 @@
   border-radius: 50%;
   clip-path: none;
 }
+
+.swatch.dot.alive {
+  background: #ee8eaa;
+  box-shadow: 0 0 0 2px #c45d7e;
+}
+
+.swatch.dot.dead {
+  background: #c5c1b8;
+}
+
+.alive-ring {
+  opacity: 0.9;
+}

@@ -43,8 +43,8 @@ html[data-dev-plain] .years-scrolly.is-sticky .years-pin {
 }
 
 .years-step[data-step="span"] {
-  height: 24vh;
-  min-height: 120px;
+  height: 22vh;
+  min-height: 110px;
 }
 
 /* Narrow scroll mode: no inner scrollbar; page scroll pans the pin. */
@@ -58,8 +58,8 @@ html[data-display="phone"] .years-step {
 }
 
 html[data-display="phone"] .years-step[data-step="span"] {
-  height: 48vh;
-  min-height: 240px;
+  height: 36vh;
+  min-height: 180px;
 }
 
 @container page (max-width: 640px) {
@@ -68,13 +68,13 @@ html[data-display="phone"] .years-step[data-step="span"] {
   }
 
   .years-step {
-    height: 40vh;
-    min-height: 200px;
+    height: 36vh;
+    min-height: 180px;
   }
 
   .years-step[data-step="span"] {
-    height: 48vh;
-    min-height: 240px;
+    height: 36vh;
+    min-height: 180px;
   }
 }
 
@@ -82,39 +82,59 @@ html[data-display="phone"] .years-step[data-step="span"] {
   vector-effect: non-scaling-stroke;
 }
 
-.announce-viz {
-  margin: 20px 0 32px;
+.swatch.announce-series {
+  width: 10px;
+  height: 10px;
+  border-radius: 0;
+  clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
 }
 
-.announce-viz .figcap {
-  margin-top: 8px;
+.announce-size-swatch {
+  display: inline-block;
+  vertical-align: -4px;
+  margin-right: 2px;
 }
 
-.announce-viz .legend {
-  margin-bottom: 10px;
+.announce-size-swatch-mark {
+  fill: none;
+  stroke: #000;
+  stroke-width: 1.25;
 }
 
-.swatch.announce-prize {
-  width: 11px;
-  height: 11px;
-  clip-path: none;
-  background: transparent;
-  box-shadow: inset 0 0 0 1.5px #5c4a2e;
+#announce {
+  margin: 28px 0 8px;
 }
 
-.swatch.announce-date {
-  width: 11px;
-  height: 11px;
-  clip-path: none;
-  border-radius: 50%;
-  background: #157e88;
+.announce-prize-mark {
+  pointer-events: none;
 }
 
-.swatch.announce-pravda {
-  width: 11px;
-  height: 11px;
-  clip-path: none;
-  background: linear-gradient(#157e88, #157e88) center / 2px 100% no-repeat;
+.announce-prize-mark.is-hot {
+  stroke: #1a1a1a;
+  stroke-width: 1.35;
+}
+
+.announce-note {
+  cursor: pointer;
+}
+
+.announce-note-label {
+  fill: #000;
+  font-family: "Segoe UI", Helvetica, Arial, sans-serif;
+  font-size: 1rem;
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  text-underline-offset: 2px;
+}
+
+.announce-note:hover .announce-note-label,
+.announce-note:focus .announce-note-label,
+.announce-note.is-hot .announce-note-label {
+  text-decoration-style: solid;
+}
+
+.announce-note-hit {
+  pointer-events: all;
 }
 
 .announce-hit {
@@ -126,40 +146,38 @@ html[data-display="phone"] .years-step[data-step="span"] {
 }
 
 .announce-link {
-  stroke-width: 1.25;
-  stroke-opacity: 0.55;
-  fill: none;
+  /* Giro wash: visible alone, denser where fans overlap */
+  fill-opacity: 0.36;
+  pointer-events: none;
+  shape-rendering: geometricPrecision;
+}
+
+.announce-link.is-hot {
+  fill-opacity: 0.55;
+}
+
+.year-axis-baseline,
+.year-axis-tick {
+  transition: none;
+}
+
+.announce-date-mark {
+  pointer-events: none;
+  /* Thin edge so the ромб stays crisp over the ribbon wash */
+  paint-order: stroke fill;
+}
+
+.announce-marks {
   pointer-events: none;
 }
 
-.announce-prize-mark,
-.announce-date-mark,
-.announce-pravda-mark {
-  pointer-events: none;
-}
-
-.announce-pravda-mark {
-  stroke-width: 1.5;
-  stroke-opacity: 0.85;
-}
-
-.announce-hit.is-hot .announce-link {
-  stroke-opacity: 1;
-  stroke-width: 2;
-}
-
-.announce-hit.is-hot .announce-prize-mark {
-  stroke-width: 2.25;
+.announce-marks .announce-hit {
+  pointer-events: all;
 }
 
 .announce-hit.is-hot .announce-date-mark {
-  stroke: #000;
-  stroke-width: 1.25;
-}
-
-.announce-hit.is-hot .announce-pravda-mark {
-  stroke-width: 2.25;
-  stroke-opacity: 1;
+  stroke: #1a1a1a;
+  stroke-width: 1.35;
 }
 
 @media (prefers-reduced-motion: reduce) {

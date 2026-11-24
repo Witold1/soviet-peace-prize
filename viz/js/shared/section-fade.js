@@ -9,7 +9,7 @@ var SECTION_FADE_NODES = null;
 function sectionFadeNodes() {
   if (!SECTION_FADE_NODES) {
     SECTION_FADE_NODES = Array.prototype.slice.call(
-      document.querySelectorAll(".hook, #occupation, #years, #decree-1956, #ages, #decree-1989, #births, #method, #footnotes")
+      document.querySelectorAll(".hook, #occupation, #years, #decree-1956, #ages, #decree-1989, #births, #ghosts, #method, #footnotes")
     );
   }
   return SECTION_FADE_NODES;
@@ -37,7 +37,14 @@ function syncSectionFade() {
       opacity = 0;
     } else {
       var enter = (height - rect.top) / (height - enterEnd);
-      var leave = (rect.bottom - leaveEnd) / (leaveStart - leaveEnd);
+      var leave;
+      if (node.id === "years") {
+        // Tall sticky runway: stay fully opaque while Fig. 4 is in play
+        // (span morph + ribbon growth). Only ease out as the section exits.
+        leave = rect.bottom / (height * 0.22);
+      } else {
+        leave = (rect.bottom - leaveEnd) / (leaveStart - leaveEnd);
+      }
       opacity = Math.min(1, Math.max(0, Math.min(enter, leave)));
     }
     if (node === last && atBottom && rect.top < height) opacity = 1;

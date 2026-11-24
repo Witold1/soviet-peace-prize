@@ -83,20 +83,20 @@ function syncYearColorChrome() {
       item.appendChild(label);
       legend.appendChild(item);
     });
-    return;
+  } else {
+    [["female", "female"], ["male", "male"]].forEach(function (row) {
+      var item = document.createElement("span");
+      var swatch = document.createElement("i");
+      swatch.className = "swatch sq " + row[0];
+      item.appendChild(swatch);
+      item.appendChild(document.createTextNode(" "));
+      var label = document.createElement("span");
+      label.textContent = t(row[1]);
+      item.appendChild(label);
+      legend.appendChild(item);
+    });
   }
 
-  [["female", "female"], ["male", "male"]].forEach(function (row) {
-    var item = document.createElement("span");
-    var swatch = document.createElement("i");
-    swatch.className = "swatch sq " + row[0];
-    item.appendChild(swatch);
-    item.appendChild(document.createTextNode(" "));
-    var label = document.createElement("span");
-    label.textContent = t(row[1]);
-    item.appendChild(label);
-    legend.appendChild(item);
-  });
 }
 
 function renderYearTally() {
@@ -105,7 +105,7 @@ function renderYearTally() {
 
   if (YEAR_COLOR === "world") {
     var counts = { first: 0, second: 0, third: 0 };
-    PEOPLE.forEach(function (person) { counts[worldOf(person)] += 1; });
+    PEOPLE_SEEN.forEach(function (person) { counts[worldOf(person)] += 1; });
     WORLD_ORDER.forEach(function (key, index) {
       if (index) tally.append(document.createTextNode(lang === "ru" ? ", " : "; "));
       var el = document.createElement("span");
@@ -117,8 +117,8 @@ function renderYearTally() {
     return;
   }
 
-  var menCount = PEOPLE.filter(function (person) { return person.gender === "male"; }).length;
-  var womenCount = PEOPLE.length - menCount;
+  var menCount = PEOPLE_SEEN.filter(function (person) { return person.gender === "male"; }).length;
+  var womenCount = PEOPLE_SEEN.length - menCount;
   tally.append(tallyBefore());
   var menEl = document.createElement("span");
   menEl.className = "m";

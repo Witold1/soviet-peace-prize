@@ -1,0 +1,120 @@
+#occ-chord {
+  display: block;
+  width: 100%;
+  margin-top: 0.55rem;
+}
+
+.occ-compound-union-wrap {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.occ-compound-union {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+/* Narrow: full-size figure in a sideways-scrolling box, like the age chart.
+   Width must stay bounded or the wide SVG expands the shell and shifts main. */
+.occ-compound-union-wrap.is-scroll {
+  display: block;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.occ-compound-union-wrap.is-scroll .occ-compound-union {
+  max-width: none;
+  margin: 0 auto;
+}
+
+
+.occ-compound-union polygon {
+  cursor: pointer;
+  transition: opacity 0.18s ease;
+}
+
+.occ-compound-union polygon.is-dim {
+  opacity: 0.18;
+}
+
+.occ-compound-wash {
+  pointer-events: none;
+  transition: fill-opacity 0.18s ease;
+}
+
+.occ-compound-wash.is-dim {
+  fill-opacity: 0.02;
+}
+
+.occ-compound-wash.is-hot {
+  fill-opacity: 0.16;
+}
+
+.occ-compound-wash.is-band {
+  fill-opacity: 0.8;
+}
+
+.occ-compound-wash.is-band.is-hot {
+  fill-opacity: 1;
+}
+
+.occ-compound-wash.is-band.is-dim {
+  fill-opacity: 0.3;
+}
+
+.occ-compound-hull {
+  pointer-events: stroke;
+  cursor: pointer;
+  transition:
+    stroke-opacity 0.18s ease,
+    stroke-width 0.18s ease;
+}
+
+.occ-compound-hull.is-dim {
+  stroke-opacity: 0.16;
+}
+
+.occ-compound-hull.is-hot {
+  stroke-width: 3.2px;
+}
+
+.occ-compound-hull.is-hub {
+  stroke-opacity: 0.9;
+}
+
+.occ-compound-svg-label {
+  font-family: "Segoe UI", Helvetica, Arial, sans-serif;
+  fill: #000;
+  pointer-events: none;
+  transition: fill-opacity 0.18s ease;
+}
+
+.occ-compound-svg-label.is-hub {
+  fill: #555;
+}
+
+.occ-compound-svg-label.is-dim {
+  fill-opacity: 0.25;
+}
+
+.occ-compound-svg-label.is-hot {
+  fill: #000;
+}
+
+#occ-chord-note {
+  margin: 1.1rem 0 0;
+  text-align: center;
+  min-height: 1.4em;
+  color: #444;
+  max-width: 40rem;
+  margin-left: auto;
+  margin-right: auto;
+}

@@ -186,7 +186,8 @@ function buildPressSample() {
       en: prize[2],
       filler: false,
       instability: true,
-      prize: true
+      prize: true,
+      pravda: "1949"
     });
   }
   var ordinary = [

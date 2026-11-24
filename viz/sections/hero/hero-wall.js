@@ -6,24 +6,29 @@ function heroWallRender() {
   var countEl = document.getElementById("hero-count");
   if (!stage) return;
 
+  if (countEl && countEl.parentElement) countEl.remove();
   stage.replaceChildren();
   heroMarks = [];
   heroLayout = null;
-  heroTravel = 0;
-  heroHold = 0;
+  heroResetMotion();
+  heroWidthCached = 0;
 
   if (section) {
     section.classList.remove("hero-scroll");
-    section.style.height = "";
+    heroClearRunway(section);
   }
+  var pin = document.getElementById("hero-pin");
   if (countEl) {
     countEl.textContent = "";
     countEl.style.opacity = "";
+    countEl.style.left = "";
+    countEl.style.top = "";
     countEl.hidden = true;
+    if (pin) pin.appendChild(countEl);
   }
 
   var portraits = typeof PORTRAITS === "object" && PORTRAITS ? PORTRAITS : {};
-  var ordered = PEOPLE.slice().sort(byYear);
+  var ordered = PEOPLE_SEEN.slice().sort(byYear);
   var withPortrait = ordered.filter(function (person) { return portraits[person.i]; }).length;
   var hero = document.createElement("div");
   hero.className = "hero portraits";
@@ -69,15 +74,13 @@ function heroWallLayout() {
   var board = document.getElementById("hero-board");
   if (section) {
     section.classList.remove("hero-scroll");
-    section.style.height = "";
+    heroClearRunway(section);
   }
   if (board) {
     board.className = "hero portraits";
     board.style.height = "";
   }
   heroLayout = null;
-  heroTravel = 0;
-  heroHold = 0;
 }
 
 function heroWallSync() {}

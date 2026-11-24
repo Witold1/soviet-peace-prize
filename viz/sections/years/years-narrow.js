@@ -51,7 +51,8 @@ function renderYearsStacked(cohorts) {
   const size = 13;
   const rowH = 22;
   const padL = 64;
-  const padR = 12;
+  // Rail to the right for announce ribbons/dots (scroll step 3).
+  const padR = 168;
   const padT = 8;
   const padB = 8;
   const maxStack = Math.max.apply(null, rows.map(function (entry) { return entry[1].length; }).concat([1]));

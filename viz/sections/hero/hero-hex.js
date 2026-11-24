@@ -6,18 +6,23 @@ function heroHexRender() {
   var countEl = document.getElementById("hero-count");
   if (!stage) return;
 
+  if (countEl && countEl.parentElement) countEl.remove();
   stage.replaceChildren();
   heroMarks = [];
   heroLayout = null;
+  heroWidthCached = 0;
+  heroResetMotion();
 
   if (section) section.classList.add("hero-scroll");
   if (countEl) {
     countEl.hidden = false;
     countEl.style.opacity = "";
+    countEl.style.left = "";
+    countEl.style.top = "";
   }
 
   var portraits = typeof PORTRAITS === "object" && PORTRAITS ? PORTRAITS : {};
-  var ordered = PEOPLE.slice().sort(byYear);
+  var ordered = PEOPLE_SEEN.slice().sort(byYear);
   var withPortrait = ordered.filter(function (person) { return portraits[person.i]; }).length;
   var hero = document.createElement("div");
   hero.className = "hero portraits";
@@ -65,7 +70,11 @@ function heroHexRender() {
   });
 
   stage.appendChild(hero);
-  if (countEl) countEl.textContent = heroCountLabel(ordered.length);
+  var pin = document.getElementById("hero-pin");
+  if (countEl) {
+    countEl.textContent = heroCountLabel(ordered.length);
+    if (pin) pin.appendChild(countEl);
+  }
   heroHexLayout();
   heroHexSync();
 }
@@ -80,7 +89,7 @@ function heroHexLayout() {
   section.classList.add("hero-scroll");
 
   if (heroReduced()) {
-    section.style.height = "";
+    heroClearRunway(section);
     board.className = "hero portraits";
     board.style.height = "";
     heroMarks.forEach(function (item) {
@@ -91,13 +100,13 @@ function heroHexLayout() {
     var countEl = document.getElementById("hero-count");
     if (countEl) countEl.style.opacity = "";
     heroLayout = null;
-    heroTravel = 0;
-    heroHold = 0;
+    heroWidthCached = 0;
     return;
   }
 
   var width = stage.clientWidth || board.clientWidth;
   if (!width) return;
+  heroWidthCached = width;
 
   var cols = heroColumns(width);
   var gap = width <= 520 ? 3 : 5;
@@ -120,7 +129,8 @@ function heroHexLayout() {
   var cloudW0 = (maxX - minX) + cloudPad * 2;
   var cloudH0 = (maxY - minY) + cloudPad * 2;
   var narrow = width <= 520;
-  var hexSize = narrow ? 14 : 12;
+  // Smaller tiles on phone; a bit larger on normal screens.
+  var hexSize = narrow ? 10 : 14;
   var cloudW = cloudW0 * hexSize;
   var cloudH = cloudH0 * hexSize;
   var maxW = narrow ? width * 0.98 : width * 0.72;
@@ -169,10 +179,42 @@ function heroHexLayout() {
     item.el.style.height = cellPx;
   });
 
-  heroTravel = Math.round(Math.min(180, Math.max(110, window.innerHeight * 0.18)));
-  heroHold = Math.round(Math.min(140, Math.max(72, window.innerHeight * 0.1)));
-  heroCacheMetrics(section, pin, gridH);
-  heroSetSectionHeight(section, gridH, heroTravel + heroHold);
+  heroClearRunway(section);
+  heroScrubKey = "";
+}
+
+function heroHexApply(t) {
+  if (!heroLayout || !heroMarks.length) return;
+  t = heroClamp01(t);
+  var faceT = heroSmooth((t - 0.05) / 0.7);
+  var tileT = heroSmooth((t - 0.12) / 0.7);
+  var countT = heroCountT();
+
+  var cell = heroLayout.cell;
+  var tile = heroLayout.tile;
+  var board = document.getElementById("hero-board");
+  var countEl = document.getElementById("hero-count");
+  var boardH = heroLerp(heroLayout.gridH, heroLayout.cloudH, t);
+  if (board) board.style.height = boardH.toFixed(2) + "px";
+
+  var faceOpacity = (1 - faceT).toFixed(3);
+  var tileOpacity = tileT.toFixed(3);
+  var tileH = tile * HERO_HEX_ASPECT;
+  heroMarks.forEach(function (item, index) {
+    var point = heroLayout.points[index];
+    var w = heroLerp(cell, tile, t);
+    var h = heroLerp(cell, tileH, t);
+    var cx = heroLerp(point.x0, point.x1, t);
+    var cy = heroLerp(point.y0, point.y1, t);
+    var sx = w / cell;
+    var sy = h / cell;
+    item.el.style.transform =
+      "translate3d(" + (cx - cell / 2).toFixed(2) + "px," + (cy - cell / 2).toFixed(2) + "px,0) scale(" + sx.toFixed(4) + "," + sy.toFixed(4) + ")";
+    item.face.style.opacity = faceOpacity;
+    if (item.tile) item.tile.style.opacity = tileOpacity;
+  });
+
+  if (countEl) countEl.style.opacity = countT.toFixed(3);
 }
 
 function heroHexSync() {
@@ -185,40 +227,5 @@ function heroHexSync() {
     return;
   }
 
-  var totalTravel = heroTravel + heroHold;
-  var passed = Math.min(
-    totalTravel,
-    Math.max(0, 28 - section.getBoundingClientRect().top - heroCaptionCached)
-  );
-  var raw = heroTravel ? Math.min(1, passed / heroTravel) : 0;
-  var t = heroSmooth((raw - 0.06) / 0.78);
-  var faceT = heroSmooth((t - 0.05) / 0.7);
-  var tileT = heroSmooth((t - 0.12) / 0.7);
-  var countT = heroSmooth((raw - 0.58) / 0.2);
-  var scrubKey = passed.toFixed(1) + ":" + t.toFixed(3);
-  if (scrubKey === heroScrubKey) return;
-  heroScrubKey = scrubKey;
-
-  var cell = heroLayout.cell;
-  var tile = heroLayout.tile;
-  var board = document.getElementById("hero-board");
-  var boardH = heroLerp(heroLayout.gridH, heroLayout.cloudH, t);
-  if (board) board.style.height = boardH.toFixed(2) + "px";
-
-  var faceOpacity = (1 - faceT).toFixed(3);
-  var tileOpacity = tileT.toFixed(3);
-  heroMarks.forEach(function (item, index) {
-    var point = heroLayout.points[index];
-    var size = heroLerp(cell, tile, t);
-    var cx = heroLerp(point.x0, point.x1, t);
-    var cy = heroLerp(point.y0, point.y1, t);
-    var scale = size / cell;
-    item.el.style.transform =
-      "translate(" + (cx - cell / 2).toFixed(2) + "px," + (cy - cell / 2).toFixed(2) + "px) scale(" + scale.toFixed(4) + ")";
-    item.face.style.opacity = faceOpacity;
-    if (item.tile) item.tile.style.opacity = tileOpacity;
-  });
-
-  if (countEl) countEl.style.opacity = countT.toFixed(3);
-  heroSetSectionHeight(section, boardH, Math.max(0, totalTravel - passed));
+  heroDriveFromScroll(section);
 }
