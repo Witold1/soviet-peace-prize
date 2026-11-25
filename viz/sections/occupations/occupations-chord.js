@@ -924,6 +924,25 @@ function renderOccClusterCloud(layout, hexR, fs, narrow) {
   return svg;
 }
 
+// How tall Fig. 3a may grow inside the sticky pin. The old 0.58×vh cap left
+// a crumpled flower on short laptop viewports (MacBook Air): spokes read short
+// and the stage (sized to Fig. 3) showed empty cream around 3a.
+function occChordMaxH() {
+  if (typeof occUseSticky !== "function" || !occUseSticky()) return Infinity;
+  var vh = window.innerHeight || 800;
+  var pinTop = typeof occStickyTop === "function" ? occStickyTop() : 16;
+  var reserved = pinTop + 20;
+  ["occ-main-cap", "occ-legend"].forEach(function (id) {
+    var el = document.getElementById(id);
+    if (el) reserved += el.offsetHeight;
+  });
+  // Note sits under the stage; reserve a band even before final copy lands.
+  var note = document.getElementById("occ-chord-note");
+  reserved += note && note.offsetHeight > 8 ? note.offsetHeight + 12 : 72;
+  reserved += 16;
+  return Math.max(380, vh - reserved);
+}
+
 function renderOccChord() {
   var host = document.getElementById("occ-chord");
   var note = document.getElementById("occ-chord-note");
@@ -940,10 +959,7 @@ function renderOccChord() {
   // viewBox scaling shrinks SVG text, and label extents change the viewBox:
   // re-render until labels land at ~1rem on screen.
   var scale = narrow ? 1 : 0.75;
-  // Sticky pin must stay shorter than the viewport — an oversized sticky
-  // fights page scroll and feels like a jump back to the section top.
-  var sticky = typeof occUseSticky === "function" && occUseSticky();
-  var maxH = sticky ? Math.max(280, window.innerHeight * 0.58) : Infinity;
+  var maxH = occChordMaxH();
   var svg;
   for (var round = 0; round < 4; round++) {
     svg = renderOccClusterCloud(layout, hexR, { label: 16 / scale, hub: 14 / scale }, narrow);

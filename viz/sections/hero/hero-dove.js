@@ -124,39 +124,17 @@ function heroDoveLayout() {
   var gridH = grid ? grid.gridH : rows * cell + gap * (rows - 1);
 
   var dove = packPeaceDove(heroMarks.length);
-  var aspect = peaceDoveAspect();
   var narrow = width <= 520;
-  var cloudMaxW = narrow ? width * 0.98 : width * 0.94;
-  var cloudW = cloudMaxW;
-  var cloudH;
-  var tile;
-  var inset;
-  var topPad;
-  var cloudBoardH;
-
-  if (narrow) {
-    // Stretch dove to the wall height so board/chart stay put and intro
-    // copy does not jump when the morph runs (aspect may go tall).
-    tile = Math.max(9, Math.min(14, cloudW / 28));
-    inset = tile * 0.55;
-    topPad = Math.max(24, tile * 1.5);
-    cloudH = Math.max(tile * 4, gridH - topPad - inset);
-    cloudBoardH = gridH;
-  } else {
-    var cloudMaxH = Math.min(
-      width * 0.72,
-      typeof heroCloudMaxH === "function" ? heroCloudMaxH(false) : budgetH
-    );
-    cloudH = cloudW / aspect;
-    if (cloudH > cloudMaxH) {
-      cloudH = cloudMaxH;
-      cloudW = cloudH * aspect;
-    }
-    tile = Math.max(12, Math.min(18, cloudW / 24));
-    inset = tile * 0.55;
-    topPad = Math.max(24, tile * 2);
-    cloudBoardH = cloudH + topPad + inset;
-  }
+  // Stretch dove to the wall/grid height on every breakpoint so board + chart
+  // height stay put — intro copy must not ride when the morph runs.
+  var cloudW = narrow ? width * 0.98 : width * 0.94;
+  var tile = narrow
+    ? Math.max(9, Math.min(14, cloudW / 28))
+    : Math.max(12, Math.min(18, cloudW / 24));
+  var inset = tile * 0.55;
+  var topPad = Math.max(narrow ? 24 : 28, tile * (narrow ? 1.5 : 2));
+  var cloudH = Math.max(tile * 4, gridH - topPad - inset);
+  var cloudBoardH = gridH;
 
   var cloudOriginX = (width - cloudW) / 2;
   var cloudOriginY = topPad;

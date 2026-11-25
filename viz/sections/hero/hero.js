@@ -17,8 +17,7 @@ var heroCountRaf = 0;
 var heroCountTs = 0;
 var heroChartH0 = 0;
 var heroChartH1 = 0;
-// CSS-composited flight can sit here without the RAF freeze: duration is
-// mostly "feel", not main-thread cost.
+// Canvas flight duration — feel, not a per-frame DOM cost.
 var HERO_MORPH_MS = 1350;
 // Morph ~halfway; the second half is mostly for the caption ride.
 var HERO_MORPH_PROGRESS = 0.4;
@@ -33,16 +32,6 @@ function heroReduced() {
 
 function heroViewportH() {
   return window.innerHeight || 800;
-}
-
-// Lean = gold tiles only (no face crossfade). Off — CSS flight keeps the
-// crossfade + height shrink without 161 JS transform writes per frame.
-function heroLeanMotion() {
-  return false;
-}
-
-function heroCssFlight() {
-  return true;
 }
 
 function heroClamp01(value) {
@@ -187,9 +176,10 @@ function heroStopAnim() {
   heroAnimTs = 0;
   heroMorphing = false;
   heroStopCountReveal();
+  if (typeof heroCanvasTeardown === "function" && heroCanvasActive) heroCanvasTeardown();
   var board = document.getElementById("hero-board");
   if (board) {
-    board.classList.remove("is-animating", "is-lean-flight", "is-css-flight");
+    board.classList.remove("is-animating", "is-canvas-flight");
     board.style.removeProperty("--hero-morph-ms");
   }
 }
@@ -295,7 +285,8 @@ function heroAnimTick(ts) {
   var u = heroAnimDur > 0 ? heroClamp01((ts - heroAnimTs) / heroAnimDur) : 1;
   heroVisualT = heroLerp(heroAnimFrom, heroAnimTo, u);
   heroMorphing = u < 1;
-  heroApplyVisual();
+  if (heroCanvasActive && typeof heroCanvasPaint === "function") heroCanvasPaint(heroVisualT);
+  else heroApplyVisual();
   if (u < 1) {
     heroAnimRaf = requestAnimationFrame(heroAnimTick);
     return;
@@ -311,13 +302,24 @@ function heroFinishMorph() {
     clearTimeout(heroFaceTimer);
     heroFaceTimer = 0;
   }
+  var wasCanvas = !!heroCanvasActive;
   var board = document.getElementById("hero-board");
-  // Strip transitions before the final paint so rest styles snap cleanly.
   if (board) {
-    board.classList.remove("is-animating", "is-lean-flight", "is-css-flight");
+    board.classList.remove("is-animating");
     board.style.removeProperty("--hero-morph-ms");
   }
-  heroApplyVisual();
+  if (wasCanvas && typeof heroCanvasPaint === "function") {
+    // Final canvas frame covers the board while DOM pose is written underneath
+    // (marks still visibility:hidden via is-canvas-flight).
+    heroCanvasPaint(heroVisualT);
+    heroApplyVisual();
+    if (typeof heroCanvasTeardown === "function") heroCanvasTeardown();
+    // Re-apply once marks are visible again so face/tile classes match rest state.
+    heroApplyVisual();
+  } else {
+    if (board) board.classList.remove("is-canvas-flight");
+    heroApplyVisual();
+  }
   heroApplyChartHeight(heroVisualT, false);
   heroPaintCountRide(heroCountRideT(heroTrackProgress()));
 }
@@ -358,101 +360,14 @@ function heroPaintMorph(t, faceT, tileT, silT, opts) {
     board.style.setProperty("--hero-tile", tileT.toFixed(3));
     if (silT != null) board.style.setProperty("--hero-sil", (silT * 0.28).toFixed(3));
     board.classList.toggle("is-animating", !!heroMorphing || !!opts.animating);
-    // During CSS flight, faces stay mounted so opacity can ease; a mid-flight
-    // timer (or finish) flips is-faces-off. RAF path still drops them early.
-    if (!board.classList.contains("is-css-flight")) {
-      board.classList.toggle("is-faces-off", faceOpacity <= 0.04);
-    }
-    board.classList.toggle("is-tiles-on", tileT >= 0.03 || board.classList.contains("is-css-flight"));
+    board.classList.toggle("is-faces-off", faceOpacity <= 0.04);
+    board.classList.toggle("is-tiles-on", tileT >= 0.03);
   }
 
   for (var i = 0; i < heroMarks.length; i++) {
     heroMarks[i].el.style.transform = heroMarkTransform(t, i);
   }
 
-}
-
-// Phone path: drop portraits first, then CSS-transition only gold tiles (no per-frame JS).
-function heroLeanFlyTo(next) {
-  var board = document.getElementById("hero-board");
-  if (!board || !heroLayout) {
-    heroVisualT = next;
-    heroFinishMorph();
-    return;
-  }
-  var ms = HERO_MORPH_MS;
-  var from = next ? 0 : 1;
-  var to = next ? 1 : 0;
-  heroMorphing = true;
-  heroVisualT = from;
-  board.style.setProperty("--hero-morph-ms", ms + "ms");
-
-  // Solid gold at the start pose; portraits stay display:none for the whole flight.
-  heroPaintMorph(from, 1, 1, next ? 0 : 1, {
-    animating: true,
-    heightT: to
-  });
-  board.classList.add("is-lean-flight", "is-animating", "is-faces-off", "is-tiles-on");
-
-  // Force style flush so the transition starts from the current transforms.
-  void board.offsetWidth;
-
-  heroVisualT = to;
-  for (var i = 0; i < heroMarks.length; i++) {
-    heroMarks[i].el.style.transform = heroMarkTransform(to, i);
-  }
-  if (next) board.style.setProperty("--hero-sil", (0.28).toFixed(3));
-  else board.style.setProperty("--hero-sil", "0");
-
-  if (heroAnimTimer) clearTimeout(heroAnimTimer);
-  heroAnimTimer = setTimeout(function () {
-    heroAnimTimer = 0;
-    heroFinishMorph();
-  }, ms + 40);
-}
-
-// Keep the hex↔face crossfade + height shrink, but let the compositor run it:
-// two paints (from/to) instead of ~50 frames × 161 style writes.
-function heroCssFlyTo(next) {
-  var board = document.getElementById("hero-board");
-  if (!board || !heroLayout) {
-    heroVisualT = next;
-    heroFinishMorph();
-    return;
-  }
-  var ms = HERO_MORPH_MS;
-  var from = heroVisualT;
-  var to = next ? 1 : 0;
-  heroMorphing = true;
-  board.style.setProperty("--hero-morph-ms", ms + "ms");
-
-  board.classList.remove("is-css-flight", "is-lean-flight");
-  heroVisualT = from;
-  heroApplyVisual();
-  board.classList.add("is-animating", "is-css-flight");
-  // Tiles must be visibility:visible before their opacity eases in.
-  board.classList.add("is-tiles-on");
-  board.classList.toggle("is-faces-off", false);
-
-  void board.offsetWidth;
-
-  heroVisualT = to;
-  heroApplyVisual();
-  heroApplyChartHeight(to, true);
-
-  if (heroAnimTimer) clearTimeout(heroAnimTimer);
-  if (heroFaceTimer) clearTimeout(heroFaceTimer);
-  // Drop portrait layers once faces have mostly faded (forward only).
-  if (to >= 1) {
-    heroFaceTimer = setTimeout(function () {
-      heroFaceTimer = 0;
-      if (heroMorphing) board.classList.add("is-faces-off");
-    }, Math.round(ms * 0.55));
-  }
-  heroAnimTimer = setTimeout(function () {
-    heroAnimTimer = 0;
-    heroFinishMorph();
-  }, ms + 40);
 }
 
 function heroSetTargetT(next, section) {
@@ -480,13 +395,9 @@ function heroSetTargetT(next, section) {
 
   heroCloseTip();
 
-  if (heroLeanMotion()) {
-    heroLeanFlyTo(next);
-    heroApplyChartHeight(next, true);
-    return;
-  }
-  if (heroCssFlight()) {
-    heroCssFlyTo(next);
+  // One morph engine everywhere (see hero-canvas.js).
+  if (typeof heroCanvasFlyTo === "function") {
+    heroCanvasFlyTo(next);
     return;
   }
 
@@ -524,19 +435,21 @@ function heroNeedsLayout() {
 
 function heroColumns(width) {
   if (width <= 520) return 10;
-  if (width <= 900) return 12;
-  return 16;
+  if (width <= 900) return 10;
+  // Prefer fewer, larger portraits on laptop; fitGrid may add cols if tall.
+  return 12;
 }
 
 // Keep marks spanning the full stage width. On wide screens, if the wall is
 // taller than the sticky budget, add columns (smaller cells) instead of
 // shrinking the cell alone (that left empty side gutters). On narrow, keep
-// the base column count so portraits stay large — same as the published grid.
+// the base column count so portraits stay large. Caps stay modest so we do
+// not collapse back to a dense postage-stamp grid.
 function heroFitGrid(width, gap, count, budgetH) {
   var cols = heroColumns(width);
   var maxCols = width <= 520
     ? cols
-    : Math.min(count, width <= 900 ? 18 : 22);
+    : Math.min(count, width <= 900 ? 14 : 16);
   var cell;
   var rows;
   var gridH;
