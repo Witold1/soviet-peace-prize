@@ -517,8 +517,28 @@ function occClusterLayout(records, hexR) {
   };
 }
 
+// Best space split into two lines (character balance — SVG has no CSS wrap).
+function occWrapCaptionLines(text) {
+  if (!text || text.indexOf(" ") === -1) return [text];
+  var best = null;
+  for (var i = 0; i < text.length; i++) {
+    if (text.charAt(i) !== " ") continue;
+    var top = text.slice(0, i);
+    var bottom = text.slice(i + 1);
+    if (!bottom) continue;
+    var widest = Math.max(top.length, bottom.length);
+    var balance = Math.abs(top.length - bottom.length);
+    if (!best || widest < best.widest || (widest === best.widest && balance < best.balance)) {
+      best = { lines: [top, bottom], widest: widest, balance: balance };
+    }
+  }
+  if (!best || best.widest >= text.length) return [text];
+  return best.lines;
+}
+
 // fs: label font sizes in viewBox units ({ label, hub }).
-function renderOccClusterCloud(layout, hexR, fs) {
+// narrow: straight wrapped captions; wide: arcs hugging each cloud.
+function renderOccClusterCloud(layout, hexR, fs, narrow) {
   var draw = hexR * 0.93;
   var hullPad = hexR * 1.4;
   var pad = hexR * 2.6;
@@ -578,8 +598,18 @@ function renderOccClusterCloud(layout, hexR, fs) {
   }
 
   function labelBox(text, hub) {
+    var lines = Array.isArray(text) ? text : [text];
     var size = hub ? fs.hub : fs.label;
-    return { hw: text.length * size * 0.29 + size * 0.2, hh: size * 0.62, size: size };
+    var maxLen = 0;
+    lines.forEach(function (line) { maxLen = Math.max(maxLen, line.length); });
+    var lineH = size * 1.2;
+    return {
+      lines: lines,
+      hw: maxLen * size * 0.29 + size * 0.2,
+      hh: (lines.length * lineH) / 2,
+      size: size,
+      lineH: lineH
+    };
   }
 
   // Seat a label just outside a circle (cx, cy, r) in direction (ux, uy),
@@ -599,14 +629,25 @@ function renderOccClusterCloud(layout, hexR, fs) {
     maxY = Math.max(maxY, y + b.hh);
     var label = document.createElementNS(SVG_NS, "text");
     label.setAttribute("font-size", b.size.toFixed(2));
-    label.setAttribute("x", x.toFixed(1));
-    label.setAttribute("y", y.toFixed(1));
     label.setAttribute("text-anchor", "middle");
     label.setAttribute("dominant-baseline", "middle");
     label.setAttribute("class", "occ-compound-svg-label" + (hub ? " is-hub" : ""));
     label.dataset.key = key;
     label.dataset.kind = hub ? "hub" : "class";
-    label.textContent = text;
+    if (b.lines.length === 1) {
+      label.setAttribute("x", x.toFixed(1));
+      label.setAttribute("y", y.toFixed(1));
+      label.textContent = b.lines[0];
+    } else {
+      var startY = y - ((b.lines.length - 1) * b.lineH) / 2;
+      b.lines.forEach(function (line, i) {
+        var tspan = document.createElementNS(SVG_NS, "tspan");
+        tspan.setAttribute("x", x.toFixed(1));
+        tspan.setAttribute("y", (startY + i * b.lineH).toFixed(1));
+        tspan.textContent = line;
+        label.appendChild(tspan);
+      });
+    }
     labelLayer.appendChild(label);
   }
 
@@ -771,13 +812,16 @@ function renderOccClusterCloud(layout, hexR, fs) {
     seatLabel(c.x, c.y, c.y - topY + draw * 0.8, 0, -1, String(pts.length), hub.key, true);
   });
 
-  // Class names bend along an arc hugging the cloud: over the top for upper
-  // clouds, under the bottom for lower ones, so the text always reads upright.
-  var defs = document.createElementNS(SVG_NS, "defs");
-  svg.insertBefore(defs, svg.firstChild);
+  // Wide: class names bend along an arc hugging the cloud. Narrow: same
+  // above/below placement as straight wrapped lines (like Fig. 3 captions).
+  var arcDefs = null;
   var arcId = 0;
 
   function arcLabel(info, text, key, top) {
+    if (!arcDefs) {
+      arcDefs = document.createElementNS(SVG_NS, "defs");
+      svg.insertBefore(arcDefs, svg.firstChild);
+    }
     var size = fs.label;
     var gap = size * 0.3;
     // Glyphs rise outward on the top arc and inward on the bottom one.
@@ -798,7 +842,7 @@ function renderOccClusterCloud(layout, hexR, fs) {
       "M" + cx.toFixed(1) + " " + start.toFixed(1) +
       " A" + r.toFixed(1) + " " + r.toFixed(1) + " 0 1 " + sweep + " " + cx.toFixed(1) + " " + end.toFixed(1) +
       " A" + r.toFixed(1) + " " + r.toFixed(1) + " 0 1 " + sweep + " " + cx.toFixed(1) + " " + start.toFixed(1));
-    defs.appendChild(path);
+    arcDefs.appendChild(path);
 
     var label = document.createElementNS(SVG_NS, "text");
     label.setAttribute("font-size", size.toFixed(2));
@@ -830,7 +874,20 @@ function renderOccClusterCloud(layout, hexR, fs) {
     var text = typeof occCountCaption === "function"
       ? occCountCaption(cluster.key, info.pts.length)
       : occLabel(cluster.key);
-    arcLabel(info, text, cluster.key, top);
+    if (narrow) {
+      seatLabel(
+        info.x,
+        info.y,
+        info.reach + hullPad,
+        0,
+        top ? -1 : 1,
+        occWrapCaptionLines(text),
+        cluster.key,
+        false
+      );
+    } else {
+      arcLabel(info, text, cluster.key, top);
+    }
   });
 
   minX -= hexR * 0.6;
@@ -883,10 +940,14 @@ function renderOccChord() {
   // viewBox scaling shrinks SVG text, and label extents change the viewBox:
   // re-render until labels land at ~1rem on screen.
   var scale = narrow ? 1 : 0.75;
+  // Sticky pin must stay shorter than the viewport — an oversized sticky
+  // fights page scroll and feels like a jump back to the section top.
+  var sticky = typeof occUseSticky === "function" && occUseSticky();
+  var maxH = sticky ? Math.max(280, window.innerHeight * 0.58) : Infinity;
   var svg;
   for (var round = 0; round < 4; round++) {
-    svg = renderOccClusterCloud(layout, hexR, { label: 16 / scale, hub: 14 / scale });
-    var next = Math.min(1, maxW / Number(svg.dataset.w));
+    svg = renderOccClusterCloud(layout, hexR, { label: 16 / scale, hub: 14 / scale }, narrow);
+    var next = Math.min(1, maxW / Number(svg.dataset.w), maxH / Number(svg.dataset.h));
     if (Math.abs(next - scale) < 0.005) break;
     scale = next;
   }

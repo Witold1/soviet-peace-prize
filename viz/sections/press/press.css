@@ -5,7 +5,9 @@
   top: 16px;
   display: flex;
   flex-direction: column;
+  /* svh stays put when the mobile URL bar hides (vh grows and jumps sticky). */
   max-height: calc(100vh - 32px);
+  max-height: calc(100svh - 32px);
 }
 
 .press-pin > .figcap {
@@ -360,6 +362,7 @@ html[data-dev-press-click] .press-rain-line.is-hot:focus-visible {
   position: relative;
   z-index: 2;
   min-height: calc(100vh - 32px);
+  min-height: calc(100svh - 32px);
 }
 
 .press-stage {
@@ -370,6 +373,7 @@ html[data-dev-press-click] .press-rain-line.is-hot:focus-visible {
   justify-content: center;
   gap: 0;
   min-height: calc(100vh - 48px);
+  min-height: calc(100svh - 48px);
   padding: 1.25rem 0.75rem 1.5rem;
 }
 
@@ -413,6 +417,7 @@ html[data-dev-press-click] .press-rain-line.is-hot:focus-visible {
 
 .press-stage > .doc .ukaz-copy {
   max-height: min(62vh, 32rem);
+  max-height: min(62svh, 32rem);
   overflow: auto;
 }
 

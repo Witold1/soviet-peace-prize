@@ -28,13 +28,15 @@
         }
       } catch (err) {}
       document.documentElement.setAttribute("data-hero-mode", hero);
-      var years = "scroll";
+      var years = "plain";
       try {
         var yearsQuery = new URLSearchParams(location.search).get("years");
-        if (yearsQuery === "plain" || yearsQuery === "stretched" || yearsQuery === "scroll") years = yearsQuery;
+        if (yearsQuery === "scroll") years = "plain";
+        else if (yearsQuery === "plain" || yearsQuery === "stretched") years = yearsQuery;
         else {
           var yearsSaved = localStorage.getItem("laureates-years-mode");
-          if (yearsSaved === "plain" || yearsSaved === "stretched" || yearsSaved === "scroll") years = yearsSaved;
+          if (yearsSaved === "scroll") years = "plain";
+          else if (yearsSaved === "plain" || yearsSaved === "stretched") years = yearsSaved;
         }
       } catch (err) {}
       document.documentElement.setAttribute("data-years-mode", years);
@@ -127,15 +129,18 @@
     <h1 id="opening" data-i18n="h1">From the Stalin Prize to the Lenin Prize: the Soviet international prize for strengthening peace among the peoples</h1>
       <p class="opener" data-i18n="opener">For forty years, from 1950 to 1990, the Soviet Union awarded a peace prize of its own. It ended with the state that gave it.</p>
     <section class="hero-scroll" id="all">
-      <div class="hero-pin" id="hero-pin">
-        <header class="figcap">
-          <h2><span class="fig-no" data-i18n="n1">Fig. 1.</span> <span data-i18n="capAll">Laureates with a portrait</span></h2>
-        </header>
-        <div class="stage" id="hero"></div>
-        <p class="hero-count" id="hero-count"></p>
+      <div class="hero-track" id="hero-track">
+        <div class="hero-pin" id="hero-pin">
+          <div class="hero-chart" id="hero-chart">
+            <header class="figcap">
+              <h2><span class="fig-no" data-i18n="n1">Fig. 1.</span> <span data-i18n="capAll">Who received the prize</span></h2>
+            </header>
+            <div class="stage" id="hero"></div>
+          </div>
+          <p class="intro" data-i18n="intro" data-i18n-html>Peace prizes are awarded by many kinds of institutions<sup class="fn"><button type="button" class="fn-ref" id="fnref-1" data-fn="1">1</button></sup>. Governments give them, and so do religious organizations, universities, and private foundations. Some are known around the world, and some are known mainly to the people who receive them. Some last only a few years and then disappear. Others are still awarded decades after they were founded. Each prize works from its own definition of peace and of peacebuilding, and each awarding committee judges by its own standards and its own biases<sup class="fn"><button type="button" class="fn-ref" id="fnref-2" data-fn="2">2</button></sup>. The prize followed here is one of the long ones that later closed.</p>
+        </div>
       </div>
     </section>
-    <p class="intro" data-i18n="intro" data-i18n-html>Peace prizes are awarded by many kinds of institutions<sup class="fn"><button type="button" class="fn-ref" id="fnref-1" data-fn="1">1</button></sup>. Governments give them, and so do religious organizations, universities, and private foundations. Some are known around the world, and some are known mainly to the people who receive them. Some last only a few years and then disappear. Others are still awarded decades after they were founded. Each prize works from its own definition of peace and of peacebuilding, and each awarding committee judges by its own standards and its own biases<sup class="fn"><button type="button" class="fn-ref" id="fnref-2" data-fn="2">2</button></sup>. The prize followed here is one of the long ones that later closed.</p>
     <section class="press-scroll" id="prize">
       <div class="press-pin" id="press-pin">
         <header class="figcap">
@@ -220,25 +225,35 @@
       </div>
       <p class="lead" id="split-lead"></p>
       <p class="finding" id="split-finding"></p>
-      <figure class="viz">
-        <figcaption class="figcap">
-          <h2><span class="fig-no" data-i18n="n3">Fig. 3.</span> <span id="cap-occ" data-i18n="capOcc">What work did they do?</span></h2>
-        </figcaption>
-        <div class="legend" id="occ-legend">
-          <span><i class="swatch female"></i> <span data-i18n="female">Female</span></span>
-          <span><i class="swatch male"></i> <span data-i18n="male">Male</span></span>
+      <div class="occ-scrolly" id="occ-scrolly">
+        <div class="occ-pin viz" id="occ-pin">
+          <header class="figcap" id="occ-main-cap">
+            <h2><span class="fig-no" id="occ-fig-no" data-i18n="n3">Fig. 3.</span> <span id="cap-occ" data-i18n="capOcc">What work did they do?</span></h2>
+          </header>
+          <div class="legend" id="occ-legend">
+            <span><i class="swatch female"></i> <span data-i18n="female">Female</span></span>
+            <span><i class="swatch male"></i> <span data-i18n="male">Male</span></span>
+          </div>
+          <div class="occ-stage" id="occ-stage">
+            <div class="occ-fig3-block" id="occ-fig3-block">
+              <div class="clouds" id="clouds"></div>
+            </div>
+            <div class="occ-chord-block" id="occ-chord-block">
+              <header class="figcap" id="occ-chord-cap">
+                <h2><span class="fig-no" data-i18n="n3a">Fig. 3a.</span> <span data-i18n="capOccChord">Where the classes overlap</span></h2>
+              </header>
+              <div id="occ-chord"></div>
+            </div>
+          </div>
+          <p class="source chart-tech" id="src-occ" data-i18n="srcOcc">Each cloud is one class from WINNER_BIO_occupation_class. Women are drawn toward the center of their cloud. Source: laureates.csv.</p>
+          <p class="lead" id="occ-chord-note"></p>
+          <p class="source chart-tech" id="src-occ-chord" data-i18n="srcOccChord">Each hexagon is a laureate with a Pravda occupation line. Clouds hold, and count, only people with a single class, so their numbers are smaller than in Fig. 3. The class that shares the most people sits in the center, and the other classes ring it like petals. Hexes on the stems between clouds are people Pravda placed in two classes.</p>
         </div>
-        <div class="clouds" id="clouds"></div>
-      </figure>
-      <p class="source chart-tech" id="src-occ" data-i18n="srcOcc">Each cloud is one class from WINNER_BIO_occupation_class. Women are drawn toward the center of their cloud. Source: laureates.csv.</p>
-      <figure class="viz" id="occ-chord-viz">
-        <figcaption class="figcap">
-          <h2><span class="fig-no" data-i18n="n3a">Fig. 3a.</span> <span data-i18n="capOccChord">Where the classes overlap</span></h2>
-        </figcaption>
-        <div id="occ-chord"></div>
-        <p class="lead" id="occ-chord-note"></p>
-        <p class="source chart-tech" id="src-occ-chord" data-i18n="srcOccChord">Each hexagon is a laureate with a Pravda occupation line. Clouds hold, and count, only people with a single class, so their numbers are smaller than in Fig. 3. The class that shares the most people sits in the center, and the other classes ring it like petals. Hexes on the stems between clouds are people Pravda placed in two classes.</p>
-      </figure>
+        <div class="occ-steps" id="occ-steps" aria-hidden="true">
+          <div class="occ-step" data-step="clouds"></div>
+          <div class="occ-step" data-step="chord"></div>
+        </div>
+      </div>
     </section>
 
     <section id="years">
@@ -515,6 +530,28 @@
       <ul class="ghost-list" id="ghost-list"></ul>
     </section>
 
+    <!-- Temporary parking for Cold War three-world charts (ex › toggles on Fig. 3 / 4). -->
+    <section id="worlds" class="worlds-park">
+      <h2 data-i18n="hWorlds">Cold War worlds (scratch)</h2>
+      <p class="lead" data-i18n="worldsParkNote">Parked here while we decide whether they belong in the main telling.</p>
+      <div class="viz">
+        <header class="figcap">
+          <h2 id="cap-world-occ" data-i18n="capOccWorld">Which “world” did they come from?</h2>
+        </header>
+        <div class="legend" id="world-occ-legend"></div>
+        <div class="clouds" id="world-clouds"></div>
+        <p class="source chart-tech" id="src-world-occ" data-i18n="srcOccWorld">Each cloud is a Cold War three-world reading of WINNER_COUNTRY.</p>
+      </div>
+      <div class="viz">
+        <header class="figcap">
+          <h2 id="cap-world-year" data-i18n="capYear">Which year did each person receive it?</h2>
+        </header>
+        <div class="legend" id="world-year-legend"></div>
+        <div class="chart" id="world-year-chart"></div>
+        <p class="source chart-tech" id="src-world-year" data-i18n="srcYearWorld">Marks colored by Cold War world.</p>
+      </div>
+    </section>
+
     <footer class="methodology" id="method">
       <h2 data-i18n="methTitle">How the list was made</h2>
       <ol>
@@ -560,7 +597,6 @@
     <nav class="dev-hero-mode" id="years-mode" aria-label="Years mode">
       <button type="button" class="dev-plain-toggle" data-years-mode="plain">years: plain</button>
       <button type="button" class="dev-plain-toggle" data-years-mode="stretched">years: stretched</button>
-      <button type="button" class="dev-plain-toggle" data-years-mode="scroll">years: scroll</button>
     </nav>
   </div>
   </div>
@@ -594,6 +630,7 @@
   <script src="sections/hero/hero.js"></script>
   <script src="sections/occupations/occupations.js"></script>
   <script src="sections/occupations/occupations-chord.js"></script>
+  <script src="sections/occupations/occupations-morph.js"></script>
   <script src="sections/occupations/occupations-world.js"></script>
   <script src="sections/years/years-narrow.js"></script>
   <script src="sections/years/years.js"></script>

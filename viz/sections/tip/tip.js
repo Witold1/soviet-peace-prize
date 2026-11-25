@@ -252,18 +252,30 @@ document.body.addEventListener("focusout", function (event) {
   deactivate(mark);
 });
 
-document.body.addEventListener("click", function (event) {
-  // Portrait tips often cover the mark; a click on the tip should pin, not no-op.
+function pinFromEvent(event) {
+  // Portrait tips often cover the mark; a press on the tip should pin, not no-op.
   if (insideTip(event.target)) {
     if (current) pinned = true;
-    return;
+    return true;
   }
   const mark = markFrom(event.target);
   if (mark) {
     pinned = true;
     activate(mark, event.clientX, event.clientY);
-    return;
+    return true;
   }
+  return false;
+}
+
+// Touch/pen: pointerover opens the tip, then pointerout on lift closes it before
+// click can pin — open/close/open flicker. Pin on pointerdown so out is ignored.
+document.body.addEventListener("pointerdown", function (event) {
+  if (event.pointerType !== "touch" && event.pointerType !== "pen") return;
+  pinFromEvent(event);
+});
+
+document.body.addEventListener("click", function (event) {
+  if (pinFromEvent(event)) return;
   if (pinned || current) deactivate(current);
 });
 

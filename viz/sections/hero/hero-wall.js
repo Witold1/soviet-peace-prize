@@ -3,10 +3,10 @@
 function heroWallRender() {
   var stage = document.getElementById("hero");
   var section = document.getElementById("all");
-  var countEl = document.getElementById("hero-count");
   if (!stage) return;
 
-  if (countEl && countEl.parentElement) countEl.remove();
+  var oldStack = document.getElementById("hero-count-stack");
+  if (oldStack && oldStack.parentElement) oldStack.remove();
   stage.replaceChildren();
   heroMarks = [];
   heroLayout = null;
@@ -16,15 +16,6 @@ function heroWallRender() {
   if (section) {
     section.classList.remove("hero-scroll");
     heroClearRunway(section);
-  }
-  var pin = document.getElementById("hero-pin");
-  if (countEl) {
-    countEl.textContent = "";
-    countEl.style.opacity = "";
-    countEl.style.left = "";
-    countEl.style.top = "";
-    countEl.hidden = true;
-    if (pin) pin.appendChild(countEl);
   }
 
   var portraits = typeof PORTRAITS === "object" && PORTRAITS ? PORTRAITS : {};

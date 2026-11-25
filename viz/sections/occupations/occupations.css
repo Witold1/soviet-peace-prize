@@ -2,6 +2,124 @@ polygon { cursor: pointer; }
 polygon:focus { outline: none; }
 polygon.no-link { cursor: default; }
 
+.occ-scrolly {
+  position: relative;
+  margin: 0 0 28px;
+  overflow-anchor: none;
+}
+
+.occ-pin {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Stacked layout: Fig. 3 source sits between the two figures. */
+.occ-scrolly:not(.is-sticky) #occ-stage {
+  display: contents;
+}
+
+.occ-scrolly:not(.is-sticky) #occ-main-cap { order: 1; }
+.occ-scrolly:not(.is-sticky) #occ-legend { order: 2; }
+.occ-scrolly:not(.is-sticky) #occ-fig3-block { order: 3; }
+.occ-scrolly:not(.is-sticky) #src-occ { order: 4; }
+.occ-scrolly:not(.is-sticky) #occ-chord-block {
+  order: 5;
+  /* Own gap — do not rely on #src-occ (hidden when tech notes are off). */
+  margin-top: 1.35rem;
+}
+.occ-scrolly:not(.is-sticky) #occ-chord-note { order: 6; }
+.occ-scrolly:not(.is-sticky) #src-occ-chord { order: 7; }
+
+.occ-scrolly.is-sticky .occ-pin {
+  position: sticky;
+  /* Fixed px — vh/svh still shift when mobile chrome shows/hides. */
+  top: 16px;
+  z-index: 1;
+  /* No max-height / overflow:auto — an inner scrollbar narrows the cloud grid. */
+  padding-bottom: 8px;
+  background: #fce5cd;
+  overflow-anchor: none;
+}
+
+html[data-dev-plain] .occ-scrolly.is-sticky .occ-pin {
+  background: var(--bg);
+}
+
+.occ-scrolly.is-sticky #occ-stage {
+  position: relative;
+  order: 3;
+  width: 100%;
+}
+
+.occ-scrolly.is-sticky #occ-fig3-block,
+.occ-scrolly.is-sticky #occ-chord-block {
+  position: absolute;
+  left: 0;
+  right: 0;
+  /* Center in the locked tall stage so Fig. 3 isn't glued to the top
+     of empty flower-height space. */
+  top: 50%;
+  width: 100%;
+  transform: translateY(-50%);
+}
+
+.occ-scrolly.is-sticky #occ-chord-cap,
+.occ-scrolly.is-sticky #src-occ-chord {
+  display: none;
+}
+
+.occ-scrolly.is-sticky #occ-chord-note {
+  order: 4;
+}
+
+.occ-scrolly.is-sticky #src-occ {
+  order: 5;
+}
+
+.occ-scrolly.is-sticky.is-clouds:not(.is-flipping) #occ-chord-block {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.occ-scrolly.is-sticky.is-chord:not(.is-flipping) #occ-fig3-block {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+/* Hide cloud labels only while leaving Fig. 3 → 3a. On the way back
+   (is-chord + is-flipping) keep them visible — a fade-in after reverse
+   felt like captions arriving late. */
+.occ-scrolly.is-sticky.is-flipping.is-clouds #occ-fig3-block .group figcaption {
+  opacity: 0;
+}
+
+.occ-scrolly.is-sticky.is-clouds:not(.is-flipping) .occ-compound-wash,
+.occ-scrolly.is-sticky.is-clouds:not(.is-flipping) .occ-compound-hull,
+.occ-scrolly.is-sticky.is-clouds:not(.is-flipping) .occ-compound-svg-label,
+.occ-scrolly.is-sticky.is-clouds:not(.is-flipping) .occ-compound-stems,
+.occ-scrolly.is-sticky.is-clouds:not(.is-flipping) #occ-chord-note {
+  opacity: 0;
+}
+
+.occ-steps {
+  pointer-events: none;
+}
+
+.occ-step {
+  /* svh = smallest viewport; does not grow when the URL bar hides. */
+  height: 24vh;
+  height: 24svh;
+  min-height: 140px;
+}
+
+.occ-step[data-step="chord"] {
+  height: 22vh;
+  height: 22svh;
+  min-height: 120px;
+}
+
 .clouds {
   display: flex;
   flex-wrap: wrap;
@@ -46,17 +164,7 @@ polygon.no-link { cursor: default; }
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .viz.is-occ-pending #occ-legend,
-  .viz.is-occ-pending .group figcaption {
-    opacity: 0;
-  }
-
-  .viz.is-occ-in #occ-legend,
-  .viz.is-occ-in .group figcaption {
-    opacity: 1;
-    transition: opacity 0.55s ease 0.75s;
-  }
-
+  /* Captions + legend stay visible; only hexes fly in. */
   .clouds.is-pending polygon {
     will-change: transform, opacity, fill;
   }

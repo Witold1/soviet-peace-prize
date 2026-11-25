@@ -3,10 +3,10 @@
 function heroHexRender() {
   var stage = document.getElementById("hero");
   var section = document.getElementById("all");
-  var countEl = document.getElementById("hero-count");
   if (!stage) return;
 
-  if (countEl && countEl.parentElement) countEl.remove();
+  var oldStack = document.getElementById("hero-count-stack");
+  if (oldStack && oldStack.parentElement) oldStack.remove();
   stage.replaceChildren();
   heroMarks = [];
   heroLayout = null;
@@ -14,12 +14,6 @@ function heroHexRender() {
   heroResetMotion();
 
   if (section) section.classList.add("hero-scroll");
-  if (countEl) {
-    countEl.hidden = false;
-    countEl.style.opacity = "";
-    countEl.style.left = "";
-    countEl.style.top = "";
-  }
 
   var portraits = typeof PORTRAITS === "object" && PORTRAITS ? PORTRAITS : {};
   var ordered = PEOPLE_SEEN.slice().sort(byYear);
@@ -70,11 +64,7 @@ function heroHexRender() {
   });
 
   stage.appendChild(hero);
-  var pin = document.getElementById("hero-pin");
-  if (countEl) {
-    countEl.textContent = heroCountLabel(ordered.length);
-    if (pin) pin.appendChild(countEl);
-  }
+  if (typeof heroMountCountStack === "function") heroMountCountStack(hero, ordered.length);
   heroHexLayout();
   heroHexSync();
 }
@@ -97,8 +87,8 @@ function heroHexLayout() {
       item.face.style.opacity = "";
       if (item.tile) item.tile.style.opacity = "";
     });
-    var countEl = document.getElementById("hero-count");
-    if (countEl) countEl.style.opacity = "";
+    var stack = document.getElementById("hero-count-stack");
+    if (stack) stack.style.transform = "";
     heroLayout = null;
     heroWidthCached = 0;
     return;
@@ -108,11 +98,15 @@ function heroHexLayout() {
   if (!width) return;
   heroWidthCached = width;
 
-  var cols = heroColumns(width);
   var gap = width <= 520 ? 3 : 5;
-  var cell = (width - gap * (cols - 1)) / cols;
-  var rows = Math.ceil(heroMarks.length / cols);
-  var gridH = rows * cell + gap * (rows - 1);
+  var budgetH = typeof heroPinBudgetH === "function" ? heroPinBudgetH() : window.innerHeight * 0.7;
+  var grid = typeof heroFitGrid === "function"
+    ? heroFitGrid(width, gap, heroMarks.length, budgetH)
+    : null;
+  var cols = grid ? grid.cols : heroColumns(width);
+  var cell = grid ? grid.cell : (width - gap * (cols - 1)) / cols;
+  var rows = grid ? grid.rows : Math.ceil(heroMarks.length / cols);
+  var gridH = grid ? grid.gridH : rows * cell + gap * (rows - 1);
 
   var units = disk(heroMarks.length);
   var minX = Infinity;
@@ -134,9 +128,10 @@ function heroHexLayout() {
   var cloudW = cloudW0 * hexSize;
   var cloudH = cloudH0 * hexSize;
   var maxW = narrow ? width * 0.98 : width * 0.72;
-  var maxH = narrow
-    ? Math.min(width * 1.05, window.innerHeight * 0.5)
-    : Math.min(width * 0.7, Math.max(240, window.innerHeight * 0.42));
+  var maxH = Math.min(
+    narrow ? width * 1.05 : width * 0.7,
+    typeof heroCloudMaxH === "function" ? heroCloudMaxH(narrow) : Math.max(240, window.innerHeight * 0.42)
+  );
   var scale = Math.min(1, maxW / cloudW, maxH / cloudH);
   hexSize *= scale;
   cloudW *= scale;
@@ -177,53 +172,34 @@ function heroHexLayout() {
   heroMarks.forEach(function (item) {
     item.el.style.width = cellPx;
     item.el.style.height = cellPx;
+    item.face.style.opacity = "";
+    if (item.tile) item.tile.style.opacity = "";
   });
+  board.classList.remove("is-animating", "is-faces-off", "is-tiles-on");
+  board.style.removeProperty("--hero-face");
+  board.style.removeProperty("--hero-tile");
+  board.style.removeProperty("--hero-sil");
 
-  heroClearRunway(section);
+  heroApplyRunway(section);
   heroScrubKey = "";
 }
 
 function heroHexApply(t) {
   if (!heroLayout || !heroMarks.length) return;
   t = heroClamp01(t);
-  var faceT = heroSmooth((t - 0.05) / 0.7);
-  var tileT = heroSmooth((t - 0.12) / 0.7);
-  var countT = heroCountT();
-
-  var cell = heroLayout.cell;
-  var tile = heroLayout.tile;
-  var board = document.getElementById("hero-board");
-  var countEl = document.getElementById("hero-count");
-  var boardH = heroLerp(heroLayout.gridH, heroLayout.cloudH, t);
-  if (board) board.style.height = boardH.toFixed(2) + "px";
-
-  var faceOpacity = (1 - faceT).toFixed(3);
-  var tileOpacity = tileT.toFixed(3);
-  var tileH = tile * HERO_HEX_ASPECT;
-  heroMarks.forEach(function (item, index) {
-    var point = heroLayout.points[index];
-    var w = heroLerp(cell, tile, t);
-    var h = heroLerp(cell, tileH, t);
-    var cx = heroLerp(point.x0, point.x1, t);
-    var cy = heroLerp(point.y0, point.y1, t);
-    var sx = w / cell;
-    var sy = h / cell;
-    item.el.style.transform =
-      "translate3d(" + (cx - cell / 2).toFixed(2) + "px," + (cy - cell / 2).toFixed(2) + "px,0) scale(" + sx.toFixed(4) + "," + sy.toFixed(4) + ")";
-    item.face.style.opacity = faceOpacity;
-    if (item.tile) item.tile.style.opacity = tileOpacity;
-  });
-
-  if (countEl) countEl.style.opacity = countT.toFixed(3);
+  // Faces return earlier on the reverse (hex → portraits) than on GitHub's 0.05/0.7.
+  var faceT = heroSmooth((t - 0.02) / 0.52);
+  var tileT = heroSmooth((t - 0.14) / 0.62);
+  heroPaintMorph(t, faceT, tileT, null);
 }
 
 function heroHexSync() {
   var section = document.getElementById("all");
-  var countEl = document.getElementById("hero-count");
+  var stack = document.getElementById("hero-count-stack");
   if (!section || !heroMarks.length) return;
 
   if (heroReduced() || !heroLayout) {
-    if (countEl) countEl.style.opacity = heroReduced() ? "0" : "";
+    if (stack) stack.style.visibility = heroReduced() ? "hidden" : "";
     return;
   }
 

@@ -6,19 +6,43 @@ var heroVisualT = 0;
 var heroTargetT = 0;
 var heroAnimRaf = 0;
 var heroAnimTs = 0;
+var heroAnimFrom = 0;
+var heroAnimTo = 0;
+var heroAnimDur = 0;
+var heroAnimTimer = 0;
+var heroFaceTimer = 0;
 var heroMorphing = false;
 var heroCountReveal = 0;
 var heroCountRaf = 0;
 var heroCountTs = 0;
-var HERO_MORPH_MS = 700;
-var HERO_COUNT_DELAY_MS = 180;
-var HERO_COUNT_MS = 420;
+var heroChartH0 = 0;
+var heroChartH1 = 0;
+// CSS-composited flight can sit here without the RAF freeze: duration is
+// mostly "feel", not main-thread cost.
+var HERO_MORPH_MS = 1350;
+// Morph ~halfway; the second half is mostly for the caption ride.
+var HERO_MORPH_PROGRESS = 0.4;
+var HERO_TRACK_VH = 420;
 // Flat-top regular hex bbox: width:height = 2:√3 (same as Fig. 3 / hex.js).
 var HERO_HEX_ASPECT = Math.sqrt(3) / 2;
 var HERO_MODE_KEY = "laureates-hero-mode";
 
 function heroReduced() {
   return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+}
+
+function heroViewportH() {
+  return window.innerHeight || 800;
+}
+
+// Lean = gold tiles only (no face crossfade). Off — CSS flight keeps the
+// crossfade + height shrink without 161 JS transform writes per frame.
+function heroLeanMotion() {
+  return false;
+}
+
+function heroCssFlight() {
+  return true;
 }
 
 function heroClamp01(value) {
@@ -35,7 +59,108 @@ function heroSmooth(t) {
 }
 
 function heroClearRunway(section) {
+  var track = document.getElementById("hero-track");
+  var chart = document.getElementById("hero-chart");
+  if (track) track.style.height = "";
+  if (chart) chart.style.height = "";
   if (section) section.style.height = "";
+  heroChartH0 = 0;
+  heroChartH1 = 0;
+}
+
+function heroCloseTip() {
+  if (typeof deactivate === "function") deactivate(null);
+  else {
+    var tipEl = document.getElementById("tip");
+    if (tipEl) tipEl.hidden = true;
+  }
+}
+
+// 0 = sticky just engaged; 1 = about to release.
+function heroTrackProgress() {
+  var track = document.getElementById("hero-track");
+  var pin = document.getElementById("hero-pin");
+  if (!track || !pin) return 0;
+  var range = track.offsetHeight - pin.offsetHeight;
+  if (range <= 1) return 0;
+  var passed = Math.min(range, Math.max(0, -track.getBoundingClientRect().top));
+  return heroClamp01(passed / range);
+}
+
+function heroApplyChartHeight(t, animate) {
+  var chart = document.getElementById("hero-chart");
+  if (!chart || !heroChartH0 || !heroChartH1) return;
+  var h = Math.round(heroLerp(heroChartH0, heroChartH1, heroClamp01(t)));
+  if (!animate) {
+    var prev = chart.style.transition;
+    chart.style.transition = "none";
+    chart.style.height = h + "px";
+    void chart.offsetHeight;
+    chart.style.transition = prev || "";
+    return;
+  }
+  chart.style.height = h + "px";
+}
+
+// Measure chart heights for wall (0) and dove (1) under current width.
+function heroMeasureChartHeights() {
+  var chart = document.getElementById("hero-chart");
+  var board = document.getElementById("hero-board");
+  if (!chart || !board || !heroLayout) {
+    heroChartH0 = 0;
+    heroChartH1 = 0;
+    return;
+  }
+  var prevBoard = board.style.height;
+  var prevChart = chart.style.height;
+  var prevTransition = chart.style.transition;
+  chart.style.transition = "none";
+
+  board.style.height = heroLayout.gridH + "px";
+  chart.style.height = "auto";
+  heroChartH0 = Math.round(chart.getBoundingClientRect().height);
+
+  board.style.height = heroLayout.cloudH + "px";
+  chart.style.height = "auto";
+  heroChartH1 = Math.round(chart.getBoundingClientRect().height);
+
+  board.style.height = prevBoard || heroLayout.gridH + "px";
+  chart.style.height = prevChart || "";
+  void chart.offsetHeight;
+  chart.style.transition = prevTransition || "";
+}
+
+function heroApplyRunway(section) {
+  var track = document.getElementById("hero-track");
+  var chart = document.getElementById("hero-chart");
+  if (heroReduced() || heroMode() === "wall") {
+    heroClearRunway(section);
+    return;
+  }
+  if (track) track.style.height = HERO_TRACK_VH + "vh";
+  heroMeasureChartHeights();
+  heroApplyChartHeight(heroVisualT, false);
+  if (chart) {
+    chart.style.setProperty("--hero-morph-ms", HERO_MORPH_MS + "ms");
+  }
+}
+
+// Room for chart inside sticky pin above the intro copy.
+function heroPinBudgetH() {
+  var vh = heroViewportH();
+  var pin = document.getElementById("hero-pin");
+  var intro = pin ? pin.querySelector(".intro") : null;
+  var introH = intro ? intro.offsetHeight + 28 : 120;
+  // Sticky `top` inset — air above Fig. 1 when pinned, not extra flow gap.
+  var inset = pin ? (parseFloat(getComputedStyle(pin).top) || 0) : 0;
+  return Math.max(180, vh - introH - inset - 12);
+}
+
+function heroCloudMaxH(narrow) {
+  var budget = heroPinBudgetH();
+  var vh = heroViewportH();
+  if (narrow) return Math.min(budget, vh * 0.56);
+  return Math.min(budget, Math.max(260, vh * 0.55));
 }
 
 function heroStopCountReveal() {
@@ -51,9 +176,22 @@ function heroStopAnim() {
     cancelAnimationFrame(heroAnimRaf);
     heroAnimRaf = 0;
   }
+  if (heroAnimTimer) {
+    clearTimeout(heroAnimTimer);
+    heroAnimTimer = 0;
+  }
+  if (heroFaceTimer) {
+    clearTimeout(heroFaceTimer);
+    heroFaceTimer = 0;
+  }
   heroAnimTs = 0;
   heroMorphing = false;
   heroStopCountReveal();
+  var board = document.getElementById("hero-board");
+  if (board) {
+    board.classList.remove("is-animating", "is-lean-flight", "is-css-flight");
+    board.style.removeProperty("--hero-morph-ms");
+  }
 }
 
 function heroResetMotion() {
@@ -74,67 +212,247 @@ function heroCountT() {
   return heroCountReveal;
 }
 
-function heroStartCountReveal() {
-  heroStopCountReveal();
-  if (heroReduced()) {
-    heroCountReveal = 1;
-    heroApplyVisual();
-    return;
-  }
-  heroCountReveal = 0;
-  var started = 0;
-  function tick(ts) {
-    heroCountRaf = 0;
-    if (!started) started = ts;
-    var elapsed = ts - started;
-    if (elapsed < HERO_COUNT_DELAY_MS) {
-      heroCountRaf = requestAnimationFrame(tick);
-      return;
-    }
-    var u = heroClamp01((elapsed - HERO_COUNT_DELAY_MS) / HERO_COUNT_MS);
-    heroCountReveal = heroSmooth(u);
-    heroApplyVisual();
-    if (u < 1) heroCountRaf = requestAnimationFrame(tick);
-  }
-  heroCountRaf = requestAnimationFrame(tick);
+// Caption rides up over the sticky stretch after the morph latch.
+// Linear with scroll so the long second half of the track actually reads.
+function heroCountRideT(progress) {
+  var start = HERO_MORPH_PROGRESS;
+  var span = Math.max(0.3, 1 - start);
+  return heroClamp01((progress - start) / span);
 }
 
-function heroWantDove(section) {
-  if (!section) return heroTargetT >= 0.5;
-  var top = section.getBoundingClientRect().top;
-  var vh = window.innerHeight || 800;
-  var arm = Math.min(88, vh * 0.12);
-  // Use target only for latch so a reverse in progress is not pulled back
-  // by visualT still being near 1. Reverse once Fig. 1 drops ~120px below arm.
-  if (heroTargetT >= 0.5) {
-    return top < arm + 120;
+function heroMountCountStack(board, n) {
+  if (!board) return null;
+  var stack = document.getElementById("hero-count-stack");
+  if (stack && stack.parentElement) stack.remove();
+  stack = document.createElement("div");
+  stack.id = "hero-count-stack";
+  stack.className = "hero-count-stack";
+  stack.setAttribute("aria-hidden", "true");
+  var lines = typeof heroCountLines === "function" ? heroCountLines(n) : [heroCountLabel(n)];
+  for (var i = 0; i < lines.length; i++) {
+    var line = document.createElement("p");
+    line.className = "hero-count";
+    if (i === 0) line.id = "hero-count";
+    line.textContent = lines[i];
+    stack.appendChild(line);
   }
-  return top < arm;
+  board.appendChild(stack);
+  return stack;
+}
+
+function heroPaintCountRide(t) {
+  var stack = document.getElementById("hero-count-stack");
+  if (!stack || stack.hidden) return;
+  t = heroClamp01(t == null ? 0 : t);
+  heroCountReveal = t;
+  var board = document.getElementById("hero-board");
+  var boardH = board ? board.clientHeight : 0;
+  // Enter from below the chart; leave by flying out past the top — same ease both ways.
+  var travelIn = Math.max(200, boardH * 0.58);
+  var travelOut = Math.max(140, boardH * 0.36);
+  var restT = 0.46;
+  var y;
+  if (t <= restT) {
+    y = (1 - heroSmooth(t / restT)) * travelIn;
+  } else {
+    y = -heroSmooth((t - restT) / (1 - restT)) * travelOut;
+  }
+  stack.style.transform = "translate3d(-50%, " + y.toFixed(1) + "px, 0)";
+
+  var frames = stack.querySelectorAll(".hero-count");
+  var n = frames.length || 1;
+  // Mirror stagger: same slot and fade length in and out.
+  var inSlot = 0.38 / n;
+  var fadeSpan = Math.max(0.09, inSlot * 0.95);
+  var outStart = restT;
+  var outSlot = inSlot;
+  var edge = Math.max(18, boardH * 0.035);
+
+  for (var i = 0; i < frames.length; i++) {
+    var fadeIn = heroSmooth(heroClamp01((t - i * inSlot) / fadeSpan));
+    var fadeOut = heroSmooth(heroClamp01((t - (outStart + i * outSlot)) / fadeSpan));
+    var opacity = fadeIn * (1 - fadeOut);
+    frames[i].style.opacity = opacity.toFixed(3);
+    // From below the edge on the way in; past the top edge on the way out.
+    var enterY = (1 - fadeIn) * edge;
+    var exitY = fadeOut * -edge;
+    frames[i].style.transform = "translate3d(0, " + (enterY + exitY).toFixed(1) + "px, 0)";
+  }
+}
+
+function heroWantDove() {
+  var progress = heroTrackProgress();
+  // First ~60% of sticky distance: wall stays for browsing/clicks.
+  // Small hysteresis so reverse needs a clear scroll back.
+  if (heroTargetT >= 0.5) return progress >= HERO_MORPH_PROGRESS - 0.04;
+  return progress >= HERO_MORPH_PROGRESS;
 }
 
 function heroAnimTick(ts) {
   heroAnimRaf = 0;
   if (!heroAnimTs) heroAnimTs = ts;
-  var dt = Math.min(0.032, (ts - heroAnimTs) / 1000);
-  heroAnimTs = ts;
-  var maxStep = dt / (HERO_MORPH_MS / 1000);
-  var delta = heroTargetT - heroVisualT;
-  if (Math.abs(delta) <= maxStep) {
-    heroVisualT = heroTargetT;
-    heroAnimTs = 0;
-    heroMorphing = false;
-    heroApplyVisual();
-    if (heroVisualT >= 0.995) heroStartCountReveal();
-    else {
-      heroCountReveal = 0;
-      heroApplyVisual();
-    }
+  // Wall-clock progress: dropped frames skip ahead instead of stretching the morph.
+  var u = heroAnimDur > 0 ? heroClamp01((ts - heroAnimTs) / heroAnimDur) : 1;
+  heroVisualT = heroLerp(heroAnimFrom, heroAnimTo, u);
+  heroMorphing = u < 1;
+  heroApplyVisual();
+  if (u < 1) {
+    heroAnimRaf = requestAnimationFrame(heroAnimTick);
     return;
   }
-  heroVisualT += delta < 0 ? -maxStep : maxStep;
-  heroMorphing = true;
-  heroAnimRaf = requestAnimationFrame(heroAnimTick);
+  heroFinishMorph();
+}
+
+function heroFinishMorph() {
+  heroVisualT = heroTargetT;
+  heroAnimTs = 0;
+  heroMorphing = false;
+  if (heroFaceTimer) {
+    clearTimeout(heroFaceTimer);
+    heroFaceTimer = 0;
+  }
+  var board = document.getElementById("hero-board");
+  // Strip transitions before the final paint so rest styles snap cleanly.
+  if (board) {
+    board.classList.remove("is-animating", "is-lean-flight", "is-css-flight");
+    board.style.removeProperty("--hero-morph-ms");
+  }
   heroApplyVisual();
+  heroApplyChartHeight(heroVisualT, false);
+  heroPaintCountRide(heroCountRideT(heroTrackProgress()));
+}
+
+function heroMarkTransform(t, index) {
+  var point = heroLayout.points[index];
+  var cell = heroLayout.cell;
+  var tile = heroLayout.tile;
+  var tileH = tile * HERO_HEX_ASPECT;
+  var w = heroLerp(cell, tile, t);
+  var h = heroLerp(cell, tileH, t);
+  var cx = heroLerp(point.x0, point.x1, t);
+  var cy = heroLerp(point.y0, point.y1, t);
+  return (
+    "translate3d(" + (cx - cell / 2).toFixed(2) + "px," + (cy - cell / 2).toFixed(2) + "px,0) scale(" +
+    (w / cell).toFixed(4) + "," + (h / cell).toFixed(4) + ")"
+  );
+}
+
+// Shared paint: board CSS vars + mark transforms.
+// opts.heightT overrides board height lerp (defaults to t).
+function heroPaintMorph(t, faceT, tileT, silT, opts) {
+  if (!heroLayout || !heroMarks.length) return;
+  opts = opts || {};
+  var board = document.getElementById("hero-board");
+  var faceOpacity = 1 - faceT;
+  // Board height follows the morph; .hero-chart height transitions in lockstep
+  // so the intro under the chart rides up without a jump.
+  var heightT = opts.heightT != null ? opts.heightT : t;
+  var boardH = Math.round(heroLerp(heroLayout.gridH, heroLayout.cloudH, heightT));
+
+  if (board) {
+    if (heroLayout._hPx !== boardH) {
+      heroLayout._hPx = boardH;
+      board.style.height = boardH + "px";
+    }
+    board.style.setProperty("--hero-face", faceOpacity.toFixed(3));
+    board.style.setProperty("--hero-tile", tileT.toFixed(3));
+    if (silT != null) board.style.setProperty("--hero-sil", (silT * 0.28).toFixed(3));
+    board.classList.toggle("is-animating", !!heroMorphing || !!opts.animating);
+    // During CSS flight, faces stay mounted so opacity can ease; a mid-flight
+    // timer (or finish) flips is-faces-off. RAF path still drops them early.
+    if (!board.classList.contains("is-css-flight")) {
+      board.classList.toggle("is-faces-off", faceOpacity <= 0.04);
+    }
+    board.classList.toggle("is-tiles-on", tileT >= 0.03 || board.classList.contains("is-css-flight"));
+  }
+
+  for (var i = 0; i < heroMarks.length; i++) {
+    heroMarks[i].el.style.transform = heroMarkTransform(t, i);
+  }
+
+}
+
+// Phone path: drop portraits first, then CSS-transition only gold tiles (no per-frame JS).
+function heroLeanFlyTo(next) {
+  var board = document.getElementById("hero-board");
+  if (!board || !heroLayout) {
+    heroVisualT = next;
+    heroFinishMorph();
+    return;
+  }
+  var ms = HERO_MORPH_MS;
+  var from = next ? 0 : 1;
+  var to = next ? 1 : 0;
+  heroMorphing = true;
+  heroVisualT = from;
+  board.style.setProperty("--hero-morph-ms", ms + "ms");
+
+  // Solid gold at the start pose; portraits stay display:none for the whole flight.
+  heroPaintMorph(from, 1, 1, next ? 0 : 1, {
+    animating: true,
+    heightT: to
+  });
+  board.classList.add("is-lean-flight", "is-animating", "is-faces-off", "is-tiles-on");
+
+  // Force style flush so the transition starts from the current transforms.
+  void board.offsetWidth;
+
+  heroVisualT = to;
+  for (var i = 0; i < heroMarks.length; i++) {
+    heroMarks[i].el.style.transform = heroMarkTransform(to, i);
+  }
+  if (next) board.style.setProperty("--hero-sil", (0.28).toFixed(3));
+  else board.style.setProperty("--hero-sil", "0");
+
+  if (heroAnimTimer) clearTimeout(heroAnimTimer);
+  heroAnimTimer = setTimeout(function () {
+    heroAnimTimer = 0;
+    heroFinishMorph();
+  }, ms + 40);
+}
+
+// Keep the hex↔face crossfade + height shrink, but let the compositor run it:
+// two paints (from/to) instead of ~50 frames × 161 style writes.
+function heroCssFlyTo(next) {
+  var board = document.getElementById("hero-board");
+  if (!board || !heroLayout) {
+    heroVisualT = next;
+    heroFinishMorph();
+    return;
+  }
+  var ms = HERO_MORPH_MS;
+  var from = heroVisualT;
+  var to = next ? 1 : 0;
+  heroMorphing = true;
+  board.style.setProperty("--hero-morph-ms", ms + "ms");
+
+  board.classList.remove("is-css-flight", "is-lean-flight");
+  heroVisualT = from;
+  heroApplyVisual();
+  board.classList.add("is-animating", "is-css-flight");
+  // Tiles must be visibility:visible before their opacity eases in.
+  board.classList.add("is-tiles-on");
+  board.classList.toggle("is-faces-off", false);
+
+  void board.offsetWidth;
+
+  heroVisualT = to;
+  heroApplyVisual();
+  heroApplyChartHeight(to, true);
+
+  if (heroAnimTimer) clearTimeout(heroAnimTimer);
+  if (heroFaceTimer) clearTimeout(heroFaceTimer);
+  // Drop portrait layers once faces have mostly faded (forward only).
+  if (to >= 1) {
+    heroFaceTimer = setTimeout(function () {
+      heroFaceTimer = 0;
+      if (heroMorphing) board.classList.add("is-faces-off");
+    }, Math.round(ms * 0.55));
+  }
+  heroAnimTimer = setTimeout(function () {
+    heroAnimTimer = 0;
+    heroFinishMorph();
+  }, ms + 40);
 }
 
 function heroSetTargetT(next, section) {
@@ -143,44 +461,51 @@ function heroSetTargetT(next, section) {
     heroStopAnim();
     heroVisualT = next;
     heroTargetT = next;
-    heroCountReveal = next ? 1 : 0;
+    heroPaintCountRide(next ? 1 : 0);
     heroApplyVisual();
+    heroApplyChartHeight(next, false);
     return;
   }
   if (heroMorphing) return;
   if (next === heroTargetT) return;
   heroTargetT = next;
   heroStopCountReveal();
-  if (next < 1) heroCountReveal = 0;
 
   if (Math.abs(heroTargetT - heroVisualT) < 0.0005) {
     heroVisualT = heroTargetT;
     heroApplyVisual();
-    if (heroVisualT >= 0.995) heroStartCountReveal();
+    heroApplyChartHeight(heroVisualT, false);
     return;
   }
 
-  // Already scrolled past the figure — snap so a late tween does not yank layout.
-  if (next === 1 && section) {
-    var rect = section.getBoundingClientRect();
-    if (rect.bottom < 64) {
-      heroVisualT = 1;
-      heroMorphing = false;
-      heroApplyVisual();
-      heroStartCountReveal();
-      return;
-    }
+  heroCloseTip();
+
+  if (heroLeanMotion()) {
+    heroLeanFlyTo(next);
+    heroApplyChartHeight(next, true);
+    return;
+  }
+  if (heroCssFlight()) {
+    heroCssFlyTo(next);
+    return;
   }
 
+  heroAnimFrom = heroVisualT;
+  heroAnimTo = heroTargetT;
+  heroAnimDur = HERO_MORPH_MS * Math.max(0.08, Math.abs(heroAnimTo - heroAnimFrom));
   heroMorphing = true;
   heroAnimTs = 0;
+  heroApplyChartHeight(heroAnimTo, true);
   heroAnimRaf = requestAnimationFrame(heroAnimTick);
 }
 
 function heroDriveFromScroll(section) {
+  var progress = heroTrackProgress();
+  // Caption tracks scroll even while the dove morph is in flight.
+  heroPaintCountRide(heroCountRideT(progress));
   if (heroMorphing) return;
-  var want = heroWantDove(section);
-  var key = (want ? "1" : "0") + ":" + heroVisualT.toFixed(3) + ":" + heroCountReveal.toFixed(3);
+  var want = heroWantDove();
+  var key = (want ? "1" : "0") + ":" + heroVisualT.toFixed(3);
   heroSetTargetT(want ? 1 : 0, section);
   if (heroMorphing) return;
   if (key === heroScrubKey) return;
@@ -201,6 +526,28 @@ function heroColumns(width) {
   if (width <= 520) return 10;
   if (width <= 900) return 12;
   return 16;
+}
+
+// Keep marks spanning the full stage width. On wide screens, if the wall is
+// taller than the sticky budget, add columns (smaller cells) instead of
+// shrinking the cell alone (that left empty side gutters). On narrow, keep
+// the base column count so portraits stay large — same as the published grid.
+function heroFitGrid(width, gap, count, budgetH) {
+  var cols = heroColumns(width);
+  var maxCols = width <= 520
+    ? cols
+    : Math.min(count, width <= 900 ? 18 : 22);
+  var cell;
+  var rows;
+  var gridH;
+  do {
+    cell = (width - gap * (cols - 1)) / cols;
+    rows = Math.ceil(count / cols);
+    gridH = rows * cell + gap * (rows - 1);
+    if (gridH <= budgetH || cols >= maxCols) break;
+    cols += 1;
+  } while (true);
+  return { cols: cols, cell: cell, rows: rows, gridH: gridH };
 }
 
 function heroModeFromQuery() {

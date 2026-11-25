@@ -7,6 +7,21 @@ function tocLinks() {
   return nav.querySelectorAll("a");
 }
 
+(function bindTocSmoothScroll() {
+  var nav = document.getElementById("toc");
+  if (!nav || nav.dataset.smoothBound) return;
+  nav.dataset.smoothBound = "1";
+  nav.addEventListener("click", function (event) {
+    var link = event.target.closest("a[href^='#']");
+    if (!link) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    document.documentElement.classList.add("toc-smooth-scroll");
+    window.setTimeout(function () {
+      document.documentElement.classList.remove("toc-smooth-scroll");
+    }, 800);
+  });
+})();
+
 function tocTargets(links) {
   if (TOC_TARGETS && TOC_TARGETS.length === links.length) return TOC_TARGETS;
   TOC_TARGETS = [];

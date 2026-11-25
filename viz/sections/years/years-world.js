@@ -1,5 +1,5 @@
-// Optional product: Cold War “world” coloring for Fig. 4.
-// Loaded after years.js. Remove this script to drop the › control.
+// Optional product: Cold War “world” coloring — parked at #worlds for now.
+// Loaded after years.js. Remove this script (and occupations-world.js) to drop it.
 
 var YEAR_COLOR = "gender";
 
@@ -39,99 +39,6 @@ function yearSourceKey() {
   return YEAR_SCROLL.mode === "span" ? "srcYearSpan" : "srcYear";
 }
 
-function ensureYearWorldChrome() {
-  var legend = document.getElementById("year-legend");
-  if (!legend) return null;
-  var toolbar = legend.closest(".split-toolbar");
-  if (!toolbar) {
-    toolbar = document.createElement("div");
-    toolbar.className = "split-toolbar";
-    legend.parentNode.insertBefore(toolbar, legend);
-    toolbar.appendChild(legend);
-  }
-  var button = document.getElementById("year-color-next");
-  if (!button) {
-    button = document.createElement("button");
-    button.type = "button";
-    button.className = "split-next";
-    button.id = "year-color-next";
-    button.textContent = "›";
-    toolbar.appendChild(button);
-  }
-  return button;
-}
-
-function syncYearColorChrome() {
-  var button = ensureYearWorldChrome();
-  if (button) {
-    button.setAttribute("aria-label", t(YEAR_COLOR === "world" ? "yearColorNextToGender" : "yearColorNextToWorld"));
-  }
-
-  var legend = document.getElementById("year-legend");
-  if (!legend) return;
-  legend.replaceChildren();
-
-  if (YEAR_COLOR === "world") {
-    WORLD_ORDER.forEach(function (key) {
-      var item = document.createElement("span");
-      var swatch = document.createElement("i");
-      swatch.className = "swatch sq world-" + key;
-      item.appendChild(swatch);
-      item.appendChild(document.createTextNode(" "));
-      var label = document.createElement("span");
-      label.textContent = worldLabel(key);
-      item.appendChild(label);
-      legend.appendChild(item);
-    });
-  } else {
-    [["female", "female"], ["male", "male"]].forEach(function (row) {
-      var item = document.createElement("span");
-      var swatch = document.createElement("i");
-      swatch.className = "swatch sq " + row[0];
-      item.appendChild(swatch);
-      item.appendChild(document.createTextNode(" "));
-      var label = document.createElement("span");
-      label.textContent = t(row[1]);
-      item.appendChild(label);
-      legend.appendChild(item);
-    });
-  }
-
-}
-
-function renderYearTally() {
-  var tally = document.getElementById("year-tally");
-  tally.replaceChildren();
-
-  if (YEAR_COLOR === "world") {
-    var counts = { first: 0, second: 0, third: 0 };
-    PEOPLE_SEEN.forEach(function (person) { counts[worldOf(person)] += 1; });
-    WORLD_ORDER.forEach(function (key, index) {
-      if (index) tally.append(document.createTextNode(lang === "ru" ? ", " : "; "));
-      var el = document.createElement("span");
-      el.className = "w-" + key;
-      el.textContent = worldLabel(key) + " " + counts[key];
-      tally.appendChild(el);
-    });
-    tally.append(".");
-    return;
-  }
-
-  var menCount = PEOPLE_SEEN.filter(function (person) { return person.gender === "male"; }).length;
-  var womenCount = PEOPLE_SEEN.length - menCount;
-  tally.append(tallyBefore());
-  var menEl = document.createElement("span");
-  menEl.className = "m";
-  menEl.textContent = tallyMen(menCount);
-  tally.appendChild(menEl);
-  tally.append(tallyMid());
-  var womenEl = document.createElement("span");
-  womenEl.className = "f";
-  womenEl.textContent = tallyWomen(womenCount);
-  tally.appendChild(womenEl);
-  tally.append(".");
-}
-
 function afterYearCohorts(cohorts) {
   var peakWorld = "first";
   var peakCount = 0;
@@ -149,15 +56,131 @@ function afterYearCohorts(cohorts) {
   });
   YEAR_SCROLL.peakWorld = peakWorld;
   YEAR_SCROLL.peakCount = peakCount;
-  if (YEAR_COLOR === "world") YEAR_SCROLL.year = peakYear;
 }
 
-function beforeRenderYears() {
-  var button = ensureYearWorldChrome();
-  if (!button || button.dataset.bound === "1") return;
-  button.dataset.bound = "1";
-  button.addEventListener("click", function () {
-    YEAR_COLOR = YEAR_COLOR === "world" ? "gender" : "world";
-    renderYears();
+function syncWorldParkYearChrome() {
+  var cap = document.getElementById("cap-world-year");
+  if (cap) {
+    cap.setAttribute("data-i18n", "capYear");
+    cap.textContent = t("capYear");
+  }
+  var source = document.getElementById("src-world-year");
+  if (source) {
+    source.setAttribute("data-i18n", "srcYearWorld");
+    source.textContent = t("srcYearWorld");
+  }
+  var legend = document.getElementById("world-year-legend");
+  if (!legend) return;
+  legend.replaceChildren();
+  WORLD_ORDER.forEach(function (key) {
+    var item = document.createElement("span");
+    var swatch = document.createElement("i");
+    swatch.className = "swatch sq world-" + key;
+    item.appendChild(swatch);
+    item.appendChild(document.createTextNode(" "));
+    var label = document.createElement("span");
+    label.textContent = worldLabel(key);
+    item.appendChild(label);
+    legend.appendChild(item);
   });
+}
+
+function renderWorldParkYears() {
+  var host = document.getElementById("world-year-chart");
+  if (!host || typeof svgEl !== "function") return;
+
+  syncWorldParkYearChrome();
+  host.replaceChildren();
+
+  var byYear = new Map();
+  PEOPLE_SEEN.forEach(function (person) {
+    if (!byYear.has(person.year)) byYear.set(person.year, []);
+    byYear.get(person.year).push(person);
+  });
+  var cohorts = Array.from(byYear.entries()).sort(function (a, b) {
+    return a[1][0].yearStart - b[1][0].yearStart || a[0].localeCompare(b[0]);
+  });
+
+  var saved = YEAR_COLOR;
+  YEAR_COLOR = "world";
+
+  var minYear = 1950;
+  var maxYear = 1990;
+  var plotW = 960;
+  var step = 22;
+  var size = 18;
+  var maxStack = Math.max.apply(null, cohorts.map(function (entry) { return entry[1].length; }));
+  var padL = 20;
+  var padR = 16;
+  var padT = 8;
+  var padB = 34;
+  var plotH = maxStack * step;
+  var width = padL + plotW + padR;
+  var height = padT + plotH + padB;
+  var axisY = padT + plotH;
+  var labelY = axisY + 18;
+
+  function xYear(year) {
+    return padL + (year - minYear) / (maxYear - minYear) * plotW;
+  }
+
+  var svg = svgEl("svg");
+  svg.setAttribute("viewBox", "0 0 " + width + " " + height);
+  svg.setAttribute("class", "wide");
+  svg.setAttribute("role", "img");
+  svg.setAttribute("aria-label", t("yearAriaWorld"));
+
+  var stalinGroup = svgEl("g");
+  stalinGroup.setAttribute("class", "era-stalin");
+  var leninGroup = svgEl("g");
+  leninGroup.setAttribute("class", "era-lenin");
+
+  var axis = svgEl("line");
+  axis.setAttribute("x1", padL);
+  axis.setAttribute("x2", padL + plotW);
+  axis.setAttribute("y1", axisY);
+  axis.setAttribute("y2", axisY);
+  axis.setAttribute("class", "axis-line year-axis-baseline");
+  svg.appendChild(axis);
+
+  for (var tick = minYear; tick <= maxYear; tick += 5) {
+    var x = xYear(tick);
+    var tickLine = svgEl("line");
+    tickLine.setAttribute("x1", x);
+    tickLine.setAttribute("x2", x);
+    tickLine.setAttribute("y1", axisY);
+    tickLine.setAttribute("y2", axisY + 5);
+    tickLine.setAttribute("class", "axis-line year-axis-tick");
+    svg.appendChild(tickLine);
+    var label = svgEl("text");
+    label.setAttribute("x", x);
+    label.setAttribute("y", labelY);
+    label.setAttribute("text-anchor", "middle");
+    label.setAttribute("class", "axis year-axis-label");
+    label.textContent = String(tick);
+    svg.appendChild(label);
+  }
+
+  cohorts.forEach(function (entry) {
+    var bounds = cohortBounds(entry[0]);
+    var mid = (bounds[0] + bounds[1]) / 2;
+    var midX = xYear(mid) - size / 2;
+    var ordered = entry[1].slice().sort(sortYearStack);
+    ordered.forEach(function (person, index) {
+      var y = axisY - index * step - size;
+      var rect = svgEl("rect");
+      rect.setAttribute("x", midX.toFixed(2));
+      rect.setAttribute("y", y.toFixed(2));
+      rect.setAttribute("width", size);
+      rect.setAttribute("height", size);
+      paintYearMark(rect, person);
+      (person.series === "stalin" ? stalinGroup : leninGroup).appendChild(rect);
+    });
+  });
+
+  svg.appendChild(stalinGroup);
+  svg.appendChild(leninGroup);
+  host.appendChild(svg);
+
+  YEAR_COLOR = saved;
 }

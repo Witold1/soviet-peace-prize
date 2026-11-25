@@ -207,12 +207,18 @@ var I18N = {
     rename1989Source: "The picture is a page of <em>Pravda</em> reporting the Presidium meeting the day after the resolution. The full text is the resolution as published. <a href=\"http://pravo.levonevsky.org/baza/soviet/sssr1118.htm\">Transcription of the resolution</a>. <a href=\"https://archive.org/details/1989346_4216\">Scan of the issue: Pravda, 12 December 1989, no. 346 (26064), page 1</a>. <a href=\"https://vedomosti.sssr.su/1989/29/\">Vedomosti of the Congress of People's Deputies of the USSR and the Supreme Soviet of the USSR, 1989, no. 27, art. 534</a>.",
     n1: "Fig. 1.",
     hAll: "Who received the prize",
-    capAll: "Laureates with a portrait",
+    capAll: "Who received the prize",
+    heroLineGender: "men and women",
+    heroLineParty: "party members and non-party",
+    heroLineFaith: "from the world's religions",
+    heroLineWorld: "from every part of the world",
     n2: "Fig. 2.",
     capPress: "The world the prize was founded in",
     hOcc: "Who they were",
     capOcc: "What work did they do?",
     capOccWorld: "Which “world” did they come from?",
+    hWorlds: "Cold War worlds (scratch)",
+    worldsParkNote: "Parked here while we decide whether they belong in the main telling.",
     splitNextAria: "Next grouping",
     splitNextToWorld: "Show Cold War worlds",
     splitNextToWork: "Show work classes",
@@ -373,12 +379,18 @@ var I18N = {
     rename1989Source: "На снимке полоса «Правды» с сообщением о заседании Президиума на следующий день после постановления. Полный текст - постановление в публикации. <a href=\"http://pravo.levonevsky.org/baza/soviet/sssr1118.htm\">Расшифровка постановления</a>. <a href=\"https://archive.org/details/1989346_4216\">Скан номера: «Правда», 12 декабря 1989 г., № 346 (26064), стр. 1</a>. <a href=\"https://vedomosti.sssr.su/1989/29/\">«Ведомости Съезда народных депутатов СССР и Верховного Совета СССР», 1989, № 27, ст. 534</a>.",
     n1: "Рис. 1.",
     hAll: "Кто получил премию",
-    capAll: "Лауреаты с портретом",
+    capAll: "Кто получил премию",
+    heroLineGender: "мужчины и женщины",
+    heroLineParty: "партийные и беспартийные",
+    heroLineFaith: "из разных мировых религий",
+    heroLineWorld: "из каждой части света",
     n2: "Рис. 2.",
     capPress: "Мир, в котором учреждали премию",
     hOcc: "Кем они были",
     capOcc: "Чем они занимались?",
     capOccWorld: "Из какого «мира» они были?",
+    hWorlds: "Миры холодной войны (черновик)",
+    worldsParkNote: "Отложено сюда, пока решаем, вписываются ли они в основной рассказ.",
     splitNextAria: "Следующая группировка",
     splitNextToWorld: "Показать миры холодной войны",
     splitNextToWork: "Показать занятия",
@@ -638,9 +650,19 @@ function heroAria(n) {
 
 function heroCountLabel(n) {
   if (lang === "ru") {
-    return countNoun(n, "", "", "лауреат", "лауреата", "лауреатов") + " с портретом на графиках";
+    return countNoun(n, "", "", "человек", "человека", "человек") + " в этом рассказе";
   }
-  return countNoun(n, "laureate", "laureates", "", "", "") + " with a portrait in the charts";
+  return countNoun(n, "person", "people", "", "", "") + " in this telling";
+}
+
+function heroCountLines(n) {
+  return [
+    heroCountLabel(n),
+    t("heroLineGender"),
+    t("heroLineParty"),
+    t("heroLineFaith"),
+    t("heroLineWorld")
+  ];
 }
 
 function markAria(person) {

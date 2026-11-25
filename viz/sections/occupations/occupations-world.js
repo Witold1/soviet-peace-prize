@@ -1,5 +1,5 @@
-// Optional product: Cold War “world” grouping for Fig. 3.
-// Loaded after occupations.js. Remove this script to drop the › control.
+// Optional product: Cold War “world” grouping — parked at #worlds for now.
+// Loaded after occupations.js. Remove this script (and years-world.js) to drop it.
 
 var OCC_SPLIT = "occupation";
 
@@ -43,53 +43,77 @@ function occSplitGroups() {
   return groups;
 }
 
-function ensureOccWorldChrome() {
-  var legend = document.getElementById("occ-legend");
-  if (!legend) return null;
-  var toolbar = legend.closest(".split-toolbar");
-  if (!toolbar) {
-    toolbar = document.createElement("div");
-    toolbar.className = "split-toolbar";
-    legend.parentNode.insertBefore(toolbar, legend);
-    toolbar.appendChild(legend);
-  }
-  var button = document.getElementById("split-next");
-  if (!button) {
-    button = document.createElement("button");
-    button.type = "button";
-    button.className = "split-next";
-    button.id = "split-next";
-    button.textContent = "›";
-    toolbar.appendChild(button);
-  }
-  return button;
-}
-
-function syncOccSplitChrome() {
-  var button = ensureOccWorldChrome();
-  if (button) {
-    button.setAttribute("aria-label", t(OCC_SPLIT === "world" ? "splitNextToWork" : "splitNextToWorld"));
-  }
-  var cap = document.getElementById("cap-occ");
+function syncWorldParkOccChrome() {
+  var cap = document.getElementById("cap-world-occ");
   if (cap) {
-    var capKey = OCC_SPLIT === "world" ? "capOccWorld" : "capOcc";
-    cap.setAttribute("data-i18n", capKey);
-    cap.textContent = t(capKey);
+    cap.setAttribute("data-i18n", "capOccWorld");
+    cap.textContent = t("capOccWorld");
   }
-  var source = document.getElementById("src-occ");
+  var source = document.getElementById("src-world-occ");
   if (source) {
-    var srcKey = OCC_SPLIT === "world" ? "srcOccWorld" : "srcOcc";
-    source.setAttribute("data-i18n", srcKey);
-    source.textContent = t(srcKey);
+    source.setAttribute("data-i18n", "srcOccWorld");
+    source.textContent = t("srcOccWorld");
   }
+  var legend = document.getElementById("world-occ-legend");
+  if (!legend) return;
+  legend.replaceChildren();
+  [["female", "female"], ["male", "male"]].forEach(function (row) {
+    var item = document.createElement("span");
+    var swatch = document.createElement("i");
+    swatch.className = "swatch " + row[0];
+    item.appendChild(swatch);
+    item.appendChild(document.createTextNode(" "));
+    var label = document.createElement("span");
+    label.textContent = t(row[1]);
+    item.appendChild(label);
+    legend.appendChild(item);
+  });
 }
 
-function beforeRenderOccupations() {
-  var button = ensureOccWorldChrome();
-  if (!button || button.dataset.bound === "1") return;
-  button.dataset.bound = "1";
-  button.addEventListener("click", function () {
-    OCC_SPLIT = OCC_SPLIT === "world" ? "occupation" : "world";
-    renderOccupations();
+function renderWorldParkOcc() {
+  var host = document.getElementById("world-clouds");
+  if (!host || typeof renderCloud !== "function") return;
+
+  syncWorldParkOccChrome();
+
+  var saved = OCC_SPLIT;
+  OCC_SPLIT = "world";
+  var groups = occSplitGroups();
+  OCC_SPLIT = saved;
+
+  host.replaceChildren();
+  groups.forEach(function (group) {
+    var figure = document.createElement("figure");
+    figure.className = "group";
+    figure.dataset.worldKey = group.key;
+    var svg = renderCloud(
+      group.people,
+      typeof occHexSize === "function" ? occHexSize() : 12,
+      function (person) { return person.gender === "female" ? FEMALE : MALE; },
+      function (person) { return person.gender === "female" ? FEMALE_HOT : MALE_HOT; }
+    );
+    var womenHere = group.people.filter(function (person) { return person.gender === "female"; }).length;
+    svg.setAttribute("role", "img");
+    svg.setAttribute("aria-label", cloudAria(group.people.length, worldLabel(group.key), womenHere));
+    svg.setAttribute("width", svg.dataset.w);
+    svg.setAttribute("height", svg.dataset.h);
+    var caption = document.createElement("figcaption");
+    var line = document.createElement("span");
+    line.className = "caption-line";
+    line.textContent = group.people.length + " " + worldLabel(group.key);
+    caption.appendChild(line);
+    figure.appendChild(svg);
+    figure.appendChild(caption);
+    host.appendChild(figure);
+    if (typeof occChartNarrow === "function" && occChartNarrow()) {
+      line.style.whiteSpace = "normal";
+    } else if (typeof fitCaptionTitle === "function") {
+      fitCaptionTitle(line, Number(svg.dataset.w));
+    }
   });
+}
+
+function renderWorldPark() {
+  renderWorldParkOcc();
+  if (typeof renderWorldParkYears === "function") renderWorldParkYears();
 }

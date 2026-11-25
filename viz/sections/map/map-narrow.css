@@ -1,9 +1,22 @@
 #map-chart.is-regions {
   overflow-x: visible;
+  overflow-anchor: none;
+}
+
+#births {
+  overflow-anchor: none;
 }
 
 .map-facet {
   margin: 0 0 1.1rem;
+  overflow-anchor: none;
+}
+
+.map-facet svg.wide {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-width: 100%;
 }
 
 .map-facet:last-child { margin-bottom: 0; }

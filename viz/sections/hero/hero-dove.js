@@ -3,10 +3,10 @@
 function heroDoveRender() {
   var stage = document.getElementById("hero");
   var section = document.getElementById("all");
-  var countEl = document.getElementById("hero-count");
   if (!stage) return;
 
-  if (countEl && countEl.parentElement) countEl.remove();
+  var oldStack = document.getElementById("hero-count-stack");
+  if (oldStack && oldStack.parentElement) oldStack.remove();
   stage.replaceChildren();
   heroMarks = [];
   heroLayout = null;
@@ -14,12 +14,6 @@ function heroDoveRender() {
   heroResetMotion();
 
   if (section) section.classList.add("hero-scroll");
-  if (countEl) {
-    countEl.hidden = false;
-    countEl.style.opacity = "";
-    countEl.style.left = "";
-    countEl.style.top = "";
-  }
 
   var portraits = typeof PORTRAITS === "object" && PORTRAITS ? PORTRAITS : {};
   var ordered = PEOPLE_SEEN.slice().sort(byYear);
@@ -77,11 +71,7 @@ function heroDoveRender() {
   });
 
   stage.appendChild(hero);
-  var pin = document.getElementById("hero-pin");
-  if (countEl) {
-    countEl.textContent = heroCountLabel(ordered.length);
-    if (pin) pin.appendChild(countEl);
-  }
+  if (typeof heroMountCountStack === "function") heroMountCountStack(hero, ordered.length);
   heroDoveLayout();
   heroDoveSync();
 }
@@ -104,9 +94,9 @@ function heroDoveLayout() {
       item.face.style.opacity = "";
       if (item.tile) item.tile.style.opacity = "";
     });
-    var countEl = document.getElementById("hero-count");
+    var stack = document.getElementById("hero-count-stack");
     var silhouette = document.getElementById("hero-silhouette");
-    if (countEl) countEl.style.opacity = "";
+    if (stack) stack.style.transform = "";
     if (silhouette) {
       silhouette.style.opacity = "";
       silhouette.style.left = "";
@@ -123,34 +113,53 @@ function heroDoveLayout() {
   if (!width) return;
   heroWidthCached = width;
 
-  var cols = heroColumns(width);
   var gap = width <= 520 ? 3 : 5;
-  var cell = (width - gap * (cols - 1)) / cols;
-  var rows = Math.ceil(heroMarks.length / cols);
-  var gridH = rows * cell + gap * (rows - 1);
+  var budgetH = typeof heroPinBudgetH === "function" ? heroPinBudgetH() : window.innerHeight * 0.7;
+  var grid = typeof heroFitGrid === "function"
+    ? heroFitGrid(width, gap, heroMarks.length, budgetH)
+    : null;
+  var cols = grid ? grid.cols : heroColumns(width);
+  var cell = grid ? grid.cell : (width - gap * (cols - 1)) / cols;
+  var rows = grid ? grid.rows : Math.ceil(heroMarks.length / cols);
+  var gridH = grid ? grid.gridH : rows * cell + gap * (rows - 1);
 
   var dove = packPeaceDove(heroMarks.length);
   var aspect = peaceDoveAspect();
   var narrow = width <= 520;
   var cloudMaxW = narrow ? width * 0.98 : width * 0.94;
-  var cloudMaxH = narrow
-    ? Math.min(width * 1.08, window.innerHeight * 0.52)
-    : Math.min(width * 0.72, Math.max(260, window.innerHeight * 0.46));
   var cloudW = cloudMaxW;
-  var cloudH = cloudW / aspect;
-  if (cloudH > cloudMaxH) {
-    cloudH = cloudMaxH;
-    cloudW = cloudH * aspect;
+  var cloudH;
+  var tile;
+  var inset;
+  var topPad;
+  var cloudBoardH;
+
+  if (narrow) {
+    // Stretch dove to the wall height so board/chart stay put and intro
+    // copy does not jump when the morph runs (aspect may go tall).
+    tile = Math.max(9, Math.min(14, cloudW / 28));
+    inset = tile * 0.55;
+    topPad = Math.max(24, tile * 1.5);
+    cloudH = Math.max(tile * 4, gridH - topPad - inset);
+    cloudBoardH = gridH;
+  } else {
+    var cloudMaxH = Math.min(
+      width * 0.72,
+      typeof heroCloudMaxH === "function" ? heroCloudMaxH(false) : budgetH
+    );
+    cloudH = cloudW / aspect;
+    if (cloudH > cloudMaxH) {
+      cloudH = cloudMaxH;
+      cloudW = cloudH * aspect;
+    }
+    tile = Math.max(12, Math.min(18, cloudW / 24));
+    inset = tile * 0.55;
+    topPad = Math.max(24, tile * 2);
+    cloudBoardH = cloudH + topPad + inset;
   }
-  // Smaller hexes on phone; a bit larger on normal screens.
-  var tile = narrow
-    ? Math.max(9, Math.min(13, cloudW / 32))
-    : Math.max(12, Math.min(18, cloudW / 24));
-  var inset = tile * 0.55;
-  var topPad = Math.max(narrow ? 32 : 24, tile * 2);
+
   var cloudOriginX = (width - cloudW) / 2;
   var cloudOriginY = topPad;
-  var cloudBoardH = cloudH + topPad + inset;
   var innerW = Math.max(tile, cloudW - inset * 2);
   var innerH = Math.max(tile, cloudH - inset * 2);
 
@@ -187,57 +196,36 @@ function heroDoveLayout() {
   heroMarks.forEach(function (item) {
     item.el.style.width = cellPx;
     item.el.style.height = cellPx;
+    item.face.style.opacity = "";
+    if (item.tile) item.tile.style.opacity = "";
   });
+  board.classList.remove("is-animating", "is-faces-off", "is-tiles-on");
+  board.style.removeProperty("--hero-face");
+  board.style.removeProperty("--hero-tile");
+  board.style.removeProperty("--hero-sil");
 
-  heroClearRunway(section);
+  heroApplyRunway(section);
   heroScrubKey = "";
 }
 
 function heroDoveApply(t) {
   if (!heroLayout || !heroMarks.length) return;
   t = heroClamp01(t);
-  var faceT = heroSmooth((t - 0.05) / 0.7);
-  var tileT = heroSmooth((t - 0.12) / 0.7);
-  var countT = heroCountT();
+  // Faces return earlier on the reverse (hex → portraits) than on GitHub's 0.05/0.7.
+  var faceT = heroSmooth((t - 0.02) / 0.52);
+  var tileT = heroSmooth((t - 0.14) / 0.62);
   var silT = heroSmooth((t - 0.2) / 0.65);
-
-  var cell = heroLayout.cell;
-  var tile = heroLayout.tile;
-  var board = document.getElementById("hero-board");
-  var countEl = document.getElementById("hero-count");
-  var silhouette = document.getElementById("hero-silhouette");
-  var boardH = heroLerp(heroLayout.gridH, heroLayout.cloudH, t);
-  if (board) board.style.height = boardH.toFixed(2) + "px";
-
-  var faceOpacity = (1 - faceT).toFixed(3);
-  var tileOpacity = tileT.toFixed(3);
-  var tileH = tile * HERO_HEX_ASPECT;
-  heroMarks.forEach(function (item, index) {
-    var point = heroLayout.points[index];
-    var w = heroLerp(cell, tile, t);
-    var h = heroLerp(cell, tileH, t);
-    var cx = heroLerp(point.x0, point.x1, t);
-    var cy = heroLerp(point.y0, point.y1, t);
-    var sx = w / cell;
-    var sy = h / cell;
-    item.el.style.transform =
-      "translate3d(" + (cx - cell / 2).toFixed(2) + "px," + (cy - cell / 2).toFixed(2) + "px,0) scale(" + sx.toFixed(4) + "," + sy.toFixed(4) + ")";
-    item.face.style.opacity = faceOpacity;
-    if (item.tile) item.tile.style.opacity = tileOpacity;
-  });
-
-  if (silhouette) silhouette.style.opacity = (silT * 0.28).toFixed(3);
-  if (countEl) countEl.style.opacity = countT.toFixed(3);
+  heroPaintMorph(t, faceT, tileT, silT);
 }
 
 function heroDoveSync() {
   var section = document.getElementById("all");
-  var countEl = document.getElementById("hero-count");
+  var stack = document.getElementById("hero-count-stack");
   var silhouette = document.getElementById("hero-silhouette");
   if (!section || !heroMarks.length) return;
 
   if (heroReduced() || !heroLayout) {
-    if (countEl) countEl.style.opacity = heroReduced() ? "0" : "";
+    if (stack) stack.style.visibility = heroReduced() ? "hidden" : "";
     if (silhouette) silhouette.style.opacity = heroReduced() ? "0" : "";
     return;
   }

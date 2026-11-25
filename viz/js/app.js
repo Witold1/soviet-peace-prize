@@ -35,6 +35,7 @@ function setDisplay(next) {
   applyChrome();
   syncFn();
   renderYears();
+  if (typeof renderWorldPark === "function") renderWorldPark();
   if (typeof renderAnnounceChart === "function") renderAnnounceChart();
   renderMap();
   if (typeof centerAgeChartScroll === "function") centerAgeChartScroll();
@@ -65,6 +66,7 @@ function setLang(next) {
   renderHero();
   renderOccupations();
   renderYears();
+  if (typeof renderWorldPark === "function") renderWorldPark();
   if (typeof renderAnnounceChart === "function") renderAnnounceChart();
   renderAges();
   if (typeof renderAliveChart === "function") renderAliveChart();
@@ -86,13 +88,16 @@ var scrollSyncQueued = false;
 var scrollHeroEl = null;
 var scrollPrizeEl = null;
 var scrollYearsEl = null;
+var scrollOccEl = null;
 function runScrollSync() {
   scrollSyncQueued = false;
   if (!scrollHeroEl) scrollHeroEl = document.getElementById("all");
   if (!scrollPrizeEl) scrollPrizeEl = document.getElementById("prize");
   if (!scrollYearsEl) scrollYearsEl = document.getElementById("years");
+  if (!scrollOccEl) scrollOccEl = document.getElementById("occupation");
   syncToc();
   if (viewNear(scrollPrizeEl, 240)) syncPress();
+  if (viewNear(scrollOccEl, 240) && typeof syncOccupations === "function") syncOccupations();
   if (viewNear(scrollYearsEl, 240) && typeof syncYears === "function") syncYears();
   if (
     (typeof heroMorphing !== "undefined" && heroMorphing) ||
@@ -115,15 +120,27 @@ var yearNarrowWas = null;
 var mapNarrowWas = null;
 var occNarrowWas = null;
 var resizeSyncQueued = false;
+var layoutWidthCached = 0;
 window.addEventListener("resize", function () {
   if (resizeSyncQueued) return;
   resizeSyncQueued = true;
   requestAnimationFrame(function () {
     resizeSyncQueued = false;
+    var width = window.innerWidth;
+    // Mobile URL-bar show/hide fires resize with height-only change. Relayout
+    // then rewrites sticky section heights and the page jumps a few lines
+    // opposite the scroll. Ignore pure height resizes.
+    if (width === layoutWidthCached) {
+      syncDisplayControls();
+      return;
+    }
+    layoutWidthCached = width;
+    if (typeof refreshSectionFadeHeight === "function") refreshSectionFadeHeight();
     var narrow = typeof yearChartNarrow === "function" && yearChartNarrow();
     if (narrow !== yearNarrowWas) {
       yearNarrowWas = narrow;
       renderYears();
+      if (typeof renderWorldPark === "function") renderWorldPark();
     }
     var mapNarrow = typeof mapChartNarrow === "function" && mapChartNarrow();
     if (mapNarrow !== mapNarrowWas) {
@@ -134,12 +151,15 @@ window.addEventListener("resize", function () {
     if (occNarrow !== occNarrowWas) {
       occNarrowWas = occNarrow;
       renderOccupations();
+      if (typeof renderWorldPark === "function") renderWorldPark();
     }
     if (typeof centerAgeChartScroll === "function") centerAgeChartScroll();
     if (typeof centerAliveChartScroll === "function") centerAliveChartScroll();
     if (typeof centerAnnounceChartScroll === "function") centerAnnounceChartScroll();
     layoutPress();
     syncPress();
+    if (typeof layoutOccSticky === "function") layoutOccSticky();
+    if (typeof syncOccupations === "function") syncOccupations();
     if (typeof layoutYears === "function") layoutYears();
     if (typeof syncYears === "function") syncYears();
     if (typeof layoutDestalin === "function") layoutDestalin();
@@ -238,8 +258,11 @@ window.addEventListener("resize", function () {
 })();
 
 setLang(initialLang());
+layoutWidthCached = window.innerWidth;
+if (typeof refreshSectionFadeHeight === "function") refreshSectionFadeHeight();
 yearNarrowWas = typeof yearChartNarrow === "function" && yearChartNarrow();
 mapNarrowWas = typeof mapChartNarrow === "function" && mapChartNarrow();
+occNarrowWas = typeof occChartNarrow === "function" && occChartNarrow();
 window.addEventListener("load", function () {
   layoutHero(true);
   syncHero();

@@ -161,11 +161,16 @@ function renderOccupations() {
 
   prepareOccCloudEntrance();
 
-  var chordViz = document.getElementById("occ-chord-viz");
-  if (chordViz) chordViz.hidden = mode !== "occupation";
+  var chordBlock = document.getElementById("occ-chord-block");
+  var note = document.getElementById("occ-chord-note");
+  var srcChord = document.getElementById("src-occ-chord");
+  if (chordBlock) chordBlock.hidden = mode !== "occupation";
+  if (note) note.hidden = mode !== "occupation";
+  if (srcChord) srcChord.hidden = mode !== "occupation";
   if (mode === "occupation" && typeof renderOccChord === "function") {
     renderOccChord();
   }
+  if (typeof afterRenderOccMorph === "function") afterRenderOccMorph();
 }
 
 var occCloudSeen = false;
@@ -176,8 +181,8 @@ function occCloudReduced() {
 }
 
 function occCloudViz() {
-  var clouds = document.getElementById("clouds");
-  return clouds ? clouds.closest(".viz") : null;
+  return document.getElementById("occ-pin") ||
+    (document.getElementById("clouds") && document.getElementById("clouds").closest(".viz"));
 }
 
 function occCloudHash(n) {

@@ -47,6 +47,7 @@ html[data-display="tablet"] body {
 html[data-display="phone"] .shell,
 html[data-display="tablet"] .shell {
   min-height: 100vh;
+  min-height: 100svh;
   box-shadow: 0 0 0 1px #d4d4d4;
 }
 
@@ -90,8 +91,11 @@ section {
   scroll-margin-top: 24px;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  html { scroll-behavior: smooth; }
+/* Disable scroll anchoring: height changes in sticky/morph sections were
+   yanking scrollY upward (felt like jumping back to the section top). */
+html,
+body {
+  overflow-anchor: none;
 }
 
 @media (max-width: 640px) {

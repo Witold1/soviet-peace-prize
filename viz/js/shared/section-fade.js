@@ -5,11 +5,24 @@ function sectionFadeReduced() {
 }
 
 var SECTION_FADE_NODES = null;
+// Lock fade math to a stable viewport height. Live innerHeight jumps when the
+// mobile URL bar hides — on a tall section like #births (Fig. 6 regional maps)
+// that makes opacity thresholds twitch and feels like a scroll jump.
+var SECTION_FADE_HEIGHT = 0;
+
+function sectionFadeHeight() {
+  if (!SECTION_FADE_HEIGHT) SECTION_FADE_HEIGHT = window.innerHeight || 1;
+  return SECTION_FADE_HEIGHT;
+}
+
+function refreshSectionFadeHeight() {
+  SECTION_FADE_HEIGHT = window.innerHeight || 1;
+}
 
 function sectionFadeNodes() {
   if (!SECTION_FADE_NODES) {
     SECTION_FADE_NODES = Array.prototype.slice.call(
-      document.querySelectorAll(".hook, #occupation, #years, #decree-1956, #ages, #decree-1989, #births, #ghosts, #method, #footnotes")
+      document.querySelectorAll(".hook, #occupation, #years, #decree-1956, #ages, #decree-1989, #births, #ghosts, #worlds, #method, #footnotes")
     );
   }
   return SECTION_FADE_NODES;
@@ -23,12 +36,12 @@ function syncSectionFade() {
     });
     return;
   }
-  var height = window.innerHeight;
+  var height = sectionFadeHeight();
   var enterEnd = height * 0.46;
   var leaveStart = height * 0.72;
   var leaveEnd = height * 0.06;
   // Short last section can't scroll into the mid-viewport enter band.
-  var atBottom = window.scrollY + height >= document.documentElement.scrollHeight - 2;
+  var atBottom = window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 2;
   var last = nodes.length ? nodes[nodes.length - 1] : null;
   nodes.forEach(function (node) {
     var rect = node.getBoundingClientRect();
@@ -38,10 +51,12 @@ function syncSectionFade() {
     } else {
       var enter = (height - rect.top) / (height - enterEnd);
       var leave;
-      if (node.id === "years") {
-        // Tall sticky runway: stay fully opaque while Fig. 4 is in play
-        // (span morph + ribbon growth). Only ease out as the section exits.
-        leave = rect.bottom / (height * 0.22);
+      if (node.id === "occupation") {
+        // Occupation is sticky only on desktop; on narrow use normal leave
+        // so a long section does not stay oddly opaque while scrolling.
+        leave = (typeof occUseSticky === "function" && occUseSticky())
+          ? rect.bottom / (height * 0.22)
+          : (rect.bottom - leaveEnd) / (leaveStart - leaveEnd);
       } else {
         leave = (rect.bottom - leaveEnd) / (leaveStart - leaveEnd);
       }
@@ -56,4 +71,7 @@ function syncSectionFade() {
   });
 }
 
-window.addEventListener("load", syncSectionFade);
+window.addEventListener("load", function () {
+  refreshSectionFadeHeight();
+  syncSectionFade();
+});

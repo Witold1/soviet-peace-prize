@@ -28,12 +28,14 @@ function yearsReduced() {
 }
 
 function yearsModeOk(mode) {
-  return mode === "plain" || mode === "stretched" || mode === "scroll";
+  return mode === "plain" || mode === "stretched";
 }
 
 function yearsModeFromQuery() {
   try {
     var query = new URLSearchParams(window.location.search).get("years");
+    // Old ?years=scroll bookmarks fall back to plain (no sticky runway).
+    if (query === "scroll") return "plain";
     if (yearsModeOk(query)) return query;
   } catch (err) {}
   return "";
@@ -44,17 +46,18 @@ function yearsMode() {
   if (fromQuery) return fromQuery;
   try {
     var saved = localStorage.getItem(YEARS_MODE_KEY);
+    if (saved === "scroll") return "plain";
     if (yearsModeOk(saved)) return saved;
   } catch (err) {}
-  return "scroll";
+  return "plain";
 }
 
 function setYearsMode(next) {
-  var mode = yearsModeOk(next) ? next : "scroll";
+  var mode = yearsModeOk(next) ? next : "plain";
   try { localStorage.setItem(YEARS_MODE_KEY, mode); } catch (err) {}
   try {
     var url = new URL(window.location.href);
-    if (mode === "scroll") url.searchParams.delete("years");
+    if (mode === "plain") url.searchParams.delete("years");
     else url.searchParams.set("years", mode);
     history.replaceState(null, "", url);
   } catch (err) {}
@@ -69,6 +72,18 @@ function setYearsMode(next) {
 function syncYearsModeControls() {
   var mode = yearsMode();
   document.documentElement.setAttribute("data-years-mode", mode);
+  try {
+    if (localStorage.getItem(YEARS_MODE_KEY) === "scroll") {
+      localStorage.setItem(YEARS_MODE_KEY, "plain");
+    }
+  } catch (err) {}
+  try {
+    var url = new URL(window.location.href);
+    if (url.searchParams.get("years") === "scroll") {
+      url.searchParams.delete("years");
+      history.replaceState(null, "", url);
+    }
+  } catch (err) {}
   document.querySelectorAll("[data-years-mode]").forEach(function (button) {
     var id = button.getAttribute("data-years-mode");
     if (id === mode) button.setAttribute("aria-current", "true");
@@ -77,7 +92,8 @@ function syncYearsModeControls() {
 }
 
 function yearsUseSticky() {
-  return !yearsReduced() && yearsMode() === "scroll";
+  // Sticky mid↔span scroll runway retired — it fought mobile chrome / scroll.
+  return false;
 }
 
 function yearMorphGate() {
@@ -274,9 +290,54 @@ function scrubYearsPinScroll(pin, progress) {
   if (Math.abs(pin.scrollTop - next) > 0.5) pin.scrollTop = next;
 }
 
+function reserveYearLeadHeight(lead) {
+  if (!lead || !YEAR_SCROLL.year) return;
+  var base = {
+    women: YEAR_SCROLL.women,
+    year: YEAR_SCROLL.year,
+    color: yearColorMode(),
+    peakWorld: YEAR_SCROLL.peakWorld,
+    peakCount: YEAR_SCROLL.peakCount,
+    canScroll: yearsUseSticky()
+  };
+  var cur = yearLead({
+    women: base.women,
+    year: base.year,
+    mode: YEAR_SCROLL.mode,
+    color: base.color,
+    peakWorld: base.peakWorld,
+    peakCount: base.peakCount,
+    canScroll: base.canScroll
+  });
+  lead.style.minHeight = "";
+  lead.textContent = yearLead({
+    women: base.women,
+    year: base.year,
+    mode: "mid",
+    color: base.color,
+    peakWorld: base.peakWorld,
+    peakCount: base.peakCount,
+    canScroll: base.canScroll
+  });
+  var hMid = lead.offsetHeight;
+  lead.textContent = yearLead({
+    women: base.women,
+    year: base.year,
+    mode: "span",
+    color: base.color,
+    peakWorld: base.peakWorld,
+    peakCount: base.peakCount,
+    canScroll: base.canScroll
+  });
+  var hSpan = lead.offsetHeight;
+  lead.style.minHeight = Math.max(hMid, hSpan, 1) + "px";
+  lead.textContent = cur;
+}
+
 function refreshYearCopy() {
   var lead = document.getElementById("year-lead");
   if (lead && YEAR_SCROLL.year) {
+    reserveYearLeadHeight(lead);
     lead.textContent = yearLead({
       women: YEAR_SCROLL.women,
       year: YEAR_SCROLL.year,
@@ -296,8 +357,23 @@ function refreshYearCopy() {
   var source = document.getElementById("year-source");
   if (source) {
     var key = yearSourceKey();
+    var prev = source.textContent;
+    source.style.minHeight = "";
+    source.textContent = t("srcYear");
+    var hA = source.offsetHeight;
+    source.textContent = t("srcYearSpan");
+    var hB = source.offsetHeight;
+    var hC = 0;
+    var hD = 0;
+    if (typeof t === "function" && t("srcYearWorld")) {
+      source.textContent = t("srcYearWorld");
+      hC = source.offsetHeight;
+      source.textContent = t("srcYearSpanWorld");
+      hD = source.offsetHeight;
+    }
+    source.style.minHeight = Math.max(hA, hB, hC, hD, 1) + "px";
     source.setAttribute("data-i18n", key);
-    source.textContent = t(key);
+    source.textContent = t(key) || prev;
   }
   syncYearColorChrome();
 }

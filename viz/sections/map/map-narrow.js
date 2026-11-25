@@ -110,6 +110,9 @@ function renderMapNarrow(chart, byPoint, appendMarks, densifyRing) {
     svg.setAttribute("class", "wide");
     svg.setAttribute("role", "img");
     svg.setAttribute("aria-label", ariaLabel);
+    // Lock aspect so mobile chrome show/hide cannot retarget facet height.
+    svg.style.aspectRatio = mapW + " / " + mapH;
+    svg.style.height = "auto";
     const land = svgEl("g");
     land.setAttribute("class", "land");
     function trace(points, close) {

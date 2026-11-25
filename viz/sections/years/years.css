@@ -23,8 +23,7 @@
   position: sticky;
   top: 16px;
   z-index: 1;
-  max-height: calc(100vh - 32px);
-  overflow: auto;
+  /* No desktop overflow:auto — inner scrollbar / max-height fights page scroll. */
   padding-bottom: 8px;
   background: #fce5cd;
 }
@@ -39,41 +38,51 @@ html[data-dev-plain] .years-scrolly.is-sticky .years-pin {
 
 .years-step {
   height: 32vh;
+  height: 32svh;
   min-height: 160px;
 }
 
 .years-step[data-step="span"] {
   height: 22vh;
+  height: 22svh;
   min-height: 110px;
 }
 
-/* Narrow scroll mode: no inner scrollbar; page scroll pans the pin. */
+/* Narrow: pin can overflow the viewport; page scroll pans via scrubYearsPinScroll. */
 html[data-display="phone"] .years-scrolly.is-sticky .years-pin {
+  max-height: calc(100vh - 32px);
+  max-height: calc(100svh - 32px);
   overflow: hidden;
 }
 
 html[data-display="phone"] .years-step {
   height: 40vh;
+  height: 40svh;
   min-height: 200px;
 }
 
 html[data-display="phone"] .years-step[data-step="span"] {
   height: 36vh;
+  height: 36svh;
   min-height: 180px;
 }
 
 @container page (max-width: 640px) {
   .years-scrolly.is-sticky .years-pin {
+    max-height: calc(100vh - 32px);
+    max-height: calc(100svh - 32px);
     overflow: hidden;
   }
 
   .years-step {
     height: 36vh;
+    height: 36svh;
     min-height: 180px;
   }
 
   .years-step[data-step="span"] {
     height: 36vh;
+    height: 36svh;
     min-height: 180px;
   }
 }
