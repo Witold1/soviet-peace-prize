@@ -76,16 +76,18 @@ html[data-dev-plain] .occ-scrolly.is-sticky .occ-pin {
   order: 5;
 }
 
+/* !important: interrupted FLIP can leave inline opacity/visibility:visible on
+   both layers; without this, Fig. 3 and 3a stack after rapid reloads. */
 .occ-scrolly.is-sticky.is-clouds:not(.is-flipping) #occ-chord-block {
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
 }
 
 .occ-scrolly.is-sticky.is-chord:not(.is-flipping) #occ-fig3-block {
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
 }
 
 /* Hide cloud labels only while leaving Fig. 3 → 3a. On the way back

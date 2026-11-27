@@ -51,6 +51,19 @@ function syncToc() {
       else links[i].removeAttribute("aria-current");
     }
     TOC_CURRENT = current;
+    // Keep the address bar on the active section (replaceState — no history spam).
+    // Fig. 3 / 3a stay under #occupation; only TOC sections get a hash.
+    try {
+      var href = current.getAttribute("href") || "";
+      if (href.charAt(0) === "#") {
+        var nextHash = href;
+        if (window.location.hash !== nextHash) {
+          var url = new URL(window.location.href);
+          url.hash = nextHash;
+          history.replaceState(null, "", url.pathname + url.search + url.hash);
+        }
+      }
+    } catch (err) {}
   }
   placeSectionMark(links, targets, current);
 }

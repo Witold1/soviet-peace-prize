@@ -1,61 +1,23 @@
 // Optional product: Cold War “world” coloring — parked at #worlds for now.
-// Loaded after years.js. Remove this script (and occupations-world.js) to drop it.
+// Does not overwrite main years.js fill/sort hooks.
 
-var YEAR_COLOR = "gender";
-
-function yearColorMode() {
-  return YEAR_COLOR;
+function worldYearFillOf(person) {
+  return WORLD_FILL[worldOf(person)] || WORLD_THIRD_FILL;
 }
 
-function yearFillOf(person) {
-  if (YEAR_COLOR === "world") return WORLD_FILL[worldOf(person)] || WORLD_THIRD_FILL;
-  return person.gender === "female" ? FEMALE : MALE;
+function worldYearHotOf(person) {
+  return WORLD_HOT[worldOf(person)] || WORLD_THIRD_HOT;
 }
 
-function yearHotOf(person) {
-  if (YEAR_COLOR === "world") return WORLD_HOT[worldOf(person)] || WORLD_THIRD_HOT;
-  return person.gender === "female" ? FEMALE_HOT : MALE_HOT;
-}
-
-function sortYearStack(a, b) {
-  if (YEAR_COLOR === "world") {
-    var wa = WORLD_ORDER.indexOf(worldOf(a));
-    var wb = WORLD_ORDER.indexOf(worldOf(b));
-    if (wa !== wb) return wa - wb;
-  } else if (a.gender !== b.gender) {
-    return a.gender === "female" ? -1 : 1;
-  }
+function sortWorldYearStack(a, b) {
+  var wa = WORLD_ORDER.indexOf(worldOf(a));
+  var wb = WORLD_ORDER.indexOf(worldOf(b));
+  if (wa !== wb) return wa - wb;
   return sortName(a).localeCompare(sortName(b), lang);
 }
 
-function yearChartAriaKey() {
-  return YEAR_COLOR === "world" ? "yearAriaWorld" : "yearAria";
-}
-
-function yearSourceKey() {
-  if (YEAR_COLOR === "world") {
-    return YEAR_SCROLL.mode === "span" ? "srcYearSpanWorld" : "srcYearWorld";
-  }
-  return YEAR_SCROLL.mode === "span" ? "srcYearSpan" : "srcYear";
-}
-
-function afterYearCohorts(cohorts) {
-  var peakWorld = "first";
-  var peakCount = 0;
-  var peakYear = shortYear(cohorts[0][0]);
-  cohorts.forEach(function (entry) {
-    var worldCounts = { first: 0, second: 0, third: 0 };
-    entry[1].forEach(function (person) { worldCounts[worldOf(person)] += 1; });
-    WORLD_ORDER.forEach(function (key) {
-      if (worldCounts[key] > peakCount) {
-        peakCount = worldCounts[key];
-        peakWorld = key;
-        peakYear = shortYear(entry[0]);
-      }
-    });
-  });
-  YEAR_SCROLL.peakWorld = peakWorld;
-  YEAR_SCROLL.peakCount = peakCount;
+function paintWorldYearMark(node, person) {
+  paintMark(node, person, worldYearFillOf(person), worldYearHotOf(person));
 }
 
 function syncWorldParkYearChrome() {
@@ -100,9 +62,6 @@ function renderWorldParkYears() {
   var cohorts = Array.from(byYear.entries()).sort(function (a, b) {
     return a[1][0].yearStart - b[1][0].yearStart || a[0].localeCompare(b[0]);
   });
-
-  var saved = YEAR_COLOR;
-  YEAR_COLOR = "world";
 
   var minYear = 1950;
   var maxYear = 1990;
@@ -165,7 +124,7 @@ function renderWorldParkYears() {
     var bounds = cohortBounds(entry[0]);
     var mid = (bounds[0] + bounds[1]) / 2;
     var midX = xYear(mid) - size / 2;
-    var ordered = entry[1].slice().sort(sortYearStack);
+    var ordered = entry[1].slice().sort(sortWorldYearStack);
     ordered.forEach(function (person, index) {
       var y = axisY - index * step - size;
       var rect = svgEl("rect");
@@ -173,7 +132,7 @@ function renderWorldParkYears() {
       rect.setAttribute("y", y.toFixed(2));
       rect.setAttribute("width", size);
       rect.setAttribute("height", size);
-      paintYearMark(rect, person);
+      paintWorldYearMark(rect, person);
       (person.series === "stalin" ? stalinGroup : leninGroup).appendChild(rect);
     });
   });
@@ -181,6 +140,4 @@ function renderWorldParkYears() {
   svg.appendChild(stalinGroup);
   svg.appendChild(leninGroup);
   host.appendChild(svg);
-
-  YEAR_COLOR = saved;
 }

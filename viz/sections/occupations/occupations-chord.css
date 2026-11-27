@@ -41,7 +41,8 @@
   transition: opacity 0.18s ease;
 }
 
-.occ-compound-union polygon.is-dim {
+.occ-compound-union polygon.is-dim,
+.occ-compound-union.is-filtering polygon:not(.is-hot) {
   opacity: 0.18;
 }
 
@@ -50,7 +51,8 @@
   transition: fill-opacity 0.18s ease;
 }
 
-.occ-compound-wash.is-dim {
+.occ-compound-wash.is-dim,
+.occ-compound-union.is-filtering .occ-compound-wash:not(.is-hot) {
   fill-opacity: 0.02;
 }
 
@@ -66,7 +68,8 @@
   fill-opacity: 1;
 }
 
-.occ-compound-wash.is-band.is-dim {
+.occ-compound-wash.is-band.is-dim,
+.occ-compound-union.is-filtering .occ-compound-wash.is-band:not(.is-hot) {
   fill-opacity: 0.3;
 }
 
@@ -78,7 +81,8 @@
     stroke-width 0.18s ease;
 }
 
-.occ-compound-hull.is-dim {
+.occ-compound-hull.is-dim,
+.occ-compound-union.is-filtering .occ-compound-hull:not(.is-hot) {
   stroke-opacity: 0.16;
 }
 
@@ -101,7 +105,8 @@
   fill: #555;
 }
 
-.occ-compound-svg-label.is-dim {
+.occ-compound-svg-label.is-dim,
+.occ-compound-union.is-filtering .occ-compound-svg-label:not(.is-hot) {
   fill-opacity: 0.25;
 }
 

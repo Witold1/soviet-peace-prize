@@ -23,100 +23,27 @@ function renderAliveChart() {
   var source = document.getElementById("alive-source");
   if (source) source.textContent = t("srcAlive");
 
-  renderAliveBeeswarm(living);
+  renderAliveBeeswarm();
 }
 
-function renderAliveBeeswarm(living) {
-  var minAge = 28;
-  var maxAge = 96;
-  var plotW = 860;
-  var radius = 6.5;
-  var padL = 36;
-  var padR = 24;
-  var padT = 28;
-  var padB = 36;
-
-  function xAge(age) {
-    return padL + (age - minAge) / (maxAge - minAge) * plotW;
-  }
-
-  var ordered = PEOPLE_SEEN.slice().sort(function (a, b) {
-    return a.age - b.age || sortName(a).localeCompare(sortName(b), lang);
-  });
-  var placed = [];
-  ordered.forEach(function (person) {
-    var x = xAge(person.age);
-    var y = 0;
-    var found = false;
-    for (var mag = 0; mag < 500 && !found; mag += 1) {
-      var candidates = mag === 0 ? [0] : [mag, -mag];
-      for (var c = 0; c < candidates.length; c += 1) {
-        var candidate = candidates[c];
-        var hit = placed.some(function (other) {
-          return Math.hypot(other.x - x, other.y - candidate) < radius * 2 - 0.4;
-        });
-        if (!hit) {
-          y = candidate;
-          found = true;
-          break;
-        }
-      }
-    }
-    placed.push({ person: person, x: x, y: y });
-  });
-
-  var ys = placed.map(function (dot) { return dot.y; });
-  var minY = Math.min.apply(null, ys);
-  var maxY = Math.max.apply(null, ys);
-  var swarmH = maxY - minY + radius * 2 + 8;
-  var width = padL + plotW + padR;
-  var height = padT + swarmH + padB;
-  var axisY = padT + swarmH;
-
-  function screenY(y) {
-    return padT + (maxY + radius + 4 - y);
-  }
-
+function renderAliveBeeswarm() {
+  var swarm = beeswarmPlace(PEOPLE_SEEN);
   var svg = svgEl("svg");
-  svg.setAttribute("viewBox", "0 0 " + width + " " + height);
+  svg.setAttribute("viewBox", "0 0 " + swarm.width + " " + swarm.height);
   svg.setAttribute("class", "wide");
   svg.setAttribute("role", "img");
   svg.setAttribute("aria-label", t("aliveAria"));
 
-  var axis = svgEl("line");
-  axis.setAttribute("x1", padL);
-  axis.setAttribute("x2", padL + plotW);
-  axis.setAttribute("y1", axisY);
-  axis.setAttribute("y2", axisY);
-  axis.setAttribute("class", "axis-line");
-  svg.appendChild(axis);
-
-  for (var tick = 30; tick <= 90; tick += 10) {
-    var x = xAge(tick);
-    var tickLine = svgEl("line");
-    tickLine.setAttribute("x1", x);
-    tickLine.setAttribute("x2", x);
-    tickLine.setAttribute("y1", axisY);
-    tickLine.setAttribute("y2", axisY + 5);
-    tickLine.setAttribute("class", "axis-line");
-    svg.appendChild(tickLine);
-    var label = svgEl("text");
-    label.setAttribute("x", x);
-    label.setAttribute("y", axisY + 20);
-    label.setAttribute("text-anchor", "middle");
-    label.setAttribute("class", "axis");
-    label.textContent = String(tick);
-    svg.appendChild(label);
-  }
+  beeswarmAxis(svg, swarm);
 
   // Draw the deceased first so the living mark stays on top.
   var livingDots = [];
-  placed.forEach(function (dot) {
+  swarm.placed.forEach(function (dot) {
     if (dot.person.living) livingDots.push(dot);
-    else appendAliveMark(svg, dot, screenY, radius, false);
+    else appendAliveMark(svg, dot, swarm.screenY, swarm.radius, false);
   });
   livingDots.forEach(function (dot) {
-    appendAliveMark(svg, dot, screenY, radius, true);
+    appendAliveMark(svg, dot, swarm.screenY, swarm.radius, true);
   });
 
   document.getElementById("alive-chart").appendChild(svg);

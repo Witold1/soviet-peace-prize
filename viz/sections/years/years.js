@@ -19,85 +19,21 @@ var yearAnimTs = 0;
 var yearMorphing = false;
 var YEAR_MORPH_MS = 720;
 
-function yearsStickyTop() {
-  return 16;
-}
-
 function yearsReduced() {
   return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 }
 
-function yearsModeOk(mode) {
-  return mode === "plain" || mode === "stretched";
-}
-
-function yearsModeFromQuery() {
-  try {
-    var query = new URLSearchParams(window.location.search).get("years");
-    // Old ?years=scroll bookmarks fall back to plain (no sticky runway).
-    if (query === "scroll") return "plain";
-    if (yearsModeOk(query)) return query;
-  } catch (err) {}
-  return "";
-}
-
-function yearsMode() {
-  var fromQuery = yearsModeFromQuery();
-  if (fromQuery) return fromQuery;
-  try {
-    var saved = localStorage.getItem(YEARS_MODE_KEY);
-    if (saved === "scroll") return "plain";
-    if (yearsModeOk(saved)) return saved;
-  } catch (err) {}
-  return "plain";
-}
-
-function setYearsMode(next) {
-  var mode = yearsModeOk(next) ? next : "plain";
-  try { localStorage.setItem(YEARS_MODE_KEY, mode); } catch (err) {}
-  try {
-    var url = new URL(window.location.href);
-    if (mode === "plain") url.searchParams.delete("years");
-    else url.searchParams.set("years", mode);
-    history.replaceState(null, "", url);
-  } catch (err) {}
-  document.documentElement.setAttribute("data-years-mode", mode);
-  syncYearsModeControls();
-  yearResetMotion();
-  layoutYears();
-  syncYears();
-  refreshYearCopy();
-}
-
+// Stretched is the only years view; plain/scroll toggles are retired.
 function syncYearsModeControls() {
-  var mode = yearsMode();
-  document.documentElement.setAttribute("data-years-mode", mode);
-  try {
-    if (localStorage.getItem(YEARS_MODE_KEY) === "scroll") {
-      localStorage.setItem(YEARS_MODE_KEY, "plain");
-    }
-  } catch (err) {}
+  document.documentElement.setAttribute("data-years-mode", "stretched");
+  try { localStorage.setItem(YEARS_MODE_KEY, "stretched"); } catch (err) {}
   try {
     var url = new URL(window.location.href);
-    if (url.searchParams.get("years") === "scroll") {
+    if (url.searchParams.has("years")) {
       url.searchParams.delete("years");
       history.replaceState(null, "", url);
     }
   } catch (err) {}
-  document.querySelectorAll("[data-years-mode]").forEach(function (button) {
-    var id = button.getAttribute("data-years-mode");
-    if (id === mode) button.setAttribute("aria-current", "true");
-    else button.removeAttribute("aria-current");
-  });
-}
-
-function yearsUseSticky() {
-  // Sticky mid↔span scroll runway retired — it fought mobile chrome / scroll.
-  return false;
-}
-
-function yearMorphGate() {
-  return 0.22;
 }
 
 function yearColorMode() {
@@ -137,9 +73,9 @@ function layoutYears() {
   var scrolly = document.getElementById("years-scrolly");
   var steps = document.getElementById("years-steps");
   if (!steps) return;
-  var sticky = yearsUseSticky();
-  steps.style.display = sticky ? "" : "none";
-  if (scrolly) scrolly.classList.toggle("is-sticky", sticky);
+  // Sticky mid↔span runway retired — it fought mobile chrome / scroll.
+  steps.style.display = "none";
+  if (scrolly) scrolly.classList.remove("is-sticky");
 }
 
 function yearStopAnim() {
@@ -159,10 +95,11 @@ function yearResetMotion() {
 }
 
 function applyYearMorph(morphT) {
-  var morphQ = morphT >= 1 ? 1 : Math.round(Math.min(1, Math.max(0, morphT)) * 100) / 100;
+  // Coarser quantize (~2%) cuts SVG attr churn while morphing.
+  var morphQ = morphT >= 1 ? 1 : Math.round(Math.min(1, Math.max(0, morphT)) * 50) / 50;
   if (morphQ === YEAR_MORPH_Q) return;
   YEAR_MORPH_Q = morphQ;
-  var morphKey = morphQ.toFixed(3);
+  var morphKey = morphQ.toFixed(2);
   YEAR_MARKS.forEach(function (mark) {
     var x = (mark.midX + (mark.spanX - mark.midX) * morphQ).toFixed(2);
     var y = (mark.midY + (mark.spanY - mark.midY) * morphQ).toFixed(2);
@@ -210,23 +147,7 @@ function yearAnimTick(ts) {
     yearAnimRaf = requestAnimationFrame(yearAnimTick);
   } else {
     yearAnimTs = 0;
-    yearResampleScroll();
   }
-}
-
-function yearScrollProgress() {
-  var scrolly = document.getElementById("years-scrolly");
-  var pin = document.getElementById("years-pin");
-  if (!scrolly || !pin || !yearsUseSticky()) return YEAR_SCROLL.progress || 0;
-  var travel = Math.max(0, scrolly.offsetHeight - pin.offsetHeight);
-  var top = yearsStickyTop();
-  var passed = Math.min(travel, Math.max(0, top - scrolly.getBoundingClientRect().top));
-  return travel > 0 ? passed / travel : 0;
-}
-
-function yearResampleScroll() {
-  if (!yearsUseSticky() || yearMorphing) return;
-  yearDriveFromScroll(yearScrollProgress());
 }
 
 function yearSetTargets(wantMorph) {
@@ -255,39 +176,11 @@ function yearSetTargets(wantMorph) {
   }
 }
 
-function yearDriveFromScroll(progress) {
-  // Like Fig. 1: ignore scroll while a tween is in flight so layout cannot fight itself.
-  if (yearMorphing) return;
-  YEAR_SCROLL.progress = progress;
-  var morphGate = yearMorphGate();
-  var wantMorph = yearTargetMorph >= 0.5
-    ? progress >= morphGate * 0.45
-    : progress >= morphGate * 0.82;
-  yearSetTargets(wantMorph);
-}
-
 function syncYears() {
-  var scrolly = document.getElementById("years-scrolly");
   var pin = document.getElementById("years-pin");
-  if (!scrolly || !pin) return;
-
-  if (yearsUseSticky()) {
-    var progress = yearScrollProgress();
-    scrubYearsPinScroll(pin, progress);
-    yearDriveFromScroll(progress);
-  } else {
-    pin.scrollTop = 0;
-    if (yearsReduced()) yearSetTargets(0);
-    else if (yearsMode() === "stretched") yearSetTargets(1);
-    else yearSetTargets(0);
-  }
-}
-
-function scrubYearsPinScroll(pin, progress) {
-  if (!yearChartNarrow()) return;
-  var maxScroll = pin.scrollHeight - pin.clientHeight;
-  var next = maxScroll > 8 ? Math.min(1, Math.max(0, progress)) * maxScroll : 0;
-  if (Math.abs(pin.scrollTop - next) > 0.5) pin.scrollTop = next;
+  if (!pin) return;
+  pin.scrollTop = 0;
+  yearSetTargets(yearsReduced() ? 0 : 1);
 }
 
 function reserveYearLeadHeight(lead) {
@@ -298,7 +191,7 @@ function reserveYearLeadHeight(lead) {
     color: yearColorMode(),
     peakWorld: YEAR_SCROLL.peakWorld,
     peakCount: YEAR_SCROLL.peakCount,
-    canScroll: yearsUseSticky()
+    canScroll: false
   };
   var cur = yearLead({
     women: base.women,
@@ -345,7 +238,7 @@ function refreshYearCopy() {
       color: yearColorMode(),
       peakWorld: YEAR_SCROLL.peakWorld,
       peakCount: YEAR_SCROLL.peakCount,
-      canScroll: yearsUseSticky()
+      canScroll: false
     });
   }
   var cap = document.getElementById("cap-year");
@@ -579,15 +472,4 @@ function renderYearsTimeline(cohorts) {
   document.getElementById("year-chart").appendChild(svg);
 }
 
-(function bindYearsModeControls() {
-  var nav = document.getElementById("years-mode");
-  if (!nav) return;
-  syncYearsModeControls();
-  nav.addEventListener("click", function (event) {
-    var button = event.target.closest("[data-years-mode]");
-    if (!button) return;
-    var next = button.getAttribute("data-years-mode");
-    if (!next || next === yearsMode()) return;
-    setYearsMode(next);
-  });
-})();
+syncYearsModeControls();

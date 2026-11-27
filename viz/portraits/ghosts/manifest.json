@@ -1,0 +1,52 @@
+{
+  "portraits": {
+    "49": {
+      "file": "portraits/ghosts/1956 Louis Aragon 49.jpg",
+      "name": "Louis Aragon",
+      "year": "1956",
+      "wiki_title": "Louis Aragon",
+      "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/28/Portrait_Aragon.jpg/960px-Portrait_Aragon.jpg",
+      "bytes": 263451
+    },
+    "118": {
+      "file": "portraits/ghosts/1970-1971 Funmilayo Ransome-Kuti 118.png",
+      "name": "Funmilayo Ransome-Kuti",
+      "year": "1970-1971",
+      "wiki_title": "Funmilayo Ransome-Kuti",
+      "source_url": "https://upload.wikimedia.org/wikipedia/commons/8/89/70_year_old_Funmilayo_Ransome-Kuti_on_her_birthday.png",
+      "bytes": 216886
+    },
+    "119": {
+      "file": "portraits/ghosts/1970-1971 Hikmat Abu Zayd 119.jpg",
+      "name": "Hikmat Abu Zayd",
+      "year": "1970-1971",
+      "wiki_title": "Hikmat Abu Zayd",
+      "source_url": "https://upload.wikimedia.org/wikipedia/commons/2/26/Hikmat_Abu_Zayd_%28cropped%29.jpg",
+      "bytes": 26504
+    },
+    "130": {
+      "file": "portraits/ghosts/1973-1974 Sam Nujoma 130.jpg",
+      "name": "Sam Nujoma",
+      "year": "1973-1974",
+      "wiki_title": "Sam Nujoma",
+      "source_url": "https://upload.wikimedia.org/wikipedia/commons/5/54/Sam_Nujoma_%282004%29_cropped.jpg",
+      "bytes": 237767
+    },
+    "153": {
+      "file": "portraits/ghosts/1983-1984 Charilaos Florakis 153.jpg",
+      "name": "Charilaos Florakis",
+      "year": "1983-1984",
+      "wiki_title": "Charilaos Florakis",
+      "source_url": "https://upload.wikimedia.org/wikipedia/commons/8/85/Charilaos_Florakis_2.jpg",
+      "bytes": 7140
+    },
+    "165": {
+      "file": "portraits/ghosts/1988 Abdul Sattar Edhi 165.jpg",
+      "name": "Abdul Sattar Edhi",
+      "year": "1988",
+      "wiki_title": "Abdul Sattar Edhi",
+      "source_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/6e/Abdul_Sattar_Edhi.jpg/960px-Abdul_Sattar_Edhi.jpg",
+      "bytes": 435504
+    }
+  }
+}

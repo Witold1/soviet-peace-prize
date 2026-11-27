@@ -20,9 +20,12 @@ function appendWikiLink(person) {
 }
 
 function portraitSrc(person) {
+  if (person == null || person.i == null) return "";
   var portraits = typeof PORTRAITS === "object" && PORTRAITS ? PORTRAITS : null;
-  if (!portraits || person == null || person.i == null) return "";
-  return portraits[person.i] || "";
+  if (portraits && portraits[person.i]) return portraits[person.i];
+  var ghosts = typeof GHOST_PORTRAITS === "object" && GHOST_PORTRAITS ? GHOST_PORTRAITS : null;
+  if (ghosts && ghosts[person.i]) return ghosts[person.i];
+  return "";
 }
 
 function fillTip(person, options) {
@@ -64,7 +67,7 @@ function fillTip(person, options) {
   occ.className = "meta";
   occ.textContent = typeof tipOccupationLine === "function"
     ? tipOccupationLine(person)
-    : titleOcc(person.occupation);
+    : occLabel(person.occupation);
   tip.appendChild(occ);
   const workValue = workText(person);
   if (workValue) {
@@ -99,15 +102,71 @@ function insideTip(target) {
   return !!(target && tip.contains(target));
 }
 
+function placeTipPeopleAndMode(group) {
+  var mode = group.countryMode || null;
+  var people = group.people || [];
+  if (group.birthPeople || group.pravdaPeople) {
+    var block = document.getElementById("map-seq-block");
+    var step = block ? Number(block.getAttribute("data-step") || 2) : 2;
+    if (step >= 3) {
+      people = group.pravdaPeople && group.pravdaPeople.length
+        ? group.pravdaPeople
+        : people;
+      if (mode) mode = "affiliation";
+    } else {
+      people = group.birthPeople && group.birthPeople.length
+        ? group.birthPeople
+        : people;
+      if (mode) mode = "birth";
+    }
+  }
+  return { mode: mode, people: people };
+}
+
+function countryKeyForTip(person, mode) {
+  if (mode === "affiliation") {
+    var aff = typeof pravdaCountryKey === "function" ? pravdaCountryKey(person) : null;
+    if (aff) return String(aff).split(";")[0].trim();
+    if (person && person.country) return String(person.country).split(";")[0].trim();
+    return lang === "ru" ? "неизвестно" : "unknown";
+  }
+  if (person && person.birthCountry) return String(person.birthCountry).split(";")[0].trim();
+  return lang === "ru" ? "неизвестно" : "unknown";
+}
+
+function countPeopleByCountry(people, mode) {
+  var counts = {};
+  var keys = [];
+  people.forEach(function (person) {
+    var key = countryKeyForTip(person, mode);
+    if (!Object.prototype.hasOwnProperty.call(counts, key)) {
+      counts[key] = 0;
+      keys.push(key);
+    }
+    counts[key] += 1;
+  });
+  return keys.map(function (key) {
+    return [key, counts[key]];
+  }).sort(function (a, b) {
+    if (b[1] !== a[1]) return b[1] - a[1];
+    return String(a[0]).localeCompare(String(b[0]));
+  });
+}
+
 function fillPlaceTip(group) {
-  if (group.people.length === 1) {
-    fillTip(group.people[0]);
+  var resolved = placeTipPeopleAndMode(group);
+  var people = resolved.people;
+  var mode = resolved.mode;
+
+  if (!mode && people.length === 1) {
+    fillTip(people[0]);
     const born = document.createElement("div");
     born.className = "meta";
-    born.textContent = bornLine(birthPlaceText(group.people[0]) || group.label);
+    born.textContent = bornLine(birthPlaceText(people[0]) || group.label);
     tip.querySelector(".name").insertAdjacentElement("afterend", born);
     return;
   }
+
   tip.classList.remove("has-portrait");
   tip.replaceChildren();
   const name = document.createElement("div");
@@ -116,11 +175,38 @@ function fillPlaceTip(group) {
   tip.appendChild(name);
   const meta = document.createElement("div");
   meta.className = "meta";
-  meta.textContent = groupBorn(group.people.length);
+
+  if (mode === "birth" || mode === "affiliation") {
+    meta.textContent = typeof groupCountryModeMeta === "function"
+      ? groupCountryModeMeta(people.length, mode)
+      : groupBorn(people.length);
+    tip.appendChild(meta);
+    const list = document.createElement("div");
+    list.className = "work";
+    const rows = countPeopleByCountry(people, mode);
+    const shown = rows.slice(0, 10);
+    shown.forEach(function (row, index) {
+      if (index) list.appendChild(document.createElement("br"));
+      var label = typeof countryLabel === "function" ? countryLabel(row[0]) : row[0];
+      list.appendChild(document.createTextNode(label + " — " + row[1]));
+    });
+    if (rows.length > shown.length) {
+      list.appendChild(document.createElement("br"));
+      list.appendChild(document.createTextNode(
+        lang === "ru"
+          ? "и еще " + (rows.length - shown.length)
+          : "and " + (rows.length - shown.length) + " more"
+      ));
+    }
+    tip.appendChild(list);
+    return;
+  }
+
+  meta.textContent = groupBorn(people.length);
   tip.appendChild(meta);
   const list = document.createElement("div");
   list.className = "work";
-  const names = group.people.map(personName);
+  const names = people.map(personName);
   const shown = names.slice(0, 8);
   list.textContent = shown.join(", ") + (names.length > shown.length ? moreNames(names.length - shown.length) : "");
   tip.appendChild(list);
@@ -187,7 +273,7 @@ function activate(mark, x, y) {
     if (!mark.getAttribute("stroke-width")) mark.setAttribute("stroke-width", "1.25");
     mark.setAttribute("vector-effect", "non-scaling-stroke");
   }
-  var onWall = mark.dataset.kind === "medal" || mark.dataset.kind === "portrait";
+  var onWall = mark.dataset.kind === "medal" || mark.dataset.kind === "portrait" || mark.dataset.kind === "empty";
   if (mark.dataset.g) fillPlaceTip(PLACE_GROUPS[Number(mark.dataset.g)]);
   else fillTip(PEOPLE[Number(mark.dataset.i)], { skipPortrait: onWall });
   if (mark.dataset.coords) {

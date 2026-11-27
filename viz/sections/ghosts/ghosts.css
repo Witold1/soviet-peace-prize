@@ -1,0 +1,123 @@
+/* Closing wall for the six disputed names — larger cells than the hero grid. */
+
+.ghost-wall {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 0.55rem 0.45rem;
+  margin: 0.35rem 0 0;
+}
+
+.ghost-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.ghost-wall .mark {
+  position: relative;
+  cursor: pointer;
+  aspect-ratio: 1;
+  overflow: hidden;
+  opacity: 0.78;
+  filter: grayscale(1) contrast(0.92) brightness(1.04);
+  transition: opacity 0.2s ease, filter 0.2s ease;
+}
+
+.ghost-wall .mark.portrait,
+.ghost-wall .mark.empty {
+  background: #1a1a1a;
+}
+
+.ghost-wall .mark.no-link {
+  cursor: default;
+}
+
+.ghost-wall .mark:focus {
+  outline: none;
+}
+
+.ghost-wall .mark.is-hot,
+.ghost-wall .mark:focus-visible {
+  opacity: 1;
+  filter: grayscale(0.35) contrast(1.02);
+}
+
+.ghost-wall .face {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+.ghost-wall .portrait .face img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  pointer-events: none;
+}
+
+.ghost-caption {
+  display: flex;
+  flex-direction: column;
+  gap: 0.12rem;
+  min-width: 0;
+}
+
+.ghost-name {
+  font-family: Georgia, "Palatino Linotype", Palatino, serif;
+  font-size: 0.82rem;
+  line-height: 1.25;
+  color: inherit;
+  text-decoration: none;
+}
+
+a.ghost-name:hover,
+a.ghost-name:focus-visible {
+  text-decoration: underline;
+  text-underline-offset: 0.12em;
+}
+
+.ghost-meta {
+  font-size: 0.72rem;
+  line-height: 1.3;
+  opacity: 0.68;
+}
+
+/* Slot for later scans, neighboring awards, origin pictures. */
+.ghost-archive {
+  margin: 1.6rem 0 0;
+}
+
+.ghost-archive:empty {
+  display: none;
+}
+
+@container page (max-width: 700px) {
+  .ghost-wall {
+    gap: 0.45rem 0.35rem;
+  }
+
+  .ghost-name {
+    font-size: 0.72rem;
+  }
+
+  .ghost-meta {
+    font-size: 0.65rem;
+  }
+}
+
+@container page (max-width: 420px) {
+  .ghost-wall {
+    gap: 0.35rem 0.25rem;
+  }
+
+  .ghost-name {
+    font-size: 0.64rem;
+  }
+
+  .ghost-meta {
+    font-size: 0.58rem;
+  }
+}

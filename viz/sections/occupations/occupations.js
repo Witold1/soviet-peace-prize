@@ -55,7 +55,7 @@ function occSplitKey(person) {
 }
 
 function occSplitLabel(key) {
-  return titleOcc(key);
+  return occLabel(key);
 }
 
 function occSplitGroups() {
@@ -217,6 +217,24 @@ function prepareOccCloudEntrance() {
     return;
   }
 
+  // Reload already on Fig. 3a: skip the gold flock. It races morph/FLIP and
+  // ghosts Fig. 3 hexes over the chord flower (same class of bug as hero Mandela).
+  if (
+    typeof occUseSticky === "function" &&
+    occUseSticky() &&
+    typeof occScrollWantsChord === "function" &&
+    occScrollWantsChord()
+  ) {
+    occCloudSeen = true;
+    clouds.classList.add("is-in");
+    clouds.classList.remove("is-pending");
+    if (viz) {
+      viz.classList.add("is-occ-in");
+      viz.classList.remove("is-occ-pending");
+    }
+    return;
+  }
+
   clouds.classList.add("is-pending");
   clouds.classList.remove("is-in");
   if (viz) {
@@ -225,7 +243,7 @@ function prepareOccCloudEntrance() {
   }
 
   // Same randomization as the top-rain version, but clustered at top-center
-  // of Fig. 3 so we can compare the two origins.
+  // of Fig. 3. Measure once per SVG (viewBox → screen) instead of per polygon.
   var flock = clouds.getBoundingClientRect();
   var originX = flock.left + flock.width / 2;
   var originY = flock.top - Math.max(56, Math.min(120, flock.height * 0.18));
@@ -233,6 +251,13 @@ function prepareOccCloudEntrance() {
   var figures = clouds.querySelectorAll(".group");
   var seed = 0;
   figures.forEach(function (figure, groupIndex) {
+    var svg = figure.querySelector("svg");
+    var svgBox = svg ? svg.getBoundingClientRect() : null;
+    var vb = svg && svg.viewBox && svg.viewBox.baseVal;
+    var sx = svgBox && vb && vb.width ? svgBox.width / vb.width : 1;
+    var sy = svgBox && vb && vb.height ? svgBox.height / vb.height : 1;
+    var ox = svgBox ? svgBox.left - (vb ? vb.x * sx : 0) : 0;
+    var oy = svgBox ? svgBox.top - (vb ? vb.y * sy : 0) : 0;
     var polys = figure.querySelectorAll("polygon");
     var groupN = polys.length || 1;
     polys.forEach(function (poly, index) {
@@ -241,9 +266,23 @@ function prepareOccCloudEntrance() {
       poly.style.fill = GOLD;
       poly.removeAttribute("fill");
 
-      var box = poly.getBoundingClientRect();
-      var cx = box.left + box.width / 2;
-      var cy = box.top + box.height / 2;
+      var cx;
+      var cy;
+      var pts = poly.points;
+      if (pts && pts.numberOfItems) {
+        var sumX = 0;
+        var sumY = 0;
+        for (var p = 0; p < pts.numberOfItems; p++) {
+          sumX += pts.getItem(p).x;
+          sumY += pts.getItem(p).y;
+        }
+        cx = ox + (sumX / pts.numberOfItems) * sx;
+        cy = oy + (sumY / pts.numberOfItems) * sy;
+      } else {
+        var box = poly.getBoundingClientRect();
+        cx = box.left + box.width / 2;
+        cy = box.top + box.height / 2;
+      }
       var jx = occCloudHash(seed++) * 48;
       var jy = occCloudHash(seed++) * 36;
       var dx = originX + jx - cx;
@@ -273,6 +312,22 @@ function playOccCloudEntrance() {
   var clouds = document.getElementById("clouds");
   var viz = occCloudViz();
   if (!clouds || occCloudSeen || occCloudReduced()) return;
+  // Sticky pin can still "intersect" while Fig. 3 is CSS-hidden under 3a.
+  if (
+    typeof occUseSticky === "function" &&
+    occUseSticky() &&
+    (occVisualMorph >= 0.5 || occTargetMorph >= 0.5 ||
+      (typeof occScrollWantsChord === "function" && occScrollWantsChord()))
+  ) {
+    occCloudSeen = true;
+    clouds.classList.add("is-in");
+    clouds.classList.remove("is-pending");
+    if (viz) {
+      viz.classList.add("is-occ-in");
+      viz.classList.remove("is-occ-pending");
+    }
+    return;
+  }
   occCloudSeen = true;
   clouds.classList.remove("is-pending");
   clouds.classList.add("is-in");

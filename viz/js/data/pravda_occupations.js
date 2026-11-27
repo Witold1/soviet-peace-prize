@@ -174,7 +174,7 @@ function pravdaOccClass(person) {
 
 function tipOccupationLine(person) {
   var row = pravdaOccFor(person);
-  if (!row || !row.text) return titleOcc(person.occupation);
+  if (!row || !row.text) return occLabel(person.occupation);
   // Decree lines are quoted excerpts; caption lines stay plain.
   if (row.source === "decree") return "«" + row.text + "»";
   return row.text;

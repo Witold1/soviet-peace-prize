@@ -180,10 +180,11 @@ html[lang="en"] .ukaz-copy::after { content: "\201D"; }
 }
 
 #ukaz-loupe-cult {
-  --side-x: 0.015;
-  --side-y: 0.14;
-  --side-w: 0.97;
-  --side-h: 0.15;
+  --side-x: 0.06;
+  --side-y: 0.148;
+  --side-w: 0.88;
+  --side-h: 0.085;
+  --side-ahead: 0.012;
 }
 
 #ukaz-loupe-cult .ukaz-view {
@@ -216,15 +217,13 @@ html[lang="en"] .ukaz-copy::after { content: "\201D"; }
   margin: 0 0.5rem 0 0;
 }
 
-.destalin-issue {
-  margin: 0 0 0.55rem;
-  text-align: center;
-  white-space: nowrap;
-  pointer-events: none;
+#destalin-fig > .figcap,
+#rename-1989-fig > .figcap {
+  margin: 0 0 0.65rem;
 }
 
 .destalin-stage {
-  --destalin-card: min(28rem, 92cqi);
+  --destalin-card: min(38rem, 94cqi);
   --destalin-gap: 0.75rem;
   position: relative;
   min-width: 0;
@@ -387,47 +386,77 @@ html[lang="en"] .ukaz-copy::after { content: "\201D"; }
   margin-top: 0.75rem;
 }
 
-.destalin-next {
+.destalin-nav {
   position: absolute;
-  z-index: 2;
-  top: 0;
-  bottom: 0;
-  right: calc(-0.5 * (var(--pad) + 0.5rem + 1.5rem));
+  left: 50%;
+  top: 58%;
+  z-index: 4;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 0.55rem;
-  width: auto;
+  gap: 0.4rem;
+  width: max-content;
+  max-width: min(28rem, 92%);
   margin: 0;
   padding: 0;
-  border: 0;
-  background: none;
-  color: inherit;
-  font-family: "Segoe UI", Helvetica, Arial, sans-serif;
-  font-weight: 500;
-  line-height: 1.15;
+  transform: translate3d(-50%, 0, 0);
+  pointer-events: none;
+}
+
+.destalin.is-rushing .destalin-nav {
+  opacity: 0;
+}
+
+/* Destalin crop approach is slower than the plain ukaz toggle. */
+#destalin .ukaz-loupe.is-page:not(.is-scrub) .ukaz-view > .ukaz-scan,
+#destalin .ukaz-loupe.is-page:not(.is-scrub) .ukaz-sheet {
+  transition-duration: 1.35s;
+  transition-timing-function: cubic-bezier(0.33, 0.05, 0.2, 1);
+}
+
+.destalin-caption,
+.destalin-next {
+  box-sizing: border-box;
+  width: max-content;
+  max-width: 100%;
+  margin: 0;
+  padding: 0.48rem 0.78rem;
+  border: 1px solid rgba(26, 26, 26, 0.62);
+  background: rgba(255, 255, 255, 0.94);
+  color: #1a1a1a;
+  font-family: Georgia, "Palatino Linotype", Palatino, serif;
+  font-size: 0.96rem;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+  text-align: center;
+}
+
+.destalin-caption {
+  font-weight: 400;
+  text-wrap: pretty;
+}
+
+.destalin-next {
+  display: block;
+  font-weight: 600;
+  pointer-events: auto;
   cursor: pointer;
 }
 
 .destalin-next-label {
-  writing-mode: vertical-rl;
-  font-size: 1rem;
+  display: block;
+}
+
+.destalin-next-hint {
+  display: block;
+  margin-top: 0.18rem;
+  font-family: Georgia, "Palatino Linotype", Palatino, serif;
+  font-size: 0.7rem;
   font-weight: 400;
-  letter-spacing: normal;
-  text-align: center;
-  white-space: nowrap;
-  max-height: none;
-}
-
-.destalin-next-chevron {
-  flex: none;
-  font-size: clamp(1.5rem, 4cqi, 2.1rem);
-  line-height: 1;
-}
-
-.destalin-next:not(.is-why) .destalin-next-label {
-  display: none;
+  font-style: italic;
+  line-height: 1.2;
+  letter-spacing: 0.01em;
+  color: rgba(90, 90, 90, 0.78);
 }
 
 .destalin-next:focus-visible {
@@ -438,6 +467,10 @@ html[lang="en"] .ukaz-copy::after { content: "\201D"; }
 .destalin-next:disabled {
   opacity: 0.35;
   cursor: default;
+}
+
+.destalin-next:hover:not(:disabled) {
+  background: #fff;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -461,15 +494,62 @@ html[lang="en"] .ukaz-copy::after { content: "\201D"; }
   }
 }
 
-#decree-1989 .ukaz-loupe.is-page {
-  --side-x: 0.7353;
-  --side-y: 0.1317;
-  --side-w: 0.2358;
-  --side-h: 0.1975;
+/* Fig. 7 reuses destalin card + stacks; no rush strip. */
+.rename-1989 {
+  margin: 0;
 }
 
-#decree-1989 .ukaz-view {
+.rename-1989-stage {
+  --destalin-card: min(38rem, 94cqi);
+}
+
+.rename-1989 .destalin-panel .destalin-page {
+  width: min(100%, var(--destalin-card));
+  margin-inline: auto;
+}
+
+#ukaz-loupe-1989,
+#ukaz-loupe-1989-ukaz,
+#ukaz-loupe-1989-statute {
+  width: 100%;
+  margin: 0;
+}
+
+#ukaz-loupe-1989 .ukaz-view,
+#ukaz-loupe-1989-ukaz .ukaz-view,
+#ukaz-loupe-1989-statute .ukaz-view {
+  /* Shared frame: Pravda page aspect, so carousel stops keep one size. */
   aspect-ratio: 1798 / 2628;
+  border: 0;
+}
+
+#ukaz-loupe-1989 {
+  /* Prize paragraph plus a little left-column context. */
+  --side-x: 0.735;
+  --side-y: 0.125;
+  --side-w: 0.245;
+  --side-h: 0.12;
+  --side-ahead: 0.01;
+}
+
+#ukaz-loupe-1989-ukaz {
+  --side-x: 0.04;
+  --side-y: 0.1709;
+  --side-w: 0.92;
+  --side-h: 0.3085;
+  --side-ahead: 0.01;
+}
+
+#ukaz-loupe-1989-statute {
+  --side-x: 0.1149;
+  --side-y: 0.12;
+  --side-w: 0.7706;
+  --side-h: 0.74;
+  --side-ahead: 0.01;
+}
+
+#rename-1989-fig .ukaz-scan {
+  border: 0;
 }
 
 .ukaz.is-open .ukaz-loupe { display: block; }
@@ -492,6 +572,11 @@ html[lang="en"] .ukaz-copy::after { content: "\201D"; }
 
 .ukaz-loupe.is-page.is-column {
   --zoom: 1;
+}
+
+.ukaz-loupe.is-page:not(.is-scrub) .ukaz-view > .ukaz-scan,
+.ukaz-loupe.is-page:not(.is-scrub) .ukaz-sheet {
+  transition: left 0.55s ease, top 0.55s ease, width 0.55s ease, height 0.55s ease;
 }
 
 .ukaz-loupe.is-page .ukaz-view > .ukaz-scan,
@@ -603,8 +688,9 @@ html[lang="en"] .ukaz-copy::after { content: "\201D"; }
   opacity: 1;
 }
 
-/* 1949 founding decree: guided markers replace the transcription toggle as the main path. */
-#decree-1949 .ukaz.is-open .ukaz-original {
+/* Guided markers replace the transcription toggle as the main path. */
+#decree-1949 .ukaz.is-open .ukaz-original,
+#destalin-rename .ukaz.is-open .ukaz-original {
   display: none;
 }
 
@@ -666,7 +752,9 @@ html[lang="en"] .ukaz-copy::after { content: "\201D"; }
 @media (prefers-reduced-motion: reduce) {
   .ukaz-view,
   .ukaz-loupe.is-page .ukaz-scan,
-  .ukaz-loupe.is-page .ukaz-sheet { transition: none; }
+  .ukaz-loupe.is-page .ukaz-sheet,
+  .ukaz-loupe.is-page:not(.is-scrub) .ukaz-view > .ukaz-scan,
+  .ukaz-loupe.is-page:not(.is-scrub) .ukaz-sheet { transition: none; }
 }
 
 .ukaz-mark,
@@ -733,7 +821,10 @@ html[lang="en"] .ukaz-copy::after { content: "\201D"; }
   line-height: 1.4;
 }
 
-.doc figcaption { margin: 0.75rem 0 0; }
+.doc figcaption,
+#rename-1989-fig > .source {
+  margin: 0.75rem 0 0;
+}
 
 @container page (max-width: 1100px) {
   .ukaz.is-open .ukaz-text { padding-top: 0; }

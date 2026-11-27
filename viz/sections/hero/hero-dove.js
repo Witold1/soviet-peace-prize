@@ -15,63 +15,19 @@ function heroDoveRender() {
 
   if (section) section.classList.add("hero-scroll");
 
-  var portraits = typeof PORTRAITS === "object" && PORTRAITS ? PORTRAITS : {};
-  var ordered = PEOPLE_SEEN.slice().sort(byYear);
-  var withPortrait = ordered.filter(function (person) { return portraits[person.i]; }).length;
-  var hero = document.createElement("div");
-  hero.className = "hero portraits";
-  hero.id = "hero-board";
-  hero.setAttribute("role", "img");
-  hero.setAttribute("aria-label", heroAria(ordered.length) + " · " + withPortrait + "/" + ordered.length);
-
-  if (typeof buildPeaceDoveSvg === "function") {
-    var silhouette = buildPeaceDoveSvg();
-    silhouette.id = "hero-silhouette";
-    silhouette.classList.add("hero-silhouette");
-    hero.appendChild(silhouette);
-  }
-
-  ordered.forEach(function (person, index) {
-    var hasPortrait = !!portraits[person.i];
-    var mark = document.createElement("div");
-    mark.className = "mark " + (hasPortrait ? "portrait" : "medal");
-    mark.dataset.kind = hasPortrait ? "portrait" : "medal";
-    mark.dataset.mark = "1";
-    mark.dataset.i = String(person.i);
-    mark.tabIndex = 0;
-    mark.setAttribute("role", "img");
-    mark.setAttribute("aria-label", markAria(person));
-    if (!wikiFor(person)) mark.classList.add("no-link");
-
-    var face = document.createElement("div");
-    face.className = "face";
-    var img = document.createElement("img");
-    if (hasPortrait) {
-      img.src = portraits[person.i];
-    } else {
-      img.src = person.series === "stalin" ? "medals/stalin.png" : "medals/lenin.png";
-      if (person.series === "stalin" || index === ordered.length - 1) img.classList.add("is-mirrored");
+  var built = heroBuildBoard({
+    withTiles: true,
+    prepend: function (hero) {
+      if (typeof buildPeaceDoveSvg !== "function") return;
+      var silhouette = buildPeaceDoveSvg();
+      silhouette.id = "hero-silhouette";
+      silhouette.classList.add("hero-silhouette");
+      hero.appendChild(silhouette);
     }
-    img.alt = "";
-    img.draggable = false;
-    img.setAttribute("aria-hidden", "true");
-    face.appendChild(img);
-
-    var tile = document.createElement("div");
-    tile.className = "tile";
-    tile.style.background = GOLD;
-    tile.dataset.fill = GOLD;
-    tile.dataset.hot = GOLD_HOT;
-    tile.setAttribute("aria-hidden", "true");
-
-    mark.appendChild(face);
-    mark.appendChild(tile);
-    hero.appendChild(mark);
-    heroMarks.push({ el: mark, face: face, tile: tile, index: index });
   });
-
-  stage.appendChild(hero);
-  if (typeof heroMountCountStack === "function") heroMountCountStack(hero, ordered.length);
+  heroMarks = built.marks;
+  stage.appendChild(built.board);
+  if (typeof heroMountCountStack === "function") heroMountCountStack(built.board, built.ordered.length);
   heroDoveLayout();
   heroDoveSync();
 }
@@ -177,12 +133,22 @@ function heroDoveLayout() {
     item.face.style.opacity = "";
     if (item.tile) item.tile.style.opacity = "";
   });
-  board.classList.remove("is-animating", "is-faces-off", "is-tiles-on");
-  board.style.removeProperty("--hero-face");
-  board.style.removeProperty("--hero-tile");
-  board.style.removeProperty("--hero-sil");
 
+  // Relayout must not leave absolute marks without a transform — they stack at
+  // (0,0) and the last DOM face (Mandela) reads as a stuck portrait. If a
+  // canvas flight was mid-way, className above already dropped is-canvas-flight;
+  // snap to the target pose instead of hoping sync finishes the morph.
   heroApplyRunway(section);
+  if (heroMorphing) {
+    heroSnapPose(heroTargetT);
+  } else {
+    board.classList.remove("is-animating", "is-faces-off", "is-tiles-on");
+    board.style.removeProperty("--hero-face");
+    board.style.removeProperty("--hero-tile");
+    board.style.removeProperty("--hero-sil");
+    heroApplyVisual();
+    heroApplyChartHeight(heroVisualT, false);
+  }
   heroScrubKey = "";
 }
 

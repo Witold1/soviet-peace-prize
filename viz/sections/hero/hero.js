@@ -12,6 +12,8 @@ var heroAnimDur = 0;
 var heroAnimTimer = 0;
 var heroFaceTimer = 0;
 var heroMorphing = false;
+// True until the first scroll-sync after render — reload mid-dove snaps, no flight.
+var heroCold = true;
 var heroCountReveal = 0;
 var heroCountRaf = 0;
 var heroCountTs = 0;
@@ -189,6 +191,20 @@ function heroResetMotion() {
   heroVisualT = 0;
   heroTargetT = 0;
   heroCountReveal = 0;
+  heroScrubKey = "";
+  heroCold = true;
+}
+
+// Hard-cut to wall (0) or dove/hex (1). Used after relayout and on cold boot
+// when scroll already sits past the morph latch (reload mid-dove).
+function heroSnapPose(t) {
+  t = t ? 1 : 0;
+  heroStopAnim();
+  heroVisualT = t;
+  heroTargetT = t;
+  heroApplyVisual();
+  heroApplyChartHeight(t, false);
+  heroPaintCountRide(t ? heroCountRideT(heroTrackProgress()) : 0);
   heroScrubKey = "";
 }
 
@@ -416,6 +432,16 @@ function heroDriveFromScroll(section) {
   heroPaintCountRide(heroCountRideT(progress));
   if (heroMorphing) return;
   var want = heroWantDove();
+  // Reload (or late layout) while the dove is already on screen: snap.
+  // Replaying wall→dove left absolute marks unpositioned at (0,0) for a spell —
+  // Mandela is last in DOM and sat on top of the stack.
+  if (heroCold) {
+    heroCold = false;
+    if (want) {
+      heroSnapPose(1);
+      return;
+    }
+  }
   var key = (want ? "1" : "0") + ":" + heroVisualT.toFixed(3);
   heroSetTargetT(want ? 1 : 0, section);
   if (heroMorphing) return;

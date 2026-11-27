@@ -1,3 +1,10 @@
+// Longitude partitions shared by narrow facets and desktop region envelopes.
+var MAP_BIRTH_REGIONS = [
+  { key: "mapRegionAmericas", cls: "map-region-americas", test: function (lon) { return lon < -25; }, lonLo: -170, lonHi: -20 },
+  { key: "mapRegionEuropeAfrica", cls: "map-region-europe-africa", test: function (lon) { return lon >= -25 && lon < 60; }, lonLo: -30, lonHi: 65 },
+  { key: "mapRegionAsiaOceania", cls: "map-region-asia-oceania", test: function (lon) { return lon >= 60; }, lonLo: 55, lonHi: 180 }
+];
+
 function mapChartNarrow() {
   var el = document.getElementById("map-chart");
   if (!el) return false;
@@ -16,10 +23,9 @@ function renderMapNarrow(chart, byPoint, appendMarks, densifyRing) {
     return [lon * RAD, Math.log(Math.tan(PI / 4 + phi / 2))];
   }
 
-  function projectMercatorRing(ring, lonCenter, shapes, outlines) {
+  function projectMercatorRing(dense, lonCenter, shapes, outlines) {
     // Keep the full ring. Lon-window cuts + Z close draw chords across gulfs
     // and the Arctic; the facet viewBox crops what you see instead.
-    const dense = densifyRing(ring);
     let shape = [];
     let outline = [];
     let previous = null;
@@ -98,10 +104,12 @@ function renderMapNarrow(chart, byPoint, appendMarks, densifyRing) {
     const lakeShapes = [];
     const lakeshores = [];
     const lonCenter = (lonMin + lonMax) / 2;
-    LAND.forEach(function (ring) {
+    var landDense = typeof mapDensifiedLand === "function" ? mapDensifiedLand() : LAND.map(densifyRing);
+    var lakeDense = typeof mapDensifiedLakes === "function" ? mapDensifiedLakes() : LAKES.map(densifyRing);
+    landDense.forEach(function (ring) {
       projectMercatorRing(ring, lonCenter, landShapes, coastlines);
     });
-    LAKES.forEach(function (ring) {
+    lakeDense.forEach(function (ring) {
       projectMercatorRing(ring, lonCenter, lakeShapes, lakeshores);
     });
     const svg = svgEl("svg");
@@ -159,12 +167,7 @@ function renderMapNarrow(chart, byPoint, appendMarks, densifyRing) {
     return svg;
   }
 
-  const regions = [
-    { key: "mapRegionAmericas", test: function (lon) { return lon < -25; }, lonLo: -170, lonHi: -20 },
-    { key: "mapRegionEuropeAfrica", test: function (lon) { return lon >= -25 && lon < 60; }, lonLo: -30, lonHi: 65 },
-    { key: "mapRegionAsiaOceania", test: function (lon) { return lon >= 60; }, lonLo: 55, lonHi: 180 }
-  ];
-  regions.forEach(function (region) {
+  MAP_BIRTH_REGIONS.forEach(function (region) {
     const groups = [];
     byPoint.forEach(function (people) {
       if (region.test(people[0].birthLon)) groups.push(people);

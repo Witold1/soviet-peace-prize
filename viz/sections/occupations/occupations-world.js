@@ -1,46 +1,22 @@
 // Optional product: Cold War “world” grouping — parked at #worlds for now.
-// Loaded after occupations.js. Remove this script (and years-world.js) to drop it.
+// Does not overwrite main occupations.js split hooks.
 
-var OCC_SPLIT = "occupation";
-
-function occSplitMode() {
-  return OCC_SPLIT;
-}
-
-function occSplitKey(person) {
-  if (OCC_SPLIT === "world") return worldOf(person);
-  var pravda = typeof pravdaOccClass === "function" ? pravdaOccClass(person) : null;
-  return pravda || person.occupationClass;
-}
-
-function occSplitLabel(key) {
-  return OCC_SPLIT === "world" ? worldLabel(key) : titleOcc(key);
-}
-
-function occSplitGroups() {
-  const buckets = new Map();
-  for (const person of PEOPLE_SEEN) {
-    const key = occSplitKey(person);
+function worldOccSplitGroups() {
+  var buckets = new Map();
+  PEOPLE_SEEN.forEach(function (person) {
+    var key = worldOf(person);
     if (!buckets.has(key)) buckets.set(key, []);
     buckets.get(key).push(person);
-  }
-  const groups = Array.from(buckets.entries()).map(function (entry) {
-    const people = entry[1].slice().sort(function (a, b) {
+  });
+  return Array.from(buckets.entries()).map(function (entry) {
+    var people = entry[1].slice().sort(function (a, b) {
       if (a.gender !== b.gender) return a.gender === "female" ? -1 : 1;
       return byYear(a, b);
     });
     return { key: entry[0], people: people };
+  }).sort(function (a, b) {
+    return WORLD_ORDER.indexOf(a.key) - WORLD_ORDER.indexOf(b.key);
   });
-  if (OCC_SPLIT === "world") {
-    groups.sort(function (a, b) {
-      return WORLD_ORDER.indexOf(a.key) - WORLD_ORDER.indexOf(b.key);
-    });
-  } else {
-    groups.sort(function (a, b) {
-      return b.people.length - a.people.length || occSplitLabel(a.key).localeCompare(occSplitLabel(b.key), lang);
-    });
-  }
-  return groups;
 }
 
 function syncWorldParkOccChrome() {
@@ -76,11 +52,7 @@ function renderWorldParkOcc() {
 
   syncWorldParkOccChrome();
 
-  var saved = OCC_SPLIT;
-  OCC_SPLIT = "world";
-  var groups = occSplitGroups();
-  OCC_SPLIT = saved;
-
+  var groups = worldOccSplitGroups();
   host.replaceChildren();
   groups.forEach(function (group) {
     var figure = document.createElement("figure");

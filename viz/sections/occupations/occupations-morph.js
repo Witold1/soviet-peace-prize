@@ -5,7 +5,24 @@ var occTargetMorph = 0;
 var occVisualMorph = 0;
 var occMorphing = false;
 var occFlipTimer = 0;
+var occFlipArmTimer = 0;
+// Until armed, scroll sync only snaps — never starts FLIP. Stops reload storms
+// from stacking Fig. 3 + 3a mid-flight.
+var occFlipArmed = false;
 var OCC_SCROLL = { progress: 0, mode: "clouds" };
+
+function occDisarmFlip(ms) {
+  occFlipArmed = false;
+  if (occFlipArmTimer) {
+    window.clearTimeout(occFlipArmTimer);
+    occFlipArmTimer = 0;
+  }
+  var delay = ms == null ? 120 : ms;
+  occFlipArmTimer = window.setTimeout(function () {
+    occFlipArmTimer = 0;
+    occFlipArmed = true;
+  }, delay);
+}
 
 function occStickyTop() {
   // Match CSS top on .occ-pin — never tie to live innerHeight (URL bar).
@@ -24,6 +41,15 @@ function occMorphGate() {
   return 0.28;
 }
 
+function occScrollWantsChord(progress) {
+  if (progress == null) progress = occScrollProgress();
+  var gate = occMorphGate();
+  // Match occDriveFromScroll hysteresis for the cold / post-render path
+  // (target still at clouds → need the higher latch).
+  if (occTargetMorph >= 0.5) return progress >= gate * 0.18;
+  return progress >= gate * 0.82;
+}
+
 function layoutOccSticky() {
   var scrolly = document.getElementById("occ-scrolly");
   var steps = document.getElementById("occ-steps");
@@ -40,7 +66,11 @@ function layoutOccSticky() {
     var stage = document.getElementById("occ-stage");
     if (stage) stage.style.minHeight = "";
     occClearFlipStyles();
+    return;
   }
+  // Same turn as enabling sticky — a 0-height stage for even one frame
+  // collapses the pin and yanks scroll on reload@3a.
+  occSizeStage();
 }
 
 function occClearFlipStyles() {
@@ -81,6 +111,7 @@ function occSizeStage() {
   var stage = document.getElementById("occ-stage");
   var fig3 = document.getElementById("occ-fig3-block");
   var chord = document.getElementById("occ-chord-block");
+  var pin = document.getElementById("occ-pin");
   if (!stage || !fig3 || !chord || !occUseSticky()) {
     if (stage) stage.style.minHeight = "";
     return;
@@ -89,8 +120,16 @@ function occSizeStage() {
   // min-height between Fig. 3 and 3a mid-scroll changes pin height /
   // travel and the browser "compensates" with a jump opposite the scroll.
   var h = Math.max(fig3.offsetHeight, chord.offsetHeight, 1);
-  if (Math.abs((parseFloat(stage.style.minHeight) || 0) - h) > 1) {
-    stage.style.minHeight = h + "px";
+  var prev = parseFloat(stage.style.minHeight) || 0;
+  if (Math.abs(prev - h) <= 1) return;
+
+  // Only compensate when refining an existing lock. Anchoring across the
+  // first 0→h lock fights sticky engagement and can invent a jump.
+  var pinTop = prev > 0 && pin ? pin.getBoundingClientRect().top : null;
+  stage.style.minHeight = h + "px";
+  if (pinTop != null && pin) {
+    var dy = pin.getBoundingClientRect().top - pinTop;
+    if (Math.abs(dy) > 0.5) window.scrollBy(0, dy);
   }
 }
 
@@ -139,6 +178,10 @@ function occSnapMorph(toChord) {
   var scrolly = document.getElementById("occ-scrolly");
   var fig3 = document.getElementById("occ-fig3-block");
   var chordBlock = document.getElementById("occ-chord-block");
+  if (occFlipTimer) {
+    window.clearTimeout(occFlipTimer);
+    occFlipTimer = 0;
+  }
   occMorphing = false;
   occVisualMorph = toChord ? 1 : 0;
   occTargetMorph = occVisualMorph;
@@ -284,25 +327,31 @@ function occPlayFlip(toChord) {
 
 function occSetTargets(wantMorph) {
   var morph = wantMorph ? 1 : 0;
-  if (occMorphing) return;
-  if (morph === occTargetMorph) return;
-  occTargetMorph = morph;
 
   if (!occUseSticky()) {
     occSnapMorph(false);
     return;
   }
 
-  if (typeof occCloudReduced === "function" && occCloudReduced()) {
+  // Boot / reload settle: hard cut only. FLIP against unsettled press/hero
+  // heights leaves both layers painted (rapid refresh ghost).
+  if (!occFlipArmed || (typeof occCloudReduced === "function" && occCloudReduced())) {
+    if (!occMorphing && morph === occTargetMorph && Math.abs(occVisualMorph - morph) < 0.001) {
+      return;
+    }
     occSnapMorph(!!wantMorph);
     return;
   }
+
+  if (occMorphing) return;
+  if (morph === occTargetMorph) return;
 
   if (Math.abs(occVisualMorph - morph) < 0.001) {
     occSnapMorph(!!wantMorph);
     return;
   }
 
+  occTargetMorph = morph;
   occPlayFlip(!!wantMorph);
 }
 
@@ -316,6 +365,104 @@ function occScrollProgress() {
   return travel > 0 ? passed / travel : 0;
 }
 
+function occStickyInView() {
+  var scrolly = document.getElementById("occ-scrolly");
+  var pin = document.getElementById("occ-pin");
+  if (!scrolly || !pin || !occUseSticky()) return false;
+  var top = occStickyTop();
+  var rect = scrolly.getBoundingClientRect();
+  return rect.top <= top + 1 && rect.bottom > top + 48;
+}
+
+// Keep Fig. 3 / 3a sticky progress across layout that changes height above
+// (press runway, hero chart) — pixel scrollY alone jumps on reload.
+function occScrollToProgress(progress) {
+  var scrolly = document.getElementById("occ-scrolly");
+  var pin = document.getElementById("occ-pin");
+  if (!scrolly || !pin || !occUseSticky()) return;
+  // progress 0 means "pin just stuck" — only valid while this scrolly is
+  // already the scroll focus. Calling it from the top of the page scrolls
+  // the whole document down to Fig. 3 (reload-away-from-occ bug).
+  var rect = scrolly.getBoundingClientRect();
+  var vh = window.innerHeight || 800;
+  if (rect.bottom < -80 || rect.top > vh + 80) return;
+  progress = Math.max(0, Math.min(1, Number(progress) || 0));
+  var travel = Math.max(0, scrolly.offsetHeight - pin.offsetHeight);
+  OCC_SCROLL.progress = progress;
+  if (travel <= 0) return;
+  var desired = occStickyTop() - progress * travel;
+  var dy = scrolly.getBoundingClientRect().top - desired;
+  if (Math.abs(dy) > 0.5) window.scrollBy(0, dy);
+}
+
+var OCC_SCROLL_KEY = "laureates-occ-scroll";
+
+function saveOccScrollAnchor() {
+  try {
+    if (!occStickyInView()) {
+      sessionStorage.removeItem(OCC_SCROLL_KEY);
+      return;
+    }
+    // Prefer the flip *target* — mid-flight visualMorph is a half-state and
+    // rapid reloads were restoring into stacked Fig. 3 + 3a.
+    var chord = occTargetMorph >= 0.5 || (occVisualMorph >= 0.5 && !occMorphing);
+    sessionStorage.setItem(
+      OCC_SCROLL_KEY,
+      JSON.stringify({
+        progress: occScrollProgress(),
+        chord: chord ? 1 : 0
+      })
+    );
+  } catch (err) {}
+}
+
+function restoreOccScrollAnchor() {
+  var raw;
+  try {
+    raw = sessionStorage.getItem(OCC_SCROLL_KEY);
+    sessionStorage.removeItem(OCC_SCROLL_KEY);
+  } catch (err) {
+    return false;
+  }
+  if (!raw || !occUseSticky()) return false;
+  var data;
+  try {
+    data = JSON.parse(raw);
+  } catch (err) {
+    return false;
+  }
+  var progress = typeof data.progress === "number" ? data.progress : parseFloat(data.progress);
+  if (!(progress >= 0)) return false;
+
+  layoutOccSticky();
+  occSizeStage();
+  // Bypass the in-view guard: we intentionally jump back into this scrolly.
+  var scrolly = document.getElementById("occ-scrolly");
+  var pin = document.getElementById("occ-pin");
+  if (scrolly && pin) {
+    var travel = Math.max(0, scrolly.offsetHeight - pin.offsetHeight);
+    if (travel > 0) {
+      var desired = occStickyTop() - progress * travel;
+      var dy = scrolly.getBoundingClientRect().top - desired;
+      if (Math.abs(dy) > 0.5) window.scrollBy(0, dy);
+    }
+    OCC_SCROLL.progress = progress;
+  }
+  occSnapMorph(data.chord ? true : occScrollWantsChord(progress));
+  occSizeStage();
+  // Second pass after snap may change pin height.
+  if (scrolly && pin) {
+    var travel2 = Math.max(0, scrolly.offsetHeight - pin.offsetHeight);
+    if (travel2 > 0) {
+      var desired2 = occStickyTop() - progress * travel2;
+      var dy2 = scrolly.getBoundingClientRect().top - desired2;
+      if (Math.abs(dy2) > 0.5) window.scrollBy(0, dy2);
+    }
+    OCC_SCROLL.progress = progress;
+  }
+  return true;
+}
+
 function occResampleScroll() {
   if (!occUseSticky() || occMorphing) return;
   occDriveFromScroll(occScrollProgress());
@@ -324,13 +471,9 @@ function occResampleScroll() {
 function occDriveFromScroll(progress) {
   if (occMorphing) return;
   OCC_SCROLL.progress = progress;
-  var gate = occMorphGate();
   // Wide hysteresis once on 3a — tiny scroll jitter must not reverse-flip
-  // and flash Fig. 3 for a beat.
-  var wantMorph = occTargetMorph >= 0.5
-    ? progress >= gate * 0.18
-    : progress >= gate * 0.82;
-  occSetTargets(wantMorph);
+  // and flash Fig. 3 for a beat (see occScrollWantsChord).
+  occSetTargets(occScrollWantsChord(progress));
 }
 
 function syncOccupations() {
@@ -370,18 +513,42 @@ function syncOccupations() {
 }
 
 function afterRenderOccMorph() {
-  layoutOccSticky();
+  occDisarmFlip(180);
+
   if (!occUseSticky()) {
+    layoutOccSticky();
     occSnapMorph(false);
     return;
   }
-  var scrolly = document.getElementById("occ-scrolly");
-  if (scrolly && !scrolly.classList.contains("is-chord") && !scrolly.classList.contains("is-clouds")) {
-    scrolly.classList.add("is-clouds");
+
+  // Sticky + min-height + mode snap in one sync turn — avoids a paint with
+  // stage height 0 (pin collapses, scroll yanks) then a tall stage (flower
+  // jumps). Also kills the Fig. 3 gold ghost over 3a on reload.
+  // Prefer the pagehide anchor when present (pixel scrollY is wrong after
+  // press/hero heights above this section change).
+  if (typeof restoreOccScrollAnchor === "function" && restoreOccScrollAnchor()) {
+    requestAnimationFrame(function () {
+      occSizeStage();
+    });
+    return;
   }
-  // Wait a frame so flex/SVG sizes settle before measuring stage + possible FLIP.
-  requestAnimationFrame(function () {
-    occSizeStage();
-    syncOccupations();
-  });
+
+  layoutOccSticky();
+  occSizeStage();
+  // Only re-anchor scroll when this section is already on screen. Otherwise
+  // occScrollToProgress(0) yanks the page down to Fig. 3 on every reload.
+  if (occStickyInView()) {
+    var progress = occScrollProgress();
+    occScrollToProgress(progress);
+    occSnapMorph(occScrollWantsChord(progress));
+    requestAnimationFrame(function () {
+      if (!occStickyInView()) return;
+      var keep = occScrollProgress();
+      occSizeStage();
+      occScrollToProgress(keep);
+    });
+    return;
+  }
+
+  occSnapMorph(false);
 }

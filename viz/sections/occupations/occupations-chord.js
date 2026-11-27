@@ -956,16 +956,17 @@ function renderOccChord() {
   // Narrow screens keep full-size hexes and labels and scroll sideways (like
   // the age chart) instead of shrinking the flower to fit.
   var maxW = narrow ? Infinity : Math.min(920, host.clientWidth || 920);
-  // viewBox scaling shrinks SVG text, and label extents change the viewBox:
-  // re-render until labels land at ~1rem on screen.
-  var scale = narrow ? 1 : 0.75;
+  // viewBox scaling shrinks SVG text, and label extents change the viewBox.
+  // Probe once, then one corrective render (was up to 4 full rebuilds).
   var maxH = occChordMaxH();
-  var svg;
-  for (var round = 0; round < 4; round++) {
-    svg = renderOccClusterCloud(layout, hexR, { label: 16 / scale, hub: 14 / scale }, narrow);
+  var scale = narrow ? 1 : 0.75;
+  var svg = renderOccClusterCloud(layout, hexR, { label: 16 / scale, hub: 14 / scale }, narrow);
+  if (!narrow) {
     var next = Math.min(1, maxW / Number(svg.dataset.w), maxH / Number(svg.dataset.h));
-    if (Math.abs(next - scale) < 0.005) break;
-    scale = next;
+    if (Math.abs(next - scale) >= 0.005) {
+      scale = next;
+      svg = renderOccClusterCloud(layout, hexR, { label: 16 / scale, hub: 14 / scale }, narrow);
+    }
   }
   svg.setAttribute("width", Number(svg.dataset.w) * scale);
   svg.setAttribute("height", Number(svg.dataset.h) * scale);
@@ -987,68 +988,63 @@ function renderOccChord() {
   var hexes = Array.prototype.slice.call(svg.querySelectorAll("polygon[data-cluster]"));
 
   function clearHot() {
-    hulls.forEach(function (h) { h.classList.remove("is-hot", "is-dim"); });
-    washes.forEach(function (w) { w.classList.remove("is-hot", "is-dim"); });
-    labels.forEach(function (l) { l.classList.remove("is-hot", "is-dim"); });
-    hexes.forEach(function (poly) { poly.classList.remove("is-dim", "is-hot"); });
+    svg.classList.remove("is-filtering");
+    hulls.forEach(function (h) { h.classList.remove("is-hot"); });
+    washes.forEach(function (w) { w.classList.remove("is-hot"); });
+    labels.forEach(function (l) { l.classList.remove("is-hot"); });
+    hexes.forEach(function (poly) { poly.classList.remove("is-hot"); });
   }
 
   function hotClass(key) {
     if (!key) return;
+    clearHot();
+    svg.classList.add("is-filtering");
     hulls.forEach(function (h) {
       var on = h.dataset.kind === "class"
         ? h.dataset.key === key
         : h.dataset.key.split("|").indexOf(key) !== -1;
-      h.classList.toggle("is-hot", on);
-      h.classList.toggle("is-dim", !on);
+      if (on) h.classList.add("is-hot");
     });
     washes.forEach(function (w) {
       var on = w.dataset.kind === "class"
         ? w.dataset.key === key
         : w.dataset.key.split("|").indexOf(key) !== -1;
-      w.classList.toggle("is-hot", on);
-      w.classList.toggle("is-dim", !on);
+      if (on) w.classList.add("is-hot");
     });
     labels.forEach(function (l) {
       var on = l.dataset.kind === "class"
         ? l.dataset.key === key
         : l.dataset.key.split("|").indexOf(key) !== -1;
-      l.classList.toggle("is-hot", on);
-      l.classList.toggle("is-dim", !on);
+      if (on) l.classList.add("is-hot");
     });
     hexes.forEach(function (poly) {
       var parts = poly.dataset.compound ? poly.dataset.compound.split("|") : [];
-      var on = poly.dataset.cluster === key || parts.indexOf(key) !== -1;
-      poly.classList.toggle("is-dim", !on);
-      poly.classList.toggle("is-hot", on && poly.dataset.multi === "1");
+      if (poly.dataset.cluster === key || parts.indexOf(key) !== -1) poly.classList.add("is-hot");
     });
   }
 
   function hotCompound(key) {
     if (!key) return;
+    clearHot();
+    svg.classList.add("is-filtering");
     var parts = key.split("|");
     hulls.forEach(function (h) {
       var on = h.dataset.key === key ||
         (h.dataset.kind === "class" && parts.indexOf(h.dataset.key) !== -1);
-      h.classList.toggle("is-hot", on);
-      h.classList.toggle("is-dim", !on);
+      if (on) h.classList.add("is-hot");
     });
     washes.forEach(function (w) {
       var on = w.dataset.key === key ||
         (w.dataset.kind === "class" && parts.indexOf(w.dataset.key) !== -1);
-      w.classList.toggle("is-hot", on);
-      w.classList.toggle("is-dim", !on);
+      if (on) w.classList.add("is-hot");
     });
     labels.forEach(function (l) {
       var on = l.dataset.key === key ||
         (l.dataset.kind === "class" && parts.indexOf(l.dataset.key) !== -1);
-      l.classList.toggle("is-hot", on);
-      l.classList.toggle("is-dim", !on);
+      if (on) l.classList.add("is-hot");
     });
     hexes.forEach(function (poly) {
-      var on = poly.dataset.compound === key;
-      poly.classList.toggle("is-dim", !on);
-      poly.classList.toggle("is-hot", on);
+      if (poly.dataset.compound === key) poly.classList.add("is-hot");
     });
   }
 

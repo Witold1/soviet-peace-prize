@@ -76,10 +76,6 @@ function hexPoints(cx, cy, radius) {
   return pts.join(" ");
 }
 
-function titleOcc(value) {
-  return occLabel(value);
-}
-
 function renderCloud(people, size, fillOf, hotOf) {
   const coords = spiral(people.length);
   const centers = coords.map(([q, r]) => pixel(q, r, size));
@@ -110,39 +106,6 @@ function renderCloud(people, size, fillOf, hotOf) {
     const poly = document.createElementNS(SVG_NS, "polygon");
     const center = centers[index];
     poly.setAttribute("points", hexPoints(center.x, center.y, draw));
-    const fill = fillOf(person);
-    poly.setAttribute("fill", fill);
-    poly.dataset.fill = fill;
-    poly.dataset.hot = hotOf(person);
-    poly.dataset.i = String(person.i);
-    poly.dataset.mark = "1";
-    poly.dataset.stroke = "none";
-    poly.setAttribute("tabindex", "0");
-    poly.setAttribute("role", "img");
-    poly.setAttribute("aria-label", markAria(person));
-    if (!wikiFor(person)) poly.classList.add("no-link");
-    svg.appendChild(poly);
-  });
-  return svg;
-}
-
-function renderRows(people, size, columns, fillOf, hotOf) {
-  const radius = size * 0.92;
-  const colStep = size * 2.15;
-  const rowStep = size * Math.sqrt(3) + 4;
-  const cols = Math.min(columns, people.length);
-  const rows = Math.ceil(people.length / columns);
-  const minX = -radius - 2;
-  const minY = -radius - 2;
-  const width = (cols - 1) * colStep + radius * 2 + 4;
-  const height = (rows - 1) * rowStep + radius * 2 + 4;
-  const svg = document.createElementNS(SVG_NS, "svg");
-  svg.setAttribute("viewBox", minX + " " + minY + " " + width + " " + height);
-  svg.dataset.w = String(width);
-  svg.dataset.h = String(height);
-  people.forEach(function (person, index) {
-    const poly = document.createElementNS(SVG_NS, "polygon");
-    poly.setAttribute("points", hexPoints((index % columns) * colStep, Math.floor(index / columns) * rowStep, radius));
     const fill = fillOf(person);
     poly.setAttribute("fill", fill);
     poly.dataset.fill = fill;

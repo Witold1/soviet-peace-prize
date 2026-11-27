@@ -1,3 +1,4 @@
+/* Shared Fig. 8 family land palette (scatter, squares, flight, sequence). */
 .land { fill: #d8d0be; stroke: #5f5a52; stroke-width: 0.85; }
 
 .lake { fill: var(--bg); }

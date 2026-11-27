@@ -430,18 +430,22 @@ function pressZoomHold() {
   return Math.round(window.innerHeight * 0.4);
 }
 
+var PRESS_DECREE_ZOOM = 0;
+
 function syncDecreeZoom(zoom, scrub) {
   var loupe = document.getElementById("ukaz-loupe");
   var quote = loupe && loupe.closest(".ukaz");
   if (!loupe) return;
   if (!scrub) {
     pressZoomLast = "";
+    PRESS_DECREE_ZOOM = 0;
     loupe.style.removeProperty("--zoom");
     loupe.classList.remove("is-scrub");
     if (quote) quote.classList.remove("is-zoomed");
     if (typeof syncDecreeAnnotProgress === "function") syncDecreeAnnotProgress(0, false);
     return;
   }
+  PRESS_DECREE_ZOOM = zoom;
   var value = zoom.toFixed(3);
   var zoomed = zoom >= 0.84 ? "1" : "0";
   var key = value + ":" + zoomed;
@@ -471,10 +475,8 @@ function awaitDecree(fade) {
   decree.classList.toggle("is-awaiting", fade < 0.12);
   // Once the scan is clearly forward, retire the title card so the decree reads as main.
   decree.classList.toggle("is-front", fade >= 0.42);
-  var loupe = document.getElementById("ukaz-loupe");
-  var zoom = loupe ? parseFloat(getComputedStyle(loupe).getPropertyValue("--zoom")) || 0 : 0;
   if (typeof syncDecreeAnnotProgress === "function") {
-    syncDecreeAnnotProgress(zoom, fade >= 0.42);
+    syncDecreeAnnotProgress(PRESS_DECREE_ZOOM, fade >= 0.42);
   }
 }
 

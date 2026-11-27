@@ -1,11 +1,11 @@
 function renderAges() {
   document.getElementById("age-chart").replaceChildren();
-  const youngestAge = Math.min.apply(null, PEOPLE_SEEN.map(function (person) { return person.age; }));
-  const oldestAge = Math.max.apply(null, PEOPLE_SEEN.map(function (person) { return person.age; }));
-  const youngest = PEOPLE_SEEN.filter(function (person) { return person.age === youngestAge; });
-  const oldest = PEOPLE_SEEN.filter(function (person) { return person.age === oldestAge; });
-  const mean = PEOPLE_SEEN.reduce(function (sum, person) { return sum + person.age; }, 0) / PEOPLE_SEEN.length;
-  const meanText = (Math.round(mean * 10) / 10).toFixed(1);
+  var youngestAge = Math.min.apply(null, PEOPLE_SEEN.map(function (person) { return person.age; }));
+  var oldestAge = Math.max.apply(null, PEOPLE_SEEN.map(function (person) { return person.age; }));
+  var youngest = PEOPLE_SEEN.filter(function (person) { return person.age === youngestAge; });
+  var oldest = PEOPLE_SEEN.filter(function (person) { return person.age === oldestAge; });
+  var mean = PEOPLE_SEEN.reduce(function (sum, person) { return sum + person.age; }, 0) / PEOPLE_SEEN.length;
+  var meanText = (Math.round(mean * 10) / 10).toFixed(1);
 
   document.getElementById("age-lead").textContent = ageLead({
     youngNames: joinNames(youngest),
@@ -21,108 +21,35 @@ function renderAges() {
 }
 
 function renderAgesBeeswarm(mean, meanText) {
-  const minAge = 28;
-  const maxAge = 96;
-  const plotW = 860;
-  const radius = 6.5;
-  const padL = 36;
-  const padR = 24;
-  const padT = 28;
-  const padB = 36;
-
-  function xAge(age) {
-    return padL + (age - minAge) / (maxAge - minAge) * plotW;
-  }
-
-  const ordered = PEOPLE_SEEN.slice().sort(function (a, b) {
-    return a.age - b.age || sortName(a).localeCompare(sortName(b), lang);
-  });
-  const placed = [];
-  ordered.forEach(function (person) {
-    const x = xAge(person.age);
-    let y = 0;
-    let found = false;
-    for (let mag = 0; mag < 500 && !found; mag += 1) {
-      const candidates = mag === 0 ? [0] : [mag, -mag];
-      for (let c = 0; c < candidates.length; c += 1) {
-        const candidate = candidates[c];
-        const hit = placed.some(function (other) {
-          return Math.hypot(other.x - x, other.y - candidate) < radius * 2 - 0.4;
-        });
-        if (!hit) {
-          y = candidate;
-          found = true;
-          break;
-        }
-      }
-    }
-    placed.push({ person: person, x: x, y: y });
-  });
-
-  const ys = placed.map(function (dot) { return dot.y; });
-  const minY = Math.min.apply(null, ys);
-  const maxY = Math.max.apply(null, ys);
-  const swarmH = maxY - minY + radius * 2 + 8;
-  const width = padL + plotW + padR;
-  const height = padT + swarmH + padB;
-  const axisY = padT + swarmH;
-
-  function screenY(y) {
-    return padT + (maxY + radius + 4 - y);
-  }
-
-  const svg = svgEl("svg");
-  svg.setAttribute("viewBox", "0 0 " + width + " " + height);
+  var swarm = beeswarmPlace(PEOPLE_SEEN);
+  var svg = svgEl("svg");
+  svg.setAttribute("viewBox", "0 0 " + swarm.width + " " + swarm.height);
   svg.setAttribute("class", "wide");
   svg.setAttribute("role", "img");
   svg.setAttribute("aria-label", ageAria(meanText));
 
-  const meanX = xAge(mean);
-  const meanLine = svgEl("line");
+  var meanX = swarm.xAge(mean);
+  var meanLine = svgEl("line");
   meanLine.setAttribute("x1", meanX);
   meanLine.setAttribute("x2", meanX);
   meanLine.setAttribute("y1", 18);
-  meanLine.setAttribute("y2", axisY);
+  meanLine.setAttribute("y2", swarm.axisY);
   meanLine.setAttribute("class", "avg-line");
   svg.appendChild(meanLine);
-  const meanLabel = svgEl("text");
+  var meanLabel = svgEl("text");
   meanLabel.setAttribute("x", meanX + 6);
   meanLabel.setAttribute("y", 14);
   meanLabel.setAttribute("class", "avg-label");
   meanLabel.textContent = ageMean(meanText);
   svg.appendChild(meanLabel);
 
-  const axis = svgEl("line");
-  axis.setAttribute("x1", padL);
-  axis.setAttribute("x2", padL + plotW);
-  axis.setAttribute("y1", axisY);
-  axis.setAttribute("y2", axisY);
-  axis.setAttribute("class", "axis-line");
-  svg.appendChild(axis);
+  beeswarmAxis(svg, swarm);
 
-  for (let tick = 30; tick <= 90; tick += 10) {
-    const x = xAge(tick);
-    const tickLine = svgEl("line");
-    tickLine.setAttribute("x1", x);
-    tickLine.setAttribute("x2", x);
-    tickLine.setAttribute("y1", axisY);
-    tickLine.setAttribute("y2", axisY + 5);
-    tickLine.setAttribute("class", "axis-line");
-    svg.appendChild(tickLine);
-    const label = svgEl("text");
-    label.setAttribute("x", x);
-    label.setAttribute("y", axisY + 20);
-    label.setAttribute("text-anchor", "middle");
-    label.setAttribute("class", "axis");
-    label.textContent = String(tick);
-    svg.appendChild(label);
-  }
-
-  placed.forEach(function (dot) {
-    const circle = svgEl("circle");
+  swarm.placed.forEach(function (dot) {
+    var circle = svgEl("circle");
     circle.setAttribute("cx", dot.x.toFixed(2));
-    circle.setAttribute("cy", screenY(dot.y).toFixed(2));
-    circle.setAttribute("r", radius);
+    circle.setAttribute("cy", swarm.screenY(dot.y).toFixed(2));
+    circle.setAttribute("r", swarm.radius);
     paintMark(circle, dot.person);
     svg.appendChild(circle);
   });
@@ -132,10 +59,10 @@ function renderAgesBeeswarm(mean, meanText) {
 }
 
 function centerAgeChartScroll() {
-  const chart = document.getElementById("age-chart");
+  var chart = document.getElementById("age-chart");
   if (!chart) return;
   requestAnimationFrame(function () {
-    const maxScroll = chart.scrollWidth - chart.clientWidth;
+    var maxScroll = chart.scrollWidth - chart.clientWidth;
     if (maxScroll > 0) chart.scrollLeft = maxScroll / 2;
     else chart.scrollLeft = 0;
   });

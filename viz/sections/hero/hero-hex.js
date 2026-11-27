@@ -15,56 +15,10 @@ function heroHexRender() {
 
   if (section) section.classList.add("hero-scroll");
 
-  var portraits = typeof PORTRAITS === "object" && PORTRAITS ? PORTRAITS : {};
-  var ordered = PEOPLE_SEEN.slice().sort(byYear);
-  var withPortrait = ordered.filter(function (person) { return portraits[person.i]; }).length;
-  var hero = document.createElement("div");
-  hero.className = "hero portraits";
-  hero.id = "hero-board";
-  hero.setAttribute("role", "img");
-  hero.setAttribute("aria-label", heroAria(ordered.length) + " · " + withPortrait + "/" + ordered.length);
-
-  ordered.forEach(function (person, index) {
-    var hasPortrait = !!portraits[person.i];
-    var mark = document.createElement("div");
-    mark.className = "mark " + (hasPortrait ? "portrait" : "medal");
-    mark.dataset.kind = hasPortrait ? "portrait" : "medal";
-    mark.dataset.mark = "1";
-    mark.dataset.i = String(person.i);
-    mark.tabIndex = 0;
-    mark.setAttribute("role", "img");
-    mark.setAttribute("aria-label", markAria(person));
-    if (!wikiFor(person)) mark.classList.add("no-link");
-
-    var face = document.createElement("div");
-    face.className = "face";
-    var img = document.createElement("img");
-    if (hasPortrait) {
-      img.src = portraits[person.i];
-    } else {
-      img.src = person.series === "stalin" ? "medals/stalin.png" : "medals/lenin.png";
-      if (person.series === "stalin" || index === ordered.length - 1) img.classList.add("is-mirrored");
-    }
-    img.alt = "";
-    img.draggable = false;
-    img.setAttribute("aria-hidden", "true");
-    face.appendChild(img);
-
-    var tile = document.createElement("div");
-    tile.className = "tile";
-    tile.style.background = GOLD;
-    tile.dataset.fill = GOLD;
-    tile.dataset.hot = GOLD_HOT;
-    tile.setAttribute("aria-hidden", "true");
-
-    mark.appendChild(face);
-    mark.appendChild(tile);
-    hero.appendChild(mark);
-    heroMarks.push({ el: mark, face: face, tile: tile, index: index });
-  });
-
-  stage.appendChild(hero);
-  if (typeof heroMountCountStack === "function") heroMountCountStack(hero, ordered.length);
+  var built = heroBuildBoard({ withTiles: true });
+  heroMarks = built.marks;
+  stage.appendChild(built.board);
+  if (typeof heroMountCountStack === "function") heroMountCountStack(built.board, built.ordered.length);
   heroHexLayout();
   heroHexSync();
 }
@@ -175,12 +129,19 @@ function heroHexLayout() {
     item.face.style.opacity = "";
     if (item.tile) item.tile.style.opacity = "";
   });
-  board.classList.remove("is-animating", "is-faces-off", "is-tiles-on");
-  board.style.removeProperty("--hero-face");
-  board.style.removeProperty("--hero-tile");
-  board.style.removeProperty("--hero-sil");
 
+  // Same as dove: absolute marks need an immediate pose after relayout.
   heroApplyRunway(section);
+  if (heroMorphing) {
+    heroSnapPose(heroTargetT);
+  } else {
+    board.classList.remove("is-animating", "is-faces-off", "is-tiles-on");
+    board.style.removeProperty("--hero-face");
+    board.style.removeProperty("--hero-tile");
+    board.style.removeProperty("--hero-sil");
+    heroApplyVisual();
+    heroApplyChartHeight(heroVisualT, false);
+  }
   heroScrubKey = "";
 }
 

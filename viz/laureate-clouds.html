@@ -28,18 +28,15 @@
         }
       } catch (err) {}
       document.documentElement.setAttribute("data-hero-mode", hero);
-      var years = "plain";
+      document.documentElement.setAttribute("data-years-mode", "stretched");
       try {
-        var yearsQuery = new URLSearchParams(location.search).get("years");
-        if (yearsQuery === "scroll") years = "plain";
-        else if (yearsQuery === "plain" || yearsQuery === "stretched") years = yearsQuery;
-        else {
-          var yearsSaved = localStorage.getItem("laureates-years-mode");
-          if (yearsSaved === "scroll") years = "plain";
-          else if (yearsSaved === "plain" || yearsSaved === "stretched") years = yearsSaved;
+        localStorage.setItem("laureates-years-mode", "stretched");
+        var yearsUrl = new URL(location.href);
+        if (yearsUrl.searchParams.has("years")) {
+          yearsUrl.searchParams.delete("years");
+          history.replaceState(null, "", yearsUrl);
         }
       } catch (err) {}
-      document.documentElement.setAttribute("data-years-mode", years);
       try {
         if (sessionStorage.getItem("laureates-dev-plain") !== "0") {
           document.documentElement.setAttribute("data-dev-plain", "");
@@ -72,7 +69,9 @@
   <link rel="stylesheet" href="sections/ages/ages.css">
   <link rel="stylesheet" href="sections/map/map.css">
   <link rel="stylesheet" href="sections/map/map-narrow.css">
+  <link rel="stylesheet" href="sections/map/map-squares.css">
   <link rel="stylesheet" href="sections/tip/tip.css">
+  <link rel="stylesheet" href="sections/ghosts/ghosts.css">
   <link rel="stylesheet" href="sections/method/method.css">
   <link rel="stylesheet" href="sections/toc/toc.css">
 </head>
@@ -93,8 +92,8 @@
         <li><a href="#decree-1989" data-i18n="tocRename1989">The Lenin Peace Prize</a></li>
         <li><a href="#births" data-i18n="hMap">Where they came from</a></li>
         <li><a href="#ghosts" data-i18n="tocGhost">Ghost winners</a></li>
-        <li><a href="#method" data-i18n="methTitle">How the list was made</a></li>
         <li><a href="#footnotes" data-i18n="fnListTitle">Footnotes</a></li>
+        <li><a href="#method" data-i18n="methTitle">Methodology</a></li>
       </ol>
     </nav>
   </div>
@@ -144,7 +143,7 @@
     <section class="press-scroll" id="prize">
       <div class="press-pin" id="press-pin">
         <header class="figcap">
-          <h2><span class="fig-no" data-i18n="n2">Fig. 2.</span> <span data-i18n="capPress">The world the prize was founded in</span></h2>
+          <h2><span class="fig-no" data-i18n="n2">Fig. 2.</span> <span data-i18n="capPress">The (post)war world the prize was founded in</span></h2>
         </header>
         <div class="press-band">
           <div class="press-frame" id="press-frame">
@@ -293,9 +292,11 @@
         <p>On the chart, 1956 is not an empty year. That cohort has seven people with portraits, and the list already counts them as Lenin laureates. Between Stalin’s death and the renaming there are about three years of <em>Pravda</em> — on the order of a thousand issues. The carousel opens on the death announcement and then on ordinary front pages of a party struggle already under way: a crisis of leadership, and conflicting views and strategic plans in politics and the economy. The pattern is familiar — not a repeat, but a rhyme: like the Second Triumvirate after Caesar’s death (Octavian, Antony, Lepidus), or the Thermidorian Reaction in France after Robespierre’s execution. History doesn't repeat itself, but it often rhymes. Most of that carousel is noise for this story. Two frames matter: on 2 July 1956 the paper prints the Central Committee resolution “On overcoming the cult of personality and its consequences”; in September the prize changes its name, and the portrait on the medal.</p>
         <p>The renaming decree is dated 6 September 1956. It does not found a new prize, and it does not close the old one. The first sentence explains the renaming by the wishes of the committees. The sum does not change: still 100,000 rubles. Point 3 extends to the laureates of 1950-1955 only the diploma and the medal, subparagraphs (a) and (b), and does not extend the cash. Those earlier laureates, as the text above has already said, were asked to hand the medal back for exchange: the old one bears Stalin, the new one bears Lenin. The decree still says each year, and up to ten. No column after 1953 reaches ten.</p>
       </div>
-      <figure class="doc">
+      <figure class="doc" id="destalin-fig">
+        <header class="figcap">
+          <h2><span class="fig-no" data-i18n="n5">Fig. 5.</span> <span data-i18n="capDestalin">From the Stalin Prize to the Lenin Prize in Pravda</span></h2>
+        </header>
         <div class="destalin" id="destalin" data-i18n-aria="destalinLabel" aria-label="De-Stalinization in Pravda, 1953–1956">
-          <p class="destalin-issue" id="destalin-issue"></p>
           <div class="destalin-stage" id="destalin-stage">
             <div class="destalin-rush" id="destalin-rush" aria-hidden="true">
               <div class="destalin-rush-strip" id="destalin-rush-strip"></div>
@@ -308,7 +309,10 @@
                       <button type="button" class="ukaz-zoom" data-i18n-aria="decreePage" aria-label="Whole page"><span class="ukaz-zoom-label">Whole page</span></button>
                       <div class="ukaz-loupe is-page" id="ukaz-loupe-death">
                         <div class="ukaz-view">
-                          <img class="ukaz-scan" src="../figures/pravda-1953-065.jpg" width="1823" height="2653" alt="Pravda, 6 March 1953, page 1, announcing the death of J. V. Stalin." data-i18n-alt="destalinDeathScanAlt">
+                          <div class="ukaz-sheet">
+                            <img class="ukaz-scan" src="../figures/pravda-1953-065.jpg" width="1823" height="2653" alt="Pravda, 6 March 1953, page 1, announcing the death of J. V. Stalin." data-i18n-alt="destalinDeathScanAlt">
+                            <div class="ukaz-annots" id="ukaz-annots-death" hidden></div>
+                          </div>
                           <button type="button" class="ukaz-side" aria-pressed="false" data-i18n-aria="destalinDeathSide" aria-label="Enlarge the death announcement"></button>
                         </div>
                         <div class="ukaz-mark" aria-hidden="true"></div>
@@ -326,7 +330,10 @@
                       <button type="button" class="ukaz-zoom" data-i18n-aria="decreePage" aria-label="Whole page"><span class="ukaz-zoom-label">Whole page</span></button>
                       <div class="ukaz-loupe is-page" id="ukaz-loupe-beria">
                         <div class="ukaz-view">
-                          <img class="ukaz-scan" src="../figures/pravda-1953-191.jpg" width="1840" height="2669" alt="Pravda, 10 July 1953, page 1, with the report on Beria’s removal." data-i18n-alt="destalin1953191ScanAlt">
+                          <div class="ukaz-sheet">
+                            <img class="ukaz-scan" src="../figures/pravda-1953-191.jpg" width="1840" height="2669" alt="Pravda, 10 July 1953, page 1, with the report on Beria’s removal." data-i18n-alt="destalin1953191ScanAlt">
+                            <div class="ukaz-annots" id="ukaz-annots-beria" hidden></div>
+                          </div>
                           <button type="button" class="ukaz-side" aria-pressed="false" data-i18n-aria="destalinBeriaSide" aria-label="Enlarge the Beria report"></button>
                         </div>
                         <div class="ukaz-mark" aria-hidden="true"></div>
@@ -344,7 +351,10 @@
                       <button type="button" class="ukaz-zoom" data-i18n-aria="decreePage" aria-label="Whole page"><span class="ukaz-zoom-label">Whole page</span></button>
                       <div class="ukaz-loupe is-page" id="ukaz-loupe-malenkov">
                         <div class="ukaz-view">
-                          <img class="ukaz-scan" src="../figures/pravda-1955-040.jpg" width="1830" height="2648" alt="Pravda, 9 February 1955, page 1, with Malenkov’s resignation from the Council of Ministers." data-i18n-alt="destalin1955040ScanAlt">
+                          <div class="ukaz-sheet">
+                            <img class="ukaz-scan" src="../figures/pravda-1955-040.jpg" width="1830" height="2648" alt="Pravda, 9 February 1955, page 1, with Malenkov’s resignation from the Council of Ministers." data-i18n-alt="destalin1955040ScanAlt">
+                            <div class="ukaz-annots" id="ukaz-annots-malenkov" hidden></div>
+                          </div>
                           <button type="button" class="ukaz-side" aria-pressed="false" data-i18n-aria="destalinMalenkovSide" aria-label="Enlarge the Malenkov resignation"></button>
                         </div>
                         <div class="ukaz-mark" aria-hidden="true"></div>
@@ -362,7 +372,10 @@
                       <button type="button" class="ukaz-zoom" data-i18n-aria="decreePage" aria-label="Whole page"><span class="ukaz-zoom-label">Whole page</span></button>
                       <div class="ukaz-loupe is-page" id="ukaz-loupe-cult">
                         <div class="ukaz-view">
-                          <img class="ukaz-scan" src="../figures/pravda-1956-184.jpg" width="1817" height="2661" alt="Pravda, 2 July 1956, page 1, with the Central Committee resolution on overcoming the cult of personality." data-i18n-alt="destalinCultScanAlt">
+                          <div class="ukaz-sheet">
+                            <img class="ukaz-scan" src="../figures/pravda-1956-184.jpg" width="1817" height="2661" alt="Pravda, 2 July 1956, page 1, with the Central Committee resolution on overcoming the cult of personality." data-i18n-alt="destalinCultScanAlt">
+                            <div class="ukaz-annots" id="ukaz-annots-cult" hidden></div>
+                          </div>
                           <button type="button" class="ukaz-side" aria-pressed="false" data-i18n-aria="destalinCultSide" aria-label="Enlarge the resolution title"></button>
                         </div>
                         <div class="ukaz-mark" aria-hidden="true"></div>
@@ -381,7 +394,10 @@
                     <button type="button" class="ukaz-zoom"><span class="ukaz-zoom-label">Whole page</span></button>
                     <div class="ukaz-loupe is-page" id="ukaz-loupe-1956">
                       <div class="ukaz-view">
-                        <img class="ukaz-scan" src="../figures/pravda-1956-252.jpg" width="1836" height="2673" alt="Pravda, 8 September 1956, page 1, with the renaming decree marked in the lower left." data-i18n-alt="renameScanAlt">
+                        <div class="ukaz-sheet">
+                          <img class="ukaz-scan" src="../figures/pravda-1956-252.jpg" width="1836" height="2673" alt="Pravda, 8 September 1956, page 1, with the renaming decree marked in the lower left." data-i18n-alt="renameScanAlt">
+                          <div class="ukaz-annots" id="ukaz-annots-1956" hidden></div>
+                        </div>
                         <button type="button" class="ukaz-side" aria-pressed="false" aria-label="Enlarge the decree"></button>
                       </div>
                       <div class="ukaz-mark" aria-hidden="true"></div>
@@ -419,11 +435,14 @@
                 <p class="source" data-i18n="renameSource" data-i18n-html>The picture is a page of <em>Pravda</em> with the printed decree renaming the prize.<sup class="fn"><button type="button" class="fn-ref" id="fnref-3" data-fn="3">3</button></sup> <a href="https://archive.org/details/1956252_3945">Scan of the issue: Pravda, 8 September 1956, no. 252 (13915), page 1</a>.</p>
               </article>
             </div>
+            <div class="destalin-nav" id="destalin-nav">
+              <p class="destalin-caption" id="destalin-caption" data-i18n="destalinCapRename">On 6 September 1956 the prize was renamed from the Stalin Prize to the Lenin Prize</p>
+              <button type="button" class="destalin-next" id="destalin-next" data-i18n-aria="destalinAskRename" aria-label="But why?">
+                <span class="destalin-next-label" id="destalin-next-label" data-i18n="destalinAskRename">But why?</span>
+                <span class="destalin-next-hint" data-i18n="destalinClickHint">click to see</span>
+              </button>
+            </div>
           </div>
-          <button type="button" class="destalin-next" id="destalin-next" data-i18n-aria="destalinWhy" aria-label="But why did it turn out this way?">
-            <span class="destalin-next-label" id="destalin-next-label" data-i18n="destalinWhy">But why did it turn out this way?</span>
-            <span class="destalin-next-chevron" aria-hidden="true">›</span>
-          </button>
         </div>
       </figure>
     </section>
@@ -436,7 +455,7 @@
       <p class="lead" id="age-lead"></p>
       <figure class="viz">
         <figcaption class="figcap">
-          <h2><span class="fig-no" data-i18n="n5">Fig. 5.</span> <span data-i18n="capAge">How old were they when they received it?</span></h2>
+          <h2><span class="fig-no" data-i18n="n6">Fig. 6.</span> <span data-i18n="capAge">How old were they when they received it?</span></h2>
         </figcaption>
       <div class="legend">
         <span><i class="swatch dot female"></i> <span data-i18n="female">Female</span></span>
@@ -446,7 +465,7 @@
       </figure>
       <figure id="alive">
         <figcaption class="figcap">
-          <h2><span class="fig-no" data-i18n="n5a">Fig. 5a.</span> <span data-i18n="capAlive">And how many of them are alive today?</span></h2>
+          <h2><span class="fig-no" data-i18n="n6a">Fig. 6a.</span> <span data-i18n="capAlive">And how many of them are alive today?</span></h2>
         </figcaption>
         <p class="lead" id="alive-lead"></p>
         <div class="legend" id="alive-legend">
@@ -454,54 +473,89 @@
           <span><i class="swatch dot dead"></i> <span data-i18n="aliveNo">Deceased</span></span>
         </div>
         <div class="chart" id="alive-chart"></div>
-        <p class="source chart-tech" id="alive-source" data-i18n="srcAlive">Same age beeswarm as Fig. 5. Marks without a recorded death date stay in color; the rest fade. Living status is WINNER_BIO_living from laureates.csv (no death date on Wikidata). Source: laureates.csv.</p>
+        <p class="source chart-tech" id="alive-source" data-i18n="srcAlive">Same age beeswarm as Fig. 6. Marks without a recorded death date stay in color; the rest fade. Living status is WINNER_BIO_living from laureates.csv (no death date on Wikidata). Source: laureates.csv.</p>
       </figure>
     </section>
 
     <section id="decree-1989">
       <div class="essay" data-i18n="rename1989Essay" data-i18n-html>
-        <p>By late 1989 the country was already deep in perestroika: shortages, political instability, a growing internal crisis. Against that noise a second renaming of a peace prize was a small act. The resolution below is dated 11 December 1989. It does not found a new prize, and it does not close the old one. It shortens the name to the International Lenin Peace Prize, and it replaces the statute and the committee rules. The prize itself was already slipping toward the far edge of the story.</p>
-        <p>The opening sentence explains the change by the present stage of the movement for human survival, a nuclear-free and nonviolent world, and new political thinking. Point 1 is the rename. Points 2 and 3 approve the new statute and the new committee regulations. Point 4 repeals earlier acts, including the renaming decree of 6 September 1956 as later amended. Only one prize was given under the new name: Mandela, for 1990. The Union dissolved the next year.</p>
+        <p>The resolution is dated 11 December 1989. The full text sits elsewhere — and it is more than a rename.</p>
+        <p>Only one prize was given under the new name: Mandela, for 1990. The Union dissolved the next year.</p>
       </div>
-      <figure class="doc">
-      <blockquote class="ukaz is-open">
-        <div class="ukaz-text">
-        <button type="button" class="ukaz-original" aria-expanded="true" aria-controls="ukaz-loupe-1989"><svg class="ukaz-lines" viewBox="0 0 16 16" aria-hidden="true"><path d="M2.15 3.7h11.7M2.15 8h11.7M2.15 12.3h7.4" fill="none" stroke="currentColor" stroke-width="1.35" stroke-linecap="round"/></svg><svg class="ukaz-glass" viewBox="0 0 16 16" aria-hidden="true"><rect x="1.35" y="2.15" width="9.1" height="6.35" fill="none" stroke="currentColor" stroke-width="1.35"/><path d="M9.15 7.7L13.15 12.55" fill="none" stroke="currentColor" stroke-width="1.35" stroke-linecap="round"/></svg><span class="ukaz-original-label">See the transcription</span></button>
-        <button type="button" class="ukaz-zoom"><span class="ukaz-zoom-label">Whole page</span></button>
-        <div class="ukaz-loupe is-page" id="ukaz-loupe-1989">
-          <div class="ukaz-view">
-            <img class="ukaz-scan" src="../figures/pravda-1989-346.jpg" width="1798" height="2628" alt="Pravda, 12 December 1989, page 1, with the Presidium meeting note marked in the upper right column." data-i18n-alt="rename1989ScanAlt">
-            <button type="button" class="ukaz-side" aria-pressed="false" aria-label="Enlarge the decree"></button>
-          </div>
-          <div class="ukaz-mark" aria-hidden="true"></div>
-          <div class="ukaz-lens" aria-hidden="true"></div>
-        </div>
-        <div class="ukaz-copy" data-i18n="rename1989" data-i18n-html>
-        <header class="ukaz-head">
-          <p class="ukaz-kicker">Resolution</p>
-          <p>of the Presidium of the Supreme Soviet of the USSR</p>
-          <p>of 11 December 1989, No. 905-1</p>
-          <p>On the International Lenin Peace Prize</p>
+      <figure class="doc" id="rename-1989-fig">
+        <header class="figcap">
+          <h2><span class="fig-no" data-i18n="n7">Fig. 7.</span> <span data-i18n="capRename1989">From the Lenin Prize to the International Lenin Prize in perestroika</span></h2>
         </header>
-        <div class="ukaz-body">
-          <p>Having considered the proposal of the Committee of the Supreme Soviet of the USSR on International Affairs on transforming the International Lenin Prize "For strengthening peace among the peoples" and improving the practice of its awarding in light of the present stage of the movement of broad public forces for the survival of humanity, the building of a nuclear-free and nonviolent world, and the establishment in international affairs of new political thinking, the Presidium of the Supreme Soviet of the USSR resolves:</p>
-          <p>1. Consider it expedient henceforth to name the International Lenin Prize "For strengthening peace among the peoples" the International Lenin Peace Prize.</p>
-          <p>2. Approve the Statute of the International Lenin Peace Prize.</p>
-          <p>3. Approve the Regulations on the Committee for the International Lenin Peace Prizes.</p>
-          <p>4. Consider as no longer in force:</p>
-          <ul class="ukaz-items">
-            <li>the Decree of the Presidium of the Supreme Soviet of the USSR of 6 September 1956 "On the international Lenin Prizes 'For strengthening peace among the peoples'" as amended by the Decrees of 15 February 1980 and 26 November 1986;</li>
-            <li>the Decree of the Presidium of the Supreme Soviet of the USSR of 22 April 1957 "On the approval of the diploma and the gold breast medal of a laureate of the International Lenin Prize 'For strengthening peace among the peoples'" as amended by the Decree of 15 February 1980;</li>
-            <li>the Resolution of the Presidium of the Supreme Soviet of the USSR of 22 April 1966 "On the Committee for the international Lenin Prizes 'For strengthening peace among the peoples'" as amended by the Decrees of 15 February 1980 and 26 November 1986.</li>
-          </ul>
+        <div class="destalin rename-1989" id="rename-1989" data-i18n-aria="rename1989Label" aria-label="The 1989 rewriting of the prize">
+          <div class="destalin-stage rename-1989-stage" id="rename-1989-stage">
+            <div class="destalin-carousel" id="rename-1989-carousel">
+              <article class="destalin-panel is-stop is-current" id="rename-1989-pravda" data-rename1989="pravda">
+                <div class="destalin-page destalin-page-ukaz">
+                  <blockquote class="ukaz is-open">
+                    <div class="ukaz-text">
+                      <button type="button" class="ukaz-zoom" data-i18n-aria="decreePage" aria-label="Whole page"><span class="ukaz-zoom-label">Whole page</span></button>
+                      <div class="ukaz-loupe is-page" id="ukaz-loupe-1989">
+                        <div class="ukaz-view">
+                          <div class="ukaz-sheet">
+                            <img class="ukaz-scan" src="../figures/pravda-1989-346.jpg" width="1798" height="2628" alt="Pravda, 12 December 1989, page 1, with the Presidium meeting note marked in the upper right column." data-i18n-alt="rename1989ScanAlt">
+                            <div class="ukaz-annots" id="ukaz-annots-1989" hidden></div>
+                          </div>
+                          <button type="button" class="ukaz-side" aria-pressed="false" data-i18n-aria="rename1989Side" aria-label="Enlarge the note"></button>
+                        </div>
+                      </div>
+                    </div>
+                  </blockquote>
+                </div>
+                <p class="source" data-i18n="rename1989PravdaSource" data-i18n-html>Front page of <em>Pravda</em> with a short note on the Presidium meeting. The paper does not print the ukaz. <a href="https://archive.org/details/1989346_4216">Scan of the issue: Pravda, 12 December 1989, no. 346 (26064), page 1</a>.</p>
+              </article>
+              <article class="destalin-panel is-stop" id="rename-1989-ukaz" data-rename1989="ukaz">
+                <div class="destalin-page destalin-page-ukaz">
+                  <blockquote class="ukaz is-open">
+                    <div class="ukaz-text">
+                      <button type="button" class="ukaz-zoom" data-i18n-aria="decreePage" aria-label="Whole page"><span class="ukaz-zoom-label">Whole page</span></button>
+                      <div class="ukaz-loupe is-page" id="ukaz-loupe-1989-ukaz">
+                        <div class="ukaz-view">
+                          <div class="ukaz-sheet">
+                            <img class="ukaz-scan" src="../figures/decree-1989-1.JPG" width="918" height="1342" alt="Resolution of the Presidium of the Supreme Soviet of the USSR of 11 December 1989, No. 905-1, on the International Lenin Peace Prize." data-i18n-alt="rename1989UkazScanAlt">
+                            <div class="ukaz-annots" id="ukaz-annots-1989-ukaz" hidden></div>
+                          </div>
+                          <button type="button" class="ukaz-side" aria-pressed="false" data-i18n-aria="rename1989UkazSide" aria-label="Enlarge the resolution"></button>
+                        </div>
+                      </div>
+                    </div>
+                  </blockquote>
+                </div>
+                <p class="source" data-i18n="rename1989UkazSource" data-i18n-html>Resolution of the Presidium of the Supreme Soviet of the USSR of 11 December 1989, No. 905-1. <a href="http://pravo.levonevsky.org/baza/soviet/sssr1118.htm">Full text of the resolution</a>. <a href="https://vedomosti.sssr.su/1989/29/">Vedomosti, 1989, no. 27, art. 534</a>.</p>
+              </article>
+              <article class="destalin-panel is-stop" id="rename-1989-statute" data-rename1989="statute">
+                <div class="destalin-page destalin-page-ukaz">
+                  <blockquote class="ukaz is-open">
+                    <div class="ukaz-text">
+                      <button type="button" class="ukaz-zoom" data-i18n-aria="decreePage" aria-label="Whole page"><span class="ukaz-zoom-label">Whole page</span></button>
+                      <div class="ukaz-loupe is-page" id="ukaz-loupe-1989-statute">
+                        <div class="ukaz-view">
+                          <div class="ukaz-sheet">
+                            <img class="ukaz-scan" src="../figures/decree-1989-2.JPG" width="872" height="1274" alt="Statute of the International Lenin Peace Prize, approved 11 December 1989." data-i18n-alt="rename1989StatuteScanAlt">
+                            <div class="ukaz-annots" id="ukaz-annots-1989-statute" hidden></div>
+                          </div>
+                          <button type="button" class="ukaz-side" aria-pressed="false" data-i18n-aria="rename1989StatuteSide" aria-label="Enlarge the statute"></button>
+                        </div>
+                      </div>
+                    </div>
+                  </blockquote>
+                </div>
+                <p class="source" data-i18n="rename1989StatuteSource" data-i18n-html>Statute of the International Lenin Peace Prize, approved by the same resolution. <a href="http://pravo.levonevsky.org/baza/soviet/sssr1118.htm">Full text of the statute</a>.</p>
+              </article>
+            </div>
+            <div class="destalin-nav" id="rename-1989-nav">
+              <p class="destalin-caption" id="rename-1989-caption" data-i18n="rename1989CapPravda">By late 1989 the country was already deep in perestroika: shortages, political instability, and an internal crisis. Pravda printed only a short note, but the changes in politics and society did not leave the prize untouched</p>
+              <button type="button" class="destalin-next" id="rename-1989-next" data-i18n-aria="rename1989AskPravda" aria-label="So what did it say?">
+                <span class="destalin-next-label" id="rename-1989-next-label" data-i18n="rename1989AskPravda">So what did it say?</span>
+                <span class="destalin-next-hint" data-i18n="destalinClickHint">click to see</span>
+              </button>
+            </div>
+          </div>
         </div>
-        <footer class="ukaz-signoff">
-          <p class="ukaz-place">Moscow, the Kremlin. 11 December 1989.</p>
-        </footer>
-        </div>
-        </div>
-      </blockquote>
-      <figcaption class="source" data-i18n="rename1989Source" data-i18n-html>The picture is a page of <em>Pravda</em> reporting the Presidium meeting the day after the resolution. The full text is the resolution as published. <a target="_blank" rel="noopener noreferrer" href="http://pravo.levonevsky.org/baza/soviet/sssr1118.htm">Transcription of the resolution</a>. <a target="_blank" rel="noopener noreferrer" href="https://archive.org/details/1989346_4216">Scan of the issue: Pravda, 12 December 1989, no. 346 (26064), page 1</a>. <a target="_blank" rel="noopener noreferrer" href="https://vedomosti.sssr.su/1989/29/">Vedomosti of the Congress of People's Deputies of the USSR and the Supreme Soviet of the USSR, 1989, no. 27, art. 534</a>.</figcaption>
       </figure>
     </section>
 
@@ -513,11 +567,76 @@
       <p class="lead" id="map-lead"></p>
       <figure class="viz">
         <figcaption class="figcap">
-          <h2><span class="fig-no" data-i18n="n6">Fig. 6.</span> <span data-i18n="capMap">Where were they born?</span></h2>
+          <h2><span class="fig-no" data-i18n="n8">Fig. 8.</span> <span data-i18n="capMap">Where were they born?</span></h2>
         </figcaption>
       <div class="chart" id="map-chart"></div>
       </figure>
       <p class="source chart-tech" id="map-source"></p>
+      <p class="lead" id="map-squares-lead"></p>
+      <figure class="viz">
+        <figcaption class="figcap">
+          <h2><span class="fig-no" data-i18n="n8a">Fig. 8a.</span> <span data-i18n="capMapSquares">Births by region</span></h2>
+        </figcaption>
+        <div class="chart" id="map-squares-chart"></div>
+      </figure>
+      <p class="source chart-tech" id="map-squares-source"></p>
+      <p class="lead" id="map-flight-lead"></p>
+      <figure class="viz">
+        <figcaption class="figcap">
+          <h2><span class="fig-no" data-i18n="n8c">Fig. 8c.</span> <span data-i18n="capMapFlight">From birth region to Pravda’s region</span></h2>
+        </figcaption>
+        <div class="chart" id="map-flight-chart"></div>
+      </figure>
+      <p class="source chart-tech" id="map-flight-source"></p>
+      <div class="map-seq-block is-sticky" id="map-seq-block">
+        <div class="map-seq-pin" id="map-seq-pin">
+          <figure class="viz">
+            <figcaption class="figcap">
+              <h2><span class="fig-no" data-i18n="n8ya">Fig. 8я.</span> <span data-i18n="capMapSeq">Where are they from?</span></h2>
+            </figcaption>
+            <div class="map-seq-scrub" id="map-seq-scrub">
+              <div class="map-seq-scrub-bar" aria-hidden="true">
+                <div class="map-seq-scrub-fill"></div>
+                <div class="map-seq-scrub-marks">
+                  <span></span><span></span><span></span><span></span>
+                </div>
+              </div>
+              <input
+                class="map-seq-scrub-input"
+                id="map-seq-scrub-input"
+                type="range"
+                min="0"
+                max="1000"
+                value="0"
+                step="1"
+                data-i18n-aria="mapSeqScrubAria"
+                aria-label="Scrub Fig. 8я stages"
+              >
+            </div>
+            <div class="map-seq-stage">
+              <div class="chart" id="map-seq-chart"></div>
+              <div class="map-seq-comments" id="map-seq-comments" aria-live="polite">
+                <div class="map-seq-rail map-seq-rail-ask" id="map-seq-rail-ask">
+                  <p class="map-seq-slip" data-step="1" data-i18n="mapSeqCard1Title">Where were they born?</p>
+                  <p class="map-seq-slip" data-step="2" data-i18n="mapSeqCard2Title" data-i18n-html>In which "regions" of the world?<sup class="fn"><button type="button" class="fn-ref" id="fnref-4" data-fn="4">4</button></sup></p>
+                  <p class="map-seq-slip" data-step="3" data-i18n="mapSeqCard3Title">And what did Pravda write?</p>
+                </div>
+                <div class="map-seq-rail map-seq-rail-note" id="map-seq-rail-note">
+                  <p class="map-seq-slip" data-step="1" data-i18n="mapSeqCard1Body">Each open circle is a birthplace.</p>
+                  <p class="map-seq-slip" data-step="2" data-i18n="mapSeqCard2Body">Country borders change; "region" borders hold steadier.</p>
+                  <p class="map-seq-slip" data-step="3" data-i18n="mapSeqCard3Body">The decree named a country. Sometimes it differed from the birth "region".</p>
+                </div>
+              </div>
+            </div>
+          </figure>
+          <p class="source chart-tech" id="map-seq-source"></p>
+        </div>
+        <div class="map-seq-steps" id="map-seq-steps" aria-hidden="true">
+          <div class="map-seq-step" data-step="1"></div>
+          <div class="map-seq-step" data-step="2"></div>
+          <div class="map-seq-step" data-step="3"></div>
+        </div>
+      </div>
     </section>
 
     <section id="ghosts">
@@ -525,9 +644,16 @@
       <div class="essay" data-i18n="ghostEssay" data-i18n-html>
         <p>Six names sit outside the portrait charts above. Louis Aragon, Funmilayo Ransome-Kuti, Hikmat Abu Zayd, Sam Nujoma, Charilaos Florakis, and Abdul Sattar Edhi appear on secondary lists, but this telling does not count them with the 161 until the paper trail is settled.</p>
         <p>Online pages, language Wikipedias, and even the Yearbook of the Great Soviet Encyclopedia do not always agree. Other Soviet orders and medals, and other international prizes, can pull a name into an encyclopedia entry or a web list without proving a Lenin Peace Prize decree in <em>Pravda</em>. The decisive holding would be fond R-9522 in the State Archive of the Russian Federation — read in person, not only through a database record.</p>
-        <p>This section will hold the disputed cases, sample scans and links, and the neighboring awards that muddy the roster. Until then the charts stay with faces we can show.</p>
+        <p>The wall below holds those six. Sample scans, neighboring awards, and pictures of where they came from will join them here. Until the paper trail is settled, the charts above stay with faces we can show.</p>
       </div>
-      <ul class="ghost-list" id="ghost-list"></ul>
+      <div class="viz">
+        <header class="figcap">
+          <h2><span class="fig-no" data-i18n="n9">Fig. 9.</span> <span data-i18n="capGhost">Not on this list?</span></h2>
+        </header>
+        <div class="ghost-wall" id="ghost-wall"></div>
+        <p class="source chart-tech" data-i18n="srcGhost">Each cell is one disputed name. Faces come from the English Wikipedia lead image, not from a Pravda decree plate. Archival documents will join this wall later.</p>
+      </div>
+      <div class="ghost-archive" id="ghost-archive"></div>
     </section>
 
     <!-- Temporary parking for Cold War three-world charts (ex › toggles on Fig. 3 / 4). -->
@@ -552,23 +678,6 @@
       </div>
     </section>
 
-    <footer class="methodology" id="method">
-      <h2 data-i18n="methTitle">How the list was made</h2>
-      <ol>
-        <li data-i18n="meth1" data-i18n-html>Primary source for the roster: scanned issues of <em>Pravda</em>, read decree by decree. Secondary checks: year-by-year lists on the prize pages in <a target="_blank" rel="noopener noreferrer" href="https://de.wikipedia.org/wiki/Internationaler_Lenin-Friedenspreis">German</a>, <a target="_blank" rel="noopener noreferrer" href="https://ru.wikipedia.org/wiki/%D0%9C%D0%B5%D0%B6%D0%B4%D1%83%D0%BD%D0%B0%D1%80%D0%BE%D0%B4%D0%BD%D0%B0%D1%8F_%D0%9B%D0%B5%D0%BD%D0%B8%D0%BD%D1%81%D0%BA%D0%B0%D1%8F_%D0%BF%D1%80%D0%B5%D0%BC%D0%B8%D1%8F_%C2%AB%D0%97%D0%B0_%D1%83%D0%BA%D1%80%D0%B5%D0%BF%D0%BB%D0%B5%D0%BD%D0%B8%D0%B5_%D0%BC%D0%B8%D1%80%D0%B0_%D0%BC%D0%B5%D0%B6%D0%B4%D1%83_%D0%BD%D0%B0%D1%80%D0%BE%D0%B4%D0%B0%D0%BC%D0%B8%C2%BB">Russian</a>, and <a target="_blank" rel="noopener noreferrer" href="https://en.wikipedia.org/wiki/Lenin_Peace_Prize">English</a> Wikipedia; the Yearbook of the Great Soviet Encyclopedia (Ежегодник Большой советской энциклопедии); and a database of the archive of the Committee on the International Lenin Peace Prizes, 1949–1991 (<a target="_blank" rel="noopener noreferrer" href="https://guides.rusarchives.ru/terms/6/346/mezhdunarodnye-otnosheniya">fond R-9522, 1 inventory, 194 files, extreme dates 1949–1991, State Archive of the Russian Federation</a>).</li>
-        <li data-i18n="meth2" data-i18n-html>Where a Wikipedia footnote or encyclopedia year-list points to a decree, the issue is read in the scanned <em>Pravda</em> archives and the paper is treated as decisive. Disagreements between language Wikipedias, the Yearbook of the Great Soviet Encyclopedia, and other online lists are held for the ghost section. Picasso and Niemeyer keep the years those pages give them when a matching decree line is still open. Fond R-9522 would be the fullest FOIA-like holding; that fund was not opened in person for this project.</li>
-        <li data-i18n="meth3">The prize year is the year named in the decree, not the day the medal was handed over.</li>
-        <li data-i18n="meth4">Stalin prizes for 1951-1955 were announced in December of that year. The 1950 prize was announced on 6 April 1951. Lenin prizes were usually announced around 1 May and named the previous year, or a span such as 1968-1969.</li>
-        <li data-i18n="meth5">Stalin laureates who later exchanged the medal for a Lenin medal are one row, under the Stalin prize.</li>
-        <li data-i18n="meth6">Occupation is the text before the first semicolon in the Wikidata list. Near-synonyms are not merged.</li>
-        <li data-i18n="meth7">Age is the first year of the prize minus the birth year, the age turned during that calendar year.</li>
-        <li data-i18n="meth8">The map places each person at the recorded birth coordinates. Shared points are drawn as a small ring. People with no coordinates are left off.</li>
-        <li data-i18n="meth9">Halldor Laxness, Martin Andersen Nexo, and names found only on incomplete lists are left out. Laxness's 1952 Soviet prize was the World Peace Council literary prize. Nexo sat on the committee and is not in a decree.</li>
-        <li data-i18n="meth10">Biography, occupation, and coordinates come from Wikidata. Arthur Moulton's birth place follows his English Wikipedia infobox. John Hanly Morgan has no Wikidata item; his dates and New Albany birthplace come from a Unitarian Universalist Ministers Association obituary. A few other birth places without Wikidata coordinates (Thakin Kodaw Hmaing, Ragnar Forbech, Udakendawala Siri Saranankara Thero, Peter Ayodele Curtis Joseph, Hikmat Abu Zayd, Gordon Schaffer) are filled from Wikipedia or local gazetteers. Schaffer's place is Clapham, South London, where Wikipedia says he grew up.</li>
-        <li data-i18n="meth11">Headlines in the title wall are generated, not copied from Pravda. The exception is five lines from 19-21 December 1949, the decree on the Stalin Prizes, and «События в Корее» from Pravda, 3 November 1950, no. 307 (11779), which stays in the wall. The date and issue at the side change with the red event then in view. Issue numbers are counted from 18 December 1949, no. 352 (11459), and are not an archival record.</li>
-        <li data-i18n="meth12">Charts before the ghost section count only the 161 laureates who have a portrait file here. The six without portraits are held for that closing section.</li>
-      </ol>
-    </footer>
     <section class="footnotes" id="footnotes" aria-labelledby="fn-list-title">
       <h2 id="fn-list-title" data-i18n="fnListTitle">Footnotes</h2>
       <ol>
@@ -584,8 +693,29 @@
           <span data-i18n="fn3" data-i18n-html>The decree is also available online in the official bulletin of state acts of the Soviet Supreme Soviet — a rough analogue of the American Federal Register. <a href="https://docs.historyrussia.org/ru/nodes/521433-o-pereimenovanii-mezhdunarodnyh-stalinskih-premiy-v-mezhdunarodnye-leninskie-premii-locale-nil-za-ukreplenie-mira-mezhdu-narodami-locale-nil-ukaz-prezidiuma-verhovnogo-soveta-sssr-moskva-6-sentyabrya-1956-g#mode/inspect/page/1/zoom/4">Scan: Vedomosti of the Supreme Soviet of the USSR, 1956, no. 18, art. 393, page 258</a>.</span>
           <a class="footnotes-back" href="#fnref-3" data-i18n="fnBackLink">To the text</a>
         </li>
+        <li id="fn-4">
+          <span data-i18n="fn4" data-i18n-html>“Regions” here are working bins for the map, not political borders. Europe and Asia are split into geographic subregions from birth coordinates; in North America the United States, Canada, and Cuba stand alone, with Central America and the Caribbean as the rest; Africa, South America, and Oceania stay whole. That keeps the squares comparable even when twentieth-century state borders moved.</span>
+          <a class="footnotes-back" href="#fnref-4" data-i18n="fnBackLink">To the text</a>
+        </li>
       </ol>
     </section>
+    <footer class="methodology" id="method">
+      <h2 data-i18n="methTitle">Methodology</h2>
+      <ol>
+        <li data-i18n="meth1" data-i18n-html>Primary source for the list: scanned issues of <em>Pravda</em>, read decree by decree. Secondary checks: year-by-year lists on the prize pages in <a target="_blank" rel="noopener noreferrer" href="https://de.wikipedia.org/wiki/Internationaler_Lenin-Friedenspreis">German</a>, <a target="_blank" rel="noopener noreferrer" href="https://ru.wikipedia.org/wiki/%D0%9C%D0%B5%D0%B6%D0%B4%D1%83%D0%BD%D0%B0%D1%80%D0%BE%D0%B4%D0%BD%D0%B0%D1%8F_%D0%9B%D0%B5%D0%BD%D0%B8%D0%BD%D1%81%D0%BA%D0%B0%D1%8F_%D0%BF%D1%80%D0%B5%D0%BC%D0%B8%D1%8F_%C2%AB%D0%97%D0%B0_%D1%83%D0%BA%D1%80%D0%B5%D0%BF%D0%BB%D0%B5%D0%BD%D0%B8%D0%B5_%D0%BC%D0%B8%D1%80%D0%B0_%D0%BC%D0%B5%D0%B6%D0%B4%D1%83_%D0%BD%D0%B0%D1%80%D0%BE%D0%B4%D0%B0%D0%BC%D0%B8%C2%BB">Russian</a>, and <a target="_blank" rel="noopener noreferrer" href="https://en.wikipedia.org/wiki/Lenin_Peace_Prize">English</a> Wikipedia; the Yearbook of the Great Soviet Encyclopedia (Ежегодник Большой советской энциклопедии); and a database of the archive of the Committee on the International Lenin Peace Prizes, 1949–1991 (<a target="_blank" rel="noopener noreferrer" href="https://guides.rusarchives.ru/terms/6/346/mezhdunarodnye-otnosheniya">fond R-9522, 1 inventory, 194 files, extreme dates 1949–1991, State Archive of the Russian Federation</a>).</li>
+        <li data-i18n="meth2" data-i18n-html>Where a Wikipedia footnote or encyclopedia year-list points to a decree, the issue is read in the scanned <em>Pravda</em> archives and the paper is treated as decisive. Disagreements between language Wikipedias, the Yearbook of the Great Soviet Encyclopedia, and other online lists are held for the ghost section. Picasso and Niemeyer keep the years those pages give them when a matching decree line is still open. Fond R-9522 would be the fullest FOIA-like holding; that fund was not opened in person for this project.</li>
+        <li data-i18n="meth3">The prize year is the year named in the decree, not the day the medal was handed over.</li>
+        <li data-i18n="meth4">Stalin prizes for 1951-1955 were announced in December of that year. The 1950 prize was announced on 6 April 1951. Lenin prizes were usually announced around 1 May and named the previous year, or a span such as 1968-1969.</li>
+        <li data-i18n="meth5">Stalin laureates who later exchanged the medal for a Lenin medal are one row, under the Stalin prize.</li>
+        <li data-i18n="meth6">Occupation is the text before the first semicolon in the Wikidata list. Near-synonyms are not merged.</li>
+        <li data-i18n="meth7">Age is the first year of the prize minus the birth year, the age turned during that calendar year.</li>
+        <li data-i18n="meth8">The map places each person at the recorded birth coordinates. Shared points are drawn as a small ring. People with no coordinates are left off.</li>
+        <li data-i18n="meth9">Halldor Laxness, Martin Andersen Nexo, and names found only on incomplete lists are left out. Laxness's 1952 Soviet prize was the World Peace Council literary prize. Nexo sat on the committee and is not in a decree.</li>
+        <li data-i18n="meth10">Biography, occupation, and coordinates come from Wikidata. Arthur Moulton's birth place follows his English Wikipedia infobox. John Hanly Morgan has no Wikidata item; his dates and New Albany birthplace come from a Unitarian Universalist Ministers Association obituary. A few other birth places without Wikidata coordinates (Thakin Kodaw Hmaing, Ragnar Forbech, Udakendawala Siri Saranankara Thero, Peter Ayodele Curtis Joseph, Hikmat Abu Zayd, Gordon Schaffer) are filled from Wikipedia or local gazetteers. Schaffer's place is Clapham, South London, where Wikipedia says he grew up.</li>
+        <li data-i18n="meth11">Headlines in the title wall are generated, not copied from Pravda. The exception is five lines from 19-21 December 1949, the decree on the Stalin Prizes, and «События в Корее» from Pravda, 3 November 1950, no. 307 (11779), which stays in the wall. The date and issue at the side change with the red event then in view. Issue numbers are counted from 18 December 1949, no. 352 (11459), and are not an archival record.</li>
+        <li data-i18n="meth12">Charts before the ghost section count only the 161 laureates who have a portrait file here. The six without portraits are held for that closing section.</li>
+      </ol>
+    </footer>
     <button type="button" class="dev-plain-toggle" id="dev-plain-toggle" aria-pressed="false">dev: drop section colors</button>
     <button type="button" class="dev-plain-toggle" id="dev-tech-toggle" aria-pressed="false">dev: drop chart tech notes</button>
     <button type="button" class="dev-plain-toggle" id="dev-press-click-toggle" aria-pressed="false">dev: press titles clickable</button>
@@ -593,10 +723,6 @@
       <button type="button" class="dev-plain-toggle" data-hero-mode="wall">hero: wall</button>
       <button type="button" class="dev-plain-toggle" data-hero-mode="hex">hero: hex</button>
       <button type="button" class="dev-plain-toggle" data-hero-mode="dove">hero: dove</button>
-    </nav>
-    <nav class="dev-hero-mode" id="years-mode" aria-label="Years mode">
-      <button type="button" class="dev-plain-toggle" data-years-mode="plain">years: plain</button>
-      <button type="button" class="dev-plain-toggle" data-years-mode="stretched">years: stretched</button>
     </nav>
   </div>
   </div>
@@ -617,34 +743,32 @@
   <script src="js/data/people.js"></script>
   <script src="js/data/portraits.js"></script>
   <script src="js/data/pravda_occupations.js"></script>
-  <script src="js/data/land.js"></script>
-  <script src="js/data/lakes.js"></script>
+  <script src="js/data/pravda_countries.js"></script>
   <script src="js/shared/palette.js"></script>
   <script src="js/shared/hex.js"></script>
   <script src="js/shared/shape-pack.js"></script>
   <script src="js/shared/marks.js"></script>
   <script src="js/shared/world.js"></script>
+  <script src="js/shared/beeswarm.js"></script>
+  <script src="js/shared/lazy.js"></script>
+  <script src="sections/hero/hero-marks.js"></script>
   <script src="sections/hero/hero-wall.js"></script>
   <script src="sections/hero/hero-hex.js"></script>
   <script src="sections/hero/hero-dove.js"></script>
   <script src="sections/hero/hero-canvas.js"></script>
   <script src="sections/hero/hero.js"></script>
   <script src="sections/occupations/occupations.js"></script>
-  <script src="sections/occupations/occupations-chord.js"></script>
   <script src="sections/occupations/occupations-morph.js"></script>
-  <script src="sections/occupations/occupations-world.js"></script>
   <script src="sections/years/years-narrow.js"></script>
   <script src="sections/years/years.js"></script>
   <script src="sections/years/years-announce.js"></script>
-  <script src="sections/years/years-world.js"></script>
   <script src="sections/ages/ages.js"></script>
   <script src="sections/ages/ages-alive.js"></script>
-  <script src="sections/map/map-narrow.js"></script>
-  <script src="sections/map/map.js"></script>
   <script src="sections/ghosts/ghosts.js"></script>
   <script src="sections/tip/tip.js"></script>
   <script src="sections/decree/decree.js"></script>
   <script src="sections/footnotes/footnotes.js"></script>
+  <script src="sections/method/method.js"></script>
   <script src="sections/press/press.js"></script>
   <script src="sections/toc/toc.js"></script>
   <script src="js/shared/section-fade.js"></script>

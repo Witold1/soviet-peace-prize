@@ -171,3 +171,13 @@ var PEOPLE_GHOST = PEOPLE.filter(function (person) {
   return !(typeof PORTRAITS === "object" && PORTRAITS && PORTRAITS[person.i]);
 });
 
+// Wikipedia lead images for the ghost wall only — not counted with the 161.
+var GHOST_PORTRAITS = {
+  49: "portraits/ghosts/1956 Louis Aragon 49.jpg",
+  118: "portraits/ghosts/1970-1971 Funmilayo Ransome-Kuti 118.png",
+  119: "portraits/ghosts/1970-1971 Hikmat Abu Zayd 119.jpg",
+  130: "portraits/ghosts/1973-1974 Sam Nujoma 130.jpg",
+  153: "portraits/ghosts/1983-1984 Charilaos Florakis 153.jpg",
+  165: "portraits/ghosts/1988 Abdul Sattar Edhi 165.jpg",
+};
+

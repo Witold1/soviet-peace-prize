@@ -20,11 +20,28 @@ function syncDisplayControls() {
   nav.hidden = window.innerWidth < DISPLAY_MIN_CHOICE;
 }
 
+function viewNear(el, margin) {
+  if (!el) return false;
+  var rect = el.getBoundingClientRect();
+  var pad = margin == null ? 160 : margin;
+  return rect.bottom > -pad && rect.top < window.innerHeight + pad;
+}
+
+function sectionEl(id) {
+  return document.getElementById(id);
+}
+
+function refreshNear(id, margin, fn) {
+  if (typeof fn !== "function") return;
+  if (viewNear(sectionEl(id), margin)) fn();
+}
+
 function setDisplay(next) {
   const display = next === "phone" || next === "tablet" ? next : "laptop";
   document.documentElement.setAttribute("data-display", display);
   mapNarrowWas = null;
   yearNarrowWas = null;
+  occNarrowWas = null;
   try { localStorage.setItem("laureates-display", display); } catch (err) {}
   try {
     const url = new URL(window.location.href);
@@ -35,9 +52,12 @@ function setDisplay(next) {
   applyChrome();
   syncFn();
   renderYears();
-  if (typeof renderWorldPark === "function") renderWorldPark();
+  refreshNear("worlds", 480, renderWorldParkIfReady);
   if (typeof renderAnnounceChart === "function") renderAnnounceChart();
-  renderMap();
+  // Map only when already loaded or the section is near.
+  if (typeof renderMapChart === "function" || viewNear(sectionEl("births"), 640)) {
+    renderMap();
+  }
   if (typeof centerAgeChartScroll === "function") centerAgeChartScroll();
   if (typeof centerAliveChartScroll === "function") centerAliveChartScroll();
   if (typeof centerAnnounceChartScroll === "function") centerAnnounceChartScroll();
@@ -47,10 +67,13 @@ function setDisplay(next) {
   if (typeof syncYears === "function") syncYears();
   if (typeof layoutDestalin === "function") layoutDestalin();
   if (typeof syncDestalin === "function") syncDestalin();
+  if (typeof layoutRename1989 === "function") layoutRename1989();
+  if (typeof syncRename1989 === "function") syncRename1989();
   layoutHero(true);
   syncHero();
   syncSectionFade();
   syncToc();
+  syncDisplayControls();
 }
 
 function setLang(next) {
@@ -63,25 +86,23 @@ function setLang(next) {
   } catch (err) {}
   applyChrome();
   syncFn();
+  if (typeof syncMethod === "function") syncMethod();
   renderHero();
+  // Press sits above occupations — lock its runway before Fig. 3/3a reads
+  // scroll progress, or reload@3a jumps when #prize height lands later.
+  renderPress();
   renderOccupations();
   renderYears();
-  if (typeof renderWorldPark === "function") renderWorldPark();
+  refreshNear("worlds", 480, renderWorldParkIfReady);
   if (typeof renderAnnounceChart === "function") renderAnnounceChart();
   renderAges();
   if (typeof renderAliveChart === "function") renderAliveChart();
-  renderMap();
-  renderPress();
+  if (typeof renderMapChart === "function" || viewNear(sectionEl("births"), 640)) {
+    renderMap();
+  }
   if (typeof renderGhosts === "function") renderGhosts();
   syncSectionFade();
   syncToc();
-}
-
-function viewNear(el, margin) {
-  if (!el) return false;
-  var rect = el.getBoundingClientRect();
-  var pad = margin == null ? 160 : margin;
-  return rect.bottom > -pad && rect.top < window.innerHeight + pad;
 }
 
 var scrollSyncQueued = false;
@@ -89,6 +110,7 @@ var scrollHeroEl = null;
 var scrollPrizeEl = null;
 var scrollYearsEl = null;
 var scrollOccEl = null;
+var scrollFadeSkip = 0;
 function runScrollSync() {
   scrollSyncQueued = false;
   if (!scrollHeroEl) scrollHeroEl = document.getElementById("all");
@@ -107,7 +129,9 @@ function runScrollSync() {
   ) {
     syncHero();
   }
-  syncSectionFade();
+  // Fade is cheaper than before but still walks many rects — run every other frame.
+  scrollFadeSkip ^= 1;
+  if (scrollFadeSkip) syncSectionFade();
 }
 
 window.addEventListener("scroll", function () {
@@ -140,18 +164,20 @@ window.addEventListener("resize", function () {
     if (narrow !== yearNarrowWas) {
       yearNarrowWas = narrow;
       renderYears();
-      if (typeof renderWorldPark === "function") renderWorldPark();
+      refreshNear("worlds", 480, renderWorldParkIfReady);
     }
     var mapNarrow = typeof mapChartNarrow === "function" && mapChartNarrow();
     if (mapNarrow !== mapNarrowWas) {
       mapNarrowWas = mapNarrow;
-      renderMap();
+      if (typeof renderMapChart === "function" || viewNear(sectionEl("births"), 640)) {
+        renderMap();
+      }
     }
     var occNarrow = typeof occChartNarrow === "function" && occChartNarrow();
     if (occNarrow !== occNarrowWas) {
       occNarrowWas = occNarrow;
       renderOccupations();
-      if (typeof renderWorldPark === "function") renderWorldPark();
+      refreshNear("worlds", 480, renderWorldParkIfReady);
     }
     if (typeof centerAgeChartScroll === "function") centerAgeChartScroll();
     if (typeof centerAliveChartScroll === "function") centerAliveChartScroll();
@@ -164,6 +190,8 @@ window.addEventListener("resize", function () {
     if (typeof syncYears === "function") syncYears();
     if (typeof layoutDestalin === "function") layoutDestalin();
     if (typeof syncDestalin === "function") syncDestalin();
+    if (typeof layoutRename1989 === "function") layoutRename1989();
+    if (typeof syncRename1989 === "function") syncRename1989();
     layoutHero();
     syncHero();
     syncSectionFade();
@@ -257,13 +285,45 @@ window.addEventListener("resize", function () {
   syncDevPressClick();
 })();
 
+// Only take over scroll when we have a Fig. 3/3a sticky anchor to revive.
+// Otherwise keep the browser's normal restoration — global "manual" was
+// leaving scroll at 0, then occScrollToProgress(0) yanked everyone to Fig. 3.
+try {
+  if ("scrollRestoration" in history) {
+    var occAnchor = null;
+    try { occAnchor = sessionStorage.getItem("laureates-occ-scroll"); } catch (err2) {}
+    history.scrollRestoration = occAnchor ? "manual" : "auto";
+  }
+} catch (err) {}
+
+window.addEventListener("pagehide", function () {
+  if (typeof saveOccScrollAnchor === "function") saveOccScrollAnchor();
+});
+
 setLang(initialLang());
 layoutWidthCached = window.innerWidth;
 if (typeof refreshSectionFadeHeight === "function") refreshSectionFadeHeight();
 yearNarrowWas = typeof yearChartNarrow === "function" && yearChartNarrow();
 mapNarrowWas = typeof mapChartNarrow === "function" && mapChartNarrow();
 occNarrowWas = typeof occChartNarrow === "function" && occChartNarrow();
+if (typeof bootLazySections === "function") bootLazySections();
 window.addEventListener("load", function () {
+  if (typeof occDisarmFlip === "function") occDisarmFlip(220);
+  var progress = null;
+  var wantChord = null;
+  if (typeof occStickyInView === "function" && occStickyInView() && typeof occScrollProgress === "function") {
+    progress = occScrollProgress();
+    wantChord = typeof occScrollWantsChord === "function" && occScrollWantsChord(progress);
+  }
   layoutHero(true);
   syncHero();
+  if (typeof layoutPress === "function") layoutPress();
+  if (typeof syncPress === "function") syncPress();
+  if (typeof layoutOccSticky === "function") layoutOccSticky();
+  if (progress != null && typeof occScrollToProgress === "function") {
+    occScrollToProgress(progress);
+    if (typeof occSnapMorph === "function") occSnapMorph(!!wantChord);
+  } else if (typeof syncOccupations === "function") {
+    syncOccupations();
+  }
 });

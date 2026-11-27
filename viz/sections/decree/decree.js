@@ -1,4 +1,4 @@
-// Yellow-marker guide on the 1949 founding decree (page fractions).
+// Yellow-marker guides (page fractions of the full Pravda scan).
 var DECREE_1949_ANNOTS = [
   { id: "title", x: 0.036, y: 0.0685, w: 0.300, h: 0.0465, textKey: "decreeAnnotTitle" },
   { id: "anyone", x: 0.0260, y: 0.1337, w: 0.3110, h: 0.0235, textKey: "decreeAnnotAnyone" },
@@ -6,9 +6,74 @@ var DECREE_1949_ANNOTS = [
   { id: "birthday", x: 0.0309, y: 0.2364, w: 0.3045, h: 0.0148, textKey: "decreeAnnotBirthday" }
 ];
 
-var decreeAnnotActive = "";
-var decreeAnnotPinned = false;
-var decreeAnnotBuilt = false;
+var DECREE_1956_ANNOTS = [
+  { id: "title", x: 0.035, y: 0.484, w: 0.455, h: 0.032, textKey: "renameAnnotTitle" },
+  { id: "medal", x: 0.040, y: 0.568, w: 0.228, h: 0.014, textKey: "renameAnnotMedal" },
+  { id: "ten", x: 0.268, y: 0.520, w: 0.248, h: 0.023, textKey: "renameAnnotTen" }
+];
+
+var DECREE_1989_ANNOTS = [
+  // Right-column Pravda paragraph on the International Lenin Peace Prize.
+  { id: "title", x: 0.8544, y: 0.1795, w: 0.1144, h: 0.0555, textKey: "rename1989AnnotTitle" }
+];
+
+/* Coords are on padded scans matched to the Pravda page aspect (1798/2628). */
+var DECREE_1989_UKAZ_ANNOTS = [
+  { id: "header", x: 0.08, y: 0.1805, w: 0.84, h: 0.096, textKey: "rename1989AnnotHeader" },
+  { id: "thinking", x: 0.05, y: 0.3252, w: 0.90, h: 0.0706, textKey: "rename1989AnnotThinking" },
+  { id: "rename", x: 0.05, y: 0.4116, w: 0.90, h: 0.0425, textKey: "rename1989AnnotRename" }
+];
+
+var DECREE_1989_STATUTE_ANNOTS = [
+  { id: "ideology", x: 0.1317, y: 0.162, w: 0.7367, h: 0.12, textKey: "rename1989AnnotIdeology" },
+  { id: "groups", x: 0.1317, y: 0.349, w: 0.7367, h: 0.078, textKey: "rename1989AnnotGroups" },
+  { id: "april", x: 0.1317, y: 0.728, w: 0.7367, h: 0.034, textKey: "rename1989AnnotApril" },
+  { id: "cash", x: 0.1317, y: 0.798, w: 0.7367, h: 0.046, textKey: "rename1989AnnotCash" }
+];
+
+var DECREE_CULT_ANNOTS = [
+  { id: "cult", x: 0.07, y: 0.185, w: 0.86, h: 0.065, textKey: "destalinAnnotCult" }
+];
+
+var DECREE_DEATH_ANNOTS = [
+  { id: "death", x: 0.44, y: 0.065, w: 0.52, h: 0.067, textKey: "destalinAnnotDeath" }
+];
+
+var DECREE_BERIA_ANNOTS = [
+  { id: "beria", x: 0.035, y: 0.226, w: 0.235, h: 0.032, textKey: "destalinAnnotBeria" }
+];
+
+var DECREE_MALENKOV_ANNOTS = [
+  { id: "malenkov", x: 0.405, y: 0.054, w: 0.57, h: 0.028, textKey: "destalinAnnotMalenkov" }
+];
+
+var UKAZ_ANNOT_SETS = [
+  { rootId: "ukaz-annots", loupeId: "ukaz-loupe", items: DECREE_1949_ANNOTS, pressDriven: true },
+  { rootId: "ukaz-annots-death", loupeId: "ukaz-loupe-death", items: DECREE_DEATH_ANNOTS },
+  { rootId: "ukaz-annots-beria", loupeId: "ukaz-loupe-beria", items: DECREE_BERIA_ANNOTS },
+  { rootId: "ukaz-annots-malenkov", loupeId: "ukaz-loupe-malenkov", items: DECREE_MALENKOV_ANNOTS },
+  { rootId: "ukaz-annots-cult", loupeId: "ukaz-loupe-cult", items: DECREE_CULT_ANNOTS },
+  { rootId: "ukaz-annots-1956", loupeId: "ukaz-loupe-1956", items: DECREE_1956_ANNOTS },
+  { rootId: "ukaz-annots-1989", loupeId: "ukaz-loupe-1989", items: DECREE_1989_ANNOTS },
+  { rootId: "ukaz-annots-1989-ukaz", loupeId: "ukaz-loupe-1989-ukaz", items: DECREE_1989_UKAZ_ANNOTS },
+  { rootId: "ukaz-annots-1989-statute", loupeId: "ukaz-loupe-1989-statute", items: DECREE_1989_STATUTE_ANNOTS }
+];
+
+var ukazAnnotState = Object.create(null);
+
+function ukazAnnotSetByRoot(rootId) {
+  for (var i = 0; i < UKAZ_ANNOT_SETS.length; i++) {
+    if (UKAZ_ANNOT_SETS[i].rootId === rootId) return UKAZ_ANNOT_SETS[i];
+  }
+  return null;
+}
+
+function ukazAnnotStateFor(rootId) {
+  if (!ukazAnnotState[rootId]) {
+    ukazAnnotState[rootId] = { active: "", pinned: false, built: false };
+  }
+  return ukazAnnotState[rootId];
+}
 
 function syncPageZoom() {
   document.querySelectorAll(".ukaz-loupe.is-page").forEach(function (loupe) {
@@ -18,7 +83,14 @@ function syncPageZoom() {
     var side = loupe.querySelector(".ukaz-side");
     if (side) {
       side.setAttribute("aria-pressed", column ? "true" : "false");
-      side.setAttribute("aria-label", t(column ? "decreePage" : "decreeSide"));
+      var sideKey = side.getAttribute("data-i18n-aria");
+      if (column) {
+        side.setAttribute("aria-label", t("decreePage"));
+      } else if (sideKey) {
+        side.setAttribute("aria-label", t(sideKey));
+      } else {
+        side.setAttribute("aria-label", t("decreeSide"));
+      }
     }
     var zoom = quote && quote.querySelector(".ukaz-zoom-label");
     if (zoom) zoom.textContent = t("decreePage");
@@ -27,18 +99,19 @@ function syncPageZoom() {
   });
 }
 
-function decreeAnnotById(id) {
-  for (var i = 0; i < DECREE_1949_ANNOTS.length; i++) {
-    if (DECREE_1949_ANNOTS[i].id === id) return DECREE_1949_ANNOTS[i];
+function ukazAnnotById(set, id) {
+  for (var i = 0; i < set.items.length; i++) {
+    if (set.items[i].id === id) return set.items[i];
   }
-  return DECREE_1949_ANNOTS[0];
+  return set.items[0];
 }
 
-function renderDecreeAnnots() {
-  var root = document.getElementById("ukaz-annots");
+function renderUkazAnnots(set) {
+  var root = document.getElementById(set.rootId);
   if (!root) return;
+  var state = ukazAnnotStateFor(set.rootId);
   root.textContent = "";
-  DECREE_1949_ANNOTS.forEach(function (item) {
+  set.items.forEach(function (item) {
     var btn = document.createElement("button");
     btn.type = "button";
     btn.className = "ukaz-annot";
@@ -55,30 +128,40 @@ function renderDecreeAnnots() {
     btn.addEventListener("click", function (event) {
       event.preventDefault();
       event.stopPropagation();
-      decreeAnnotPinned = true;
-      setDecreeAnnot(item.id, true);
+      setUkazAnnot(set.rootId, item.id, true);
     });
     root.appendChild(btn);
   });
-  decreeAnnotBuilt = true;
-  syncDecreeAnnotChrome();
+  state.built = true;
+  syncUkazAnnotChrome(set.rootId);
+}
+
+function renderDecreeAnnots() {
+  UKAZ_ANNOT_SETS.forEach(renderUkazAnnots);
+}
+
+function setUkazAnnot(rootId, id, force) {
+  var state = ukazAnnotStateFor(rootId);
+  var next = id || "";
+  if (force && state.active === next) next = "";
+  state.active = next;
+  state.pinned = !!next;
+  syncUkazAnnotChrome(rootId);
 }
 
 function setDecreeAnnot(id, force) {
-  var next = id || "";
-  if (force && decreeAnnotActive === next) next = "";
-  decreeAnnotActive = next;
-  decreeAnnotPinned = !!next;
-  syncDecreeAnnotChrome();
+  setUkazAnnot("ukaz-annots", id, force);
 }
 
-function syncDecreeAnnotChrome() {
-  var root = document.getElementById("ukaz-annots");
-  if (!root) return;
-  if (!decreeAnnotBuilt) renderDecreeAnnots();
+function syncUkazAnnotChrome(rootId) {
+  var set = ukazAnnotSetByRoot(rootId);
+  var root = document.getElementById(rootId);
+  if (!set || !root) return;
+  var state = ukazAnnotStateFor(rootId);
+  if (!state.built) renderUkazAnnots(set);
   root.querySelectorAll(".ukaz-annot").forEach(function (btn) {
-    var row = decreeAnnotById(btn.dataset.annot);
-    var on = !!decreeAnnotActive && btn.dataset.annot === decreeAnnotActive;
+    var row = ukazAnnotById(set, btn.dataset.annot);
+    var on = !!state.active && btn.dataset.annot === state.active;
     var label = t(row.textKey);
     btn.classList.toggle("is-active", on);
     btn.setAttribute("aria-pressed", on ? "true" : "false");
@@ -88,20 +171,52 @@ function syncDecreeAnnotChrome() {
   });
 }
 
+function syncDecreeAnnotChrome() {
+  UKAZ_ANNOT_SETS.forEach(function (set) {
+    syncUkazAnnotChrome(set.rootId);
+  });
+}
+
+function clearUkazAnnot(rootId) {
+  var state = ukazAnnotStateFor(rootId);
+  state.active = "";
+  state.pinned = false;
+  syncUkazAnnotChrome(rootId);
+}
+
+function loupeZoomProgress(loupe) {
+  if (!loupe) return 0;
+  if (loupe.classList.contains("is-column")) return 1;
+  return parseFloat(getComputedStyle(loupe).getPropertyValue("--zoom")) || 0;
+}
+
+function syncUkazAnnotVisibility() {
+  UKAZ_ANNOT_SETS.forEach(function (set) {
+    if (set.pressDriven) return;
+    var root = document.getElementById(set.rootId);
+    var loupe = document.getElementById(set.loupeId);
+    if (!root || !loupe) return;
+    if (!ukazAnnotStateFor(set.rootId).built) renderUkazAnnots(set);
+    var show = loupeZoomProgress(loupe) >= 0.9;
+    root.hidden = !show;
+    if (!show) clearUkazAnnot(set.rootId);
+    else syncUkazAnnotChrome(set.rootId);
+  });
+}
+
 function syncDecreeAnnotProgress(zoom, front) {
   var root = document.getElementById("ukaz-annots");
   if (!root) return;
-  if (!decreeAnnotBuilt) renderDecreeAnnots();
+  var state = ukazAnnotStateFor("ukaz-annots");
+  if (!state.built) renderUkazAnnots(ukazAnnotSetByRoot("ukaz-annots"));
   // Markers only after the zoom settles — not while the crop is still moving in.
   var show = !!front && zoom >= 0.9;
   root.hidden = !show;
   if (!show) {
-    decreeAnnotPinned = false;
-    decreeAnnotActive = "";
-    syncDecreeAnnotChrome();
+    clearUkazAnnot("ukaz-annots");
     return;
   }
-  syncDecreeAnnotChrome();
+  syncUkazAnnotChrome("ukaz-annots");
 }
 
 if (document.readyState === "loading") {
@@ -148,6 +263,7 @@ function setPageColumn(quote, column) {
   if (lens) lens.classList.remove("is-on");
   if (mark) mark.classList.remove("is-on");
   syncPageZoom();
+  syncUkazAnnotVisibility();
   relayoutDecree(quote, target);
 }
 
@@ -285,19 +401,13 @@ var DESTALIN_RUSH_SRCS = [
 ];
 var DESTALIN_RUSH_COUNT = 18;
 
-var DESTALIN_ISSUES = [
-  { iso: "1953-03-06", edition: "65 (12633)" },
-  { iso: "1953-07-10", edition: "191 (12759)" },
-  { iso: "1955-02-09", edition: "40 (13338)" },
-  { iso: "1956-07-02", edition: "184 (13847)" },
-  { iso: "1956-09-08", edition: "252 (13915)" }
-];
-
-// Start on the renaming decree; › then walks the earlier destalinization carousel.
-var destalinStop = DESTALIN_ISSUES.length - 1;
-
 // Stable page tilts — same order as stops — so the land doesn't snap upright.
 var DESTALIN_TILTS = [-1.15, 0.9, -0.7, 1.05, -0.95];
+
+// Start on the renaming decree; › then walks the earlier destalinization carousel.
+var destalinStop = DESTALIN_TILTS.length - 1;
+var destalinReady = false;
+var destalinCropRaf = 0;
 
 function destalinReduced() {
   return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -305,76 +415,6 @@ function destalinReduced() {
 
 function destalinStops() {
   return Array.prototype.slice.call(document.querySelectorAll("#destalin-carousel .destalin-panel.is-stop"));
-}
-
-function destalinIssueParts(iso) {
-  if (typeof pressIssue === "function") return pressIssue(iso);
-  var parts = iso.split("-");
-  var year = +parts[0];
-  var month = +parts[1];
-  var day = +parts[2];
-  var monthsRu = ["января", "февраля", "марта", "апреля", "мая", "июня", "июля", "августа", "сентября", "октября", "ноября", "декабря"];
-  var monthsEn = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-  var langCode = typeof lang === "string" ? lang : "en";
-  if (langCode === "ru") {
-    return {
-      before: "Правда, ",
-      date: day + " " + monthsRu[month - 1] + " " + year + " г."
-    };
-  }
-  return {
-    before: "Pravda, ",
-    date: monthsEn[month - 1] + " " + day + ", " + year
-  };
-}
-
-function destalinIssueBetween(fromStop, toStop, t) {
-  var a = DESTALIN_ISSUES[fromStop] || DESTALIN_ISSUES[0];
-  var b = DESTALIN_ISSUES[toStop] || a;
-  if (t <= 0) return { iso: a.iso, edition: a.edition };
-  if (t >= 1) return { iso: b.iso, edition: b.edition };
-  var aMs = Date.parse(a.iso + "T12:00:00Z");
-  var bMs = Date.parse(b.iso + "T12:00:00Z");
-  var d = new Date(aMs + (bMs - aMs) * t);
-  var iso =
-    d.getUTCFullYear() +
-    "-" +
-    String(d.getUTCMonth() + 1).padStart(2, "0") +
-    "-" +
-    String(d.getUTCDate()).padStart(2, "0");
-  // Yearly issue no. resets; derive it from the calendar day, serial from the archival run.
-  var yearStart = Date.UTC(d.getUTCFullYear(), 0, 1);
-  var n = Math.round((Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()) - yearStart) / 86400000) + 1;
-  var aEd = a.edition.match(/\((\d+)\)/);
-  var bEd = b.edition.match(/\((\d+)\)/);
-  var serial = aEd && bEd ? Math.round(+aEd[1] + (+bEd[1] - +aEd[1]) * t) : n;
-  return { iso: iso, edition: n + " (" + serial + ")" };
-}
-
-function syncDestalinIssue(meta) {
-  var el = document.getElementById("destalin-issue");
-  meta = meta || DESTALIN_ISSUES[destalinStop] || DESTALIN_ISSUES[0];
-  if (!el || !meta) return;
-  var langCode = typeof lang === "string" ? lang : "en";
-  if (
-    el.dataset.iso === meta.iso &&
-    el.dataset.edition === meta.edition &&
-    el.dataset.lang === langCode
-  ) {
-    return;
-  }
-  el.dataset.iso = meta.iso;
-  el.dataset.edition = meta.edition;
-  el.dataset.lang = langCode;
-  var parts = destalinIssueParts(meta.iso);
-  var after = langCode === "ru" ? ", № " + meta.edition : ", no. " + meta.edition;
-  el.textContent = "";
-  el.appendChild(document.createTextNode(parts.before));
-  var date = document.createElement("span");
-  date.className = "press-issue-date";
-  date.textContent = parts.date;
-  el.appendChild(date);
-  el.appendChild(document.createTextNode(after));
 }
 
 function destalinRushRand(min, max) {
@@ -485,37 +525,85 @@ function prepareDestalinRush(fromStop, toStop, forward) {
   return { strip: strip, travel: travel };
 }
 
-function applyDestalin(stopIndex) {
+function applyDestalin(stopIndex, opts) {
+  opts = opts || {};
+  var enterCrop = !!opts.enterCrop;
+  var animateCrop = !!opts.animateCrop;
   var stops = destalinStops();
   if (!stops.length) return;
   var index = Math.max(0, Math.min(stops.length - 1, stopIndex));
+  if (destalinCropRaf) {
+    cancelAnimationFrame(destalinCropRaf);
+    destalinCropRaf = 0;
+  }
   stops.forEach(function (panel, i) {
-    panel.classList.toggle("is-current", i === index);
+    var current = i === index;
+    panel.classList.toggle("is-current", current);
     panel.classList.toggle(
       "is-prev",
       destalinPrevStop >= 0 && i === destalinPrevStop && i !== index
     );
+    var quote = panel.querySelector(".ukaz");
+    if (!quote) return;
+    if (!current) {
+      setPageColumn(quote, false);
+      return;
+    }
+    if (!enterCrop) return;
+    if (animateCrop) {
+      setPageColumn(quote, false);
+      destalinCropRaf = requestAnimationFrame(function () {
+        destalinCropRaf = requestAnimationFrame(function () {
+          destalinCropRaf = 0;
+          if (destalinStop !== index || !panel.classList.contains("is-current")) return;
+          setPageColumn(quote, true);
+        });
+      });
+    } else {
+      setPageColumn(quote, true);
+    }
   });
-  syncDestalinIssue();
+  syncUkazAnnotVisibility();
 }
+
+var DESTALIN_CAPTION_KEYS = [
+  "destalinCapDeath",
+  "destalinCapBeria",
+  "destalinCapMalenkov",
+  "destalinCapCult",
+  "destalinCapRename"
+];
+
+var DESTALIN_ASK_KEYS = [
+  "destalinAskDeath",
+  "destalinAskBeria",
+  "destalinAskMalenkov",
+  "destalinAskCult",
+  "destalinAskRename"
+];
 
 function syncDestalinButton() {
   var next = document.getElementById("destalin-next");
   var label = document.getElementById("destalin-next-label");
+  var caption = document.getElementById("destalin-caption");
   var stops = destalinStops();
   if (!next || !stops.length) return;
-  // Prompt on the renaming stop; plain next while walking the history.
   var atRename = destalinStop === stops.length - 1;
-  var key = atRename ? "destalinWhy" : "destalinNext";
+  var askKey = DESTALIN_ASK_KEYS[destalinStop] || "destalinWhatNext";
+  var capKey = DESTALIN_CAPTION_KEYS[destalinStop] || DESTALIN_CAPTION_KEYS[0];
   next.classList.toggle("is-why", atRename);
   next.disabled = destalinAnimating;
-  next.setAttribute("data-i18n-aria", key);
+  next.setAttribute("data-i18n-aria", askKey);
+  if (caption) {
+    caption.setAttribute("data-i18n", capKey);
+    if (typeof t === "function") caption.textContent = t(capKey);
+  }
   if (label) {
-    label.setAttribute("data-i18n", "destalinWhy");
-    if (typeof t === "function") label.textContent = t("destalinWhy");
+    label.setAttribute("data-i18n", askKey);
+    if (typeof t === "function") label.textContent = t(askKey);
   }
   if (typeof t === "function") {
-    next.setAttribute("aria-label", t(key));
+    next.setAttribute("aria-label", t(askKey));
   }
 }
 
@@ -530,16 +618,19 @@ function setDestalinStop(stopIndex, animate) {
   if (!stops.length) return;
   var nextStop = Math.max(0, Math.min(stops.length - 1, stopIndex));
   var from = destalinStop;
+  var changed = from !== nextStop;
   destalinStop = nextStop;
   if (destalinRushRaf) {
     cancelAnimationFrame(destalinRushRaf);
     destalinRushRaf = 0;
   }
-  if (!animate || destalinReduced() || from === nextStop) {
+  var enterCrop = changed || !destalinReady;
+  if (!animate || destalinReduced() || !changed) {
     clearDestalinRush(root);
     destalinAnimating = false;
-    if (animate && from !== nextStop) destalinPrevStop = from;
-    applyDestalin(destalinStop);
+    if (animate && changed) destalinPrevStop = from;
+    applyDestalin(destalinStop, { enterCrop: enterCrop, animateCrop: false });
+    destalinReady = true;
     syncDestalinButton();
     return;
   }
@@ -554,7 +645,8 @@ function setDestalinStop(stopIndex, animate) {
   if (!rush) {
     clearDestalinRush(root);
     destalinAnimating = false;
-    applyDestalin(destalinStop);
+    applyDestalin(destalinStop, { enterCrop: true, animateCrop: false });
+    destalinReady = true;
     syncDestalinButton();
     return;
   }
@@ -566,8 +658,6 @@ function setDestalinStop(stopIndex, animate) {
   var start = performance.now();
   var wrap = nextStop < from;
   var dur = wrap ? 920 : 720;
-  var lastIssueKey = "";
-  syncDestalinIssue(destalinIssueBetween(from, nextStop, 0));
 
   function finish() {
     if (!destalinAnimating) return;
@@ -575,7 +665,8 @@ function setDestalinStop(stopIndex, animate) {
     destalinRushRaf = 0;
     destalinPrevStop = from;
     clearDestalinRush(root);
-    applyDestalin(destalinStop);
+    applyDestalin(destalinStop, { enterCrop: true, animateCrop: !destalinReduced() });
+    destalinReady = true;
     syncDestalinButton();
   }
 
@@ -585,13 +676,6 @@ function setDestalinStop(stopIndex, animate) {
     var eased = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
     var x = fromX + (toX - fromX) * eased;
     strip.style.transform = "translate3d(" + x.toFixed(1) + "px,0,0)";
-    var page = Math.round(eased * (DESTALIN_RUSH_COUNT - 1));
-    var meta = destalinIssueBetween(from, nextStop, page / (DESTALIN_RUSH_COUNT - 1));
-    var key = meta.iso + "|" + meta.edition;
-    if (key !== lastIssueKey) {
-      lastIssueKey = key;
-      syncDestalinIssue(meta);
-    }
     if (t < 1) {
       destalinRushRaf = requestAnimationFrame(frame);
       return;
@@ -609,21 +693,141 @@ function layoutDestalin() {
   buildDestalinRush();
   if (next && !next.dataset.destalinBound) {
     next.dataset.destalinBound = "1";
-    next.addEventListener("click", function () {
+    function advanceDestalin() {
       if (destalinAnimating) return;
       var stops = destalinStops();
       if (!stops.length) return;
       setDestalinStop((destalinStop + 1) % stops.length, true);
-    });
+    }
+    next.addEventListener("click", advanceDestalin);
   }
   setDestalinStop(destalinStop, false);
 }
 
 function syncDestalin() {
   if (!destalinAnimating) applyDestalin(destalinStop);
-  else syncDestalinIssue();
   syncDestalinButton();
 }
 
 layoutDestalin();
 syncDestalin();
+
+var rename1989Stop = 0;
+var rename1989Ready = false;
+var rename1989PrevStop = -1;
+var rename1989CropRaf = 0;
+var rename1989Animating = false;
+
+var RENAME1989_CAPTION_KEYS = ["rename1989CapPravda", "rename1989CapUkaz", "rename1989CapStatute"];
+var RENAME1989_ASK_KEYS = ["rename1989AskPravda", "rename1989AskUkaz", "rename1989AskStatute"];
+
+function rename1989Stops() {
+  return Array.prototype.slice.call(
+    document.querySelectorAll("#rename-1989-carousel .destalin-panel.is-stop")
+  );
+}
+
+function syncRename1989Button() {
+  var next = document.getElementById("rename-1989-next");
+  var label = document.getElementById("rename-1989-next-label");
+  var caption = document.getElementById("rename-1989-caption");
+  var stops = rename1989Stops();
+  if (!next || !stops.length) return;
+  var askKey = RENAME1989_ASK_KEYS[rename1989Stop] || RENAME1989_ASK_KEYS[0];
+  var capKey = RENAME1989_CAPTION_KEYS[rename1989Stop] || RENAME1989_CAPTION_KEYS[0];
+  next.disabled = rename1989Animating;
+  next.setAttribute("data-i18n-aria", askKey);
+  if (caption) {
+    caption.setAttribute("data-i18n", capKey);
+    if (typeof t === "function") caption.textContent = t(capKey);
+  }
+  if (label) {
+    label.setAttribute("data-i18n", askKey);
+    if (typeof t === "function") label.textContent = t(askKey);
+  }
+  if (typeof t === "function") next.setAttribute("aria-label", t(askKey));
+}
+
+function applyRename1989(stopIndex, opts) {
+  opts = opts || {};
+  var enterCrop = !!opts.enterCrop;
+  var animateCrop = !!opts.animateCrop;
+  var stops = rename1989Stops();
+  if (!stops.length) return;
+  var index = Math.max(0, Math.min(stops.length - 1, stopIndex));
+  if (rename1989CropRaf) {
+    cancelAnimationFrame(rename1989CropRaf);
+    rename1989CropRaf = 0;
+  }
+  stops.forEach(function (panel, i) {
+    var current = i === index;
+    panel.classList.toggle("is-current", current);
+    panel.classList.toggle(
+      "is-prev",
+      rename1989PrevStop >= 0 && i === rename1989PrevStop && i !== index
+    );
+    var quote = panel.querySelector(".ukaz");
+    if (!quote) return;
+    if (!current) {
+      setPageColumn(quote, false);
+      return;
+    }
+    if (!enterCrop) return;
+    if (animateCrop) {
+      setPageColumn(quote, false);
+      rename1989CropRaf = requestAnimationFrame(function () {
+        rename1989CropRaf = requestAnimationFrame(function () {
+          rename1989CropRaf = 0;
+          if (rename1989Stop !== index || !panel.classList.contains("is-current")) return;
+          setPageColumn(quote, true);
+        });
+      });
+    } else {
+      setPageColumn(quote, true);
+    }
+  });
+  syncUkazAnnotVisibility();
+}
+
+function setRename1989Stop(stopIndex, animate) {
+  var stops = rename1989Stops();
+  if (!stops.length) return;
+  var nextStop = Math.max(0, Math.min(stops.length - 1, stopIndex));
+  var from = rename1989Stop;
+  var changed = from !== nextStop;
+  rename1989Stop = nextStop;
+  var enterCrop = changed || !rename1989Ready;
+  if (animate && changed) rename1989PrevStop = from;
+  rename1989Animating = false;
+  applyRename1989(rename1989Stop, {
+    enterCrop: enterCrop,
+    animateCrop: !!(animate && changed && !destalinReduced())
+  });
+  rename1989Ready = true;
+  syncRename1989Button();
+}
+
+function layoutRename1989() {
+  var track = document.getElementById("rename-1989-carousel");
+  var next = document.getElementById("rename-1989-next");
+  if (!track) return;
+  if (next && !next.dataset.rename1989Bound) {
+    next.dataset.rename1989Bound = "1";
+    function advanceRename1989() {
+      if (rename1989Animating) return;
+      var stops = rename1989Stops();
+      if (!stops.length) return;
+      setRename1989Stop((rename1989Stop + 1) % stops.length, true);
+    }
+    next.addEventListener("click", advanceRename1989);
+  }
+  setRename1989Stop(rename1989Stop, false);
+}
+
+function syncRename1989() {
+  if (!rename1989Animating) applyRename1989(rename1989Stop);
+  syncRename1989Button();
+}
+
+layoutRename1989();
+syncRename1989();

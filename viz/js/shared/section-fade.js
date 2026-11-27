@@ -6,7 +6,7 @@ function sectionFadeReduced() {
 
 var SECTION_FADE_NODES = null;
 // Lock fade math to a stable viewport height. Live innerHeight jumps when the
-// mobile URL bar hides — on a tall section like #births (Fig. 6 regional maps)
+// mobile URL bar hides — on a tall section like #births (Fig. 8 regional maps)
 // that makes opacity thresholds twitch and feels like a scroll jump.
 var SECTION_FADE_HEIGHT = 0;
 
@@ -22,7 +22,7 @@ function refreshSectionFadeHeight() {
 function sectionFadeNodes() {
   if (!SECTION_FADE_NODES) {
     SECTION_FADE_NODES = Array.prototype.slice.call(
-      document.querySelectorAll(".hook, #occupation, #years, #decree-1956, #ages, #decree-1989, #births, #ghosts, #worlds, #method, #footnotes")
+      document.querySelectorAll(".hook, #occupation, #years, #decree-1956, #ages, #decree-1989, #births, #ghosts, #worlds, #footnotes, #method")
     );
   }
   return SECTION_FADE_NODES;
@@ -40,10 +40,22 @@ function syncSectionFade() {
   var enterEnd = height * 0.46;
   var leaveStart = height * 0.72;
   var leaveEnd = height * 0.06;
+  var bandTop = -80;
+  var bandBottom = height + 80;
   // Short last section can't scroll into the mid-viewport enter band.
   var atBottom = window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 2;
   var last = nodes.length ? nodes[nodes.length - 1] : null;
   nodes.forEach(function (node) {
+    // Cheap vertical skip via offsetTop before paying for layout rects.
+    var topApprox = node.offsetTop - window.scrollY;
+    var bottomApprox = topApprox + node.offsetHeight;
+    if (bottomApprox < bandTop || topApprox > bandBottom) {
+      if (node.dataset.fadeOpacity !== "0") {
+        node.dataset.fadeOpacity = "0";
+        node.style.opacity = "0";
+      }
+      return;
+    }
     var rect = node.getBoundingClientRect();
     var opacity;
     if (rect.bottom < -40 || rect.top > height + 40) {
