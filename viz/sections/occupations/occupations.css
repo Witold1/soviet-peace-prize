@@ -18,24 +18,150 @@ polygon.no-link { cursor: default; }
   display: contents;
 }
 
-.occ-scrolly:not(.is-sticky) #occ-main-cap { order: 1; }
-.occ-scrolly:not(.is-sticky) #occ-legend { order: 2; }
-.occ-scrolly:not(.is-sticky) #occ-fig3-block { order: 3; }
-.occ-scrolly:not(.is-sticky) #src-occ { order: 4; }
+/* Narrow story (no sticky): button slips sit in the center of each chart. */
+.occ-scrolly:not(.is-sticky) #occ-comments {
+  display: none;
+}
+
+.occ-scrolly:not(.is-sticky) #occ-rain-block { order: 1; }
+.occ-scrolly:not(.is-sticky) #occ-main-cap { order: 2; }
+.occ-scrolly:not(.is-sticky) #occ-legend { order: 3; }
+.occ-scrolly:not(.is-sticky) #occ-fig3-block { order: 4; }
+.occ-scrolly:not(.is-sticky) #src-occ { order: 5; }
 .occ-scrolly:not(.is-sticky) #occ-chord-block {
-  order: 5;
-  /* Own gap — do not rely on #src-occ (hidden when tech notes are off). */
+  order: 6;
+  /* Own gap - do not rely on #src-occ (hidden when tech notes are off). */
   margin-top: 1.35rem;
 }
-.occ-scrolly:not(.is-sticky) #occ-chord-note { order: 6; }
-.occ-scrolly:not(.is-sticky) #src-occ-chord { order: 7; }
+.occ-scrolly:not(.is-sticky) #occ-chord-note { order: 7; }
+.occ-scrolly:not(.is-sticky) #src-occ-chord { order: 8; }
+
+/* Frame wraps the chart so re-renders can clear it without killing slips. */
+.occ-narrow-frame {
+  position: relative;
+  display: block;
+  width: 100%;
+}
+
+.occ-scrolly.is-sticky .occ-narrow-host,
+.occ-scrolly.is-sticky .occ-narrow-toggle {
+  display: none;
+}
+
+.occ-scrolly:not(.is-sticky) .occ-narrow-host {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  width: max-content;
+  max-width: min(36rem, 92%);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.occ-scrolly:not(.is-sticky) .occ-narrow-frame.is-stacks-hidden .occ-narrow-host .occ-slip {
+  display: none !important;
+}
+
+/* Top-right of the stack card, not the chart. */
+.occ-scrolly:not(.is-sticky) .occ-narrow-host .occ-narrow-toggle {
+  position: absolute;
+  top: 0.18rem;
+  right: 0.4rem;
+  z-index: 5;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  font-size: 0.68rem;
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  color: rgba(26, 26, 26, 0.62);
+  cursor: pointer;
+  pointer-events: auto;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.occ-scrolly:not(.is-sticky) .occ-narrow-frame.is-stacks-hidden .occ-narrow-host .occ-narrow-toggle {
+  position: static;
+  box-sizing: border-box;
+  padding: 0.55rem 0.85rem;
+  border: 1px solid rgba(26, 26, 26, 0.55);
+  background: rgba(255, 255, 255, 0.94);
+  font-size: 0.95rem;
+  font-weight: 600;
+  line-height: 1.35;
+  letter-spacing: -0.01em;
+  color: #1a1a1a;
+  text-align: center;
+  white-space: pre-line;
+  text-wrap: pretty;
+}
+
+.occ-scrolly:not(.is-sticky) .occ-narrow-host .occ-narrow-toggle:hover,
+.occ-scrolly:not(.is-sticky) .occ-narrow-host .occ-narrow-toggle:focus-visible {
+  color: #1a1a1a;
+}
+
+.occ-scrolly:not(.is-sticky) .occ-narrow-host .occ-slip {
+  position: relative;
+  display: block;
+  width: max-content;
+  max-width: min(36rem, 92%);
+  margin: 0;
+  padding: 0.55rem 2.4rem 0.55rem 0.85rem;
+  text-align: center;
+  cursor: pointer;
+  pointer-events: auto;
+  /* Kill leftover sticky scrub transforms when the layout flips. */
+  transform: none !important;
+  opacity: 1 !important;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.occ-scrolly:not(.is-sticky) .occ-narrow-host .occ-slip.is-live {
+  border-color: #1a1a1a;
+  background: #fff;
+  box-shadow: inset 0 0 0 1px #1a1a1a;
+}
+
+/* Fig. 3b: one story button at a time; click advances the beat. */
+.occ-scrolly:not(.is-sticky) .occ-narrow-host .occ-slip[data-step="3"]:not(.is-live),
+.occ-scrolly:not(.is-sticky) .occ-narrow-host .occ-slip[data-step="4"]:not(.is-live),
+.occ-scrolly:not(.is-sticky) .occ-narrow-host .occ-slip[data-step="5"]:not(.is-live) {
+  display: none;
+}
+
+.occ-scrolly:not(.is-sticky) #occ-rain-block {
+  margin: 0 0 1.4rem;
+}
+
+.occ-scrolly:not(.is-sticky) #occ-rain-cap {
+  margin: 0 0 0.55rem;
+}
+
+/* Fallback until JS matches #clouds; keep rain as tall as Fig. 3a. */
+.occ-scrolly:not(.is-sticky) .occ-rain {
+  height: clamp(400px, 68vh, 720px);
+}
+
+/* Sticky: one shared caption swaps 3 / 3a / 3b - hide the rain-only title. */
+.occ-scrolly.is-sticky #occ-rain-cap {
+  display: none;
+}
 
 .occ-scrolly.is-sticky .occ-pin {
   position: sticky;
-  /* Fixed px — vh/svh still shift when mobile chrome shows/hides. */
+  /* Fixed px - vh/svh still shift when mobile chrome shows/hides. */
   top: 16px;
   z-index: 1;
-  /* No max-height / overflow:auto — an inner scrollbar narrows the cloud grid. */
+  /* No max-height / overflow:auto - an inner scrollbar narrows the cloud grid. */
   padding-bottom: 8px;
   background: #fce5cd;
   overflow-anchor: none;
@@ -45,22 +171,185 @@ html[data-dev-plain] .occ-scrolly.is-sticky .occ-pin {
   background: var(--bg);
 }
 
-.occ-scrolly.is-sticky #occ-stage {
-  position: relative;
-  order: 3;
-  width: 100%;
+.occ-scrolly.is-sticky #occ-main-cap {
+  order: 1;
 }
 
+.occ-scrolly.is-sticky #occ-scrub {
+  order: 2;
+  display: block;
+}
+
+.occ-scrolly.is-sticky #occ-legend {
+  order: 3;
+}
+
+.occ-scrolly.is-sticky #occ-stage {
+  position: relative;
+  order: 4;
+  width: 100%;
+  /* Let 3a hexes gather from above the frame; clipping kills the entrance. */
+  overflow: visible;
+}
+
+/* Fig. 3 progress bar - same language as Fig. 8 scrub. */
+.occ-scrub {
+  position: relative;
+  box-sizing: border-box;
+  display: none;
+  width: 100%;
+  height: 0.95rem;
+  margin: 0.35rem 0 0.55rem;
+  padding: 0;
+  pointer-events: auto;
+}
+
+.occ-scrub-bar {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border: 1px solid rgba(26, 26, 26, 0.72);
+  background: rgba(26, 26, 26, 0.14);
+  pointer-events: none;
+}
+
+.occ-scrub-fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: var(--occ-t, 0%);
+  background: rgba(26, 26, 26, 0.82);
+  transition: width 90ms linear;
+}
+
+.occ-scrub.is-scrubbing .occ-scrub-fill {
+  transition: none;
+}
+
+.occ-scrub-marks {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.occ-scrub-marks span {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 7px;
+  margin-left: -3.5px;
+  box-sizing: border-box;
+  background: #fce5cd;
+  border-left: 1px solid rgba(26, 26, 26, 0.55);
+  border-right: 1px solid rgba(26, 26, 26, 0.55);
+}
+
+html[data-dev-plain] .occ-scrub-marks span {
+  background: var(--bg);
+}
+
+.occ-scrub-input {
+  -webkit-appearance: none;
+  appearance: none;
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.occ-scrub-input:focus-visible {
+  outline: 1px solid #1a1a1a;
+  outline-offset: 2px;
+}
+
+.occ-scrub-input::-webkit-slider-runnable-track {
+  height: 100%;
+  background: transparent;
+}
+
+.occ-scrub-input::-moz-range-track {
+  height: 100%;
+  border: 0;
+  background: transparent;
+}
+
+.occ-scrub-input::-moz-range-progress {
+  background: transparent;
+}
+
+.occ-scrub-input::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 1px;
+  height: 100%;
+  margin-top: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.occ-scrub-input::-moz-range-thumb {
+  width: 1px;
+  height: 100%;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+/* One shared frame for 3 / 3a / 3b. Rain + clouds stay top-aligned so 3a
+   does not jump between center and top; the denser flower stays centered. */
+.occ-scrolly.is-sticky #occ-rain-block,
 .occ-scrolly.is-sticky #occ-fig3-block,
 .occ-scrolly.is-sticky #occ-chord-block {
   position: absolute;
-  left: 0;
-  right: 0;
-  /* Center in the locked tall stage so Fig. 3 isn't glued to the top
-     of empty flower-height space. */
-  top: 50%;
+  inset: 0;
   width: 100%;
-  transform: translateY(-50%);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transform: none;
+  overflow: visible;
+}
+
+.occ-scrolly.is-sticky #occ-rain-block,
+.occ-scrolly.is-sticky #occ-fig3-block {
+  justify-content: flex-start;
+}
+
+.occ-scrolly.is-sticky #occ-chord-block {
+  justify-content: center;
+}
+
+.occ-scrolly.is-sticky .occ-rain {
+  width: 100%;
+  height: 100%;
+  flex: 1 1 auto;
+  /* Floor for stage measure; then stretch to the shared frame. */
+  min-height: clamp(400px, 72vh, 720px);
+}
+
+.occ-scrolly.is-sticky #occ-fig3-block .clouds,
+.occ-scrolly.is-sticky #occ-chord {
+  width: 100%;
+}
+
+/* Scale applied in fitOccCloudsToStage() so 3a fills the shared frame.
+   No will-change here - it promotes a layer that clips fly-in above the top edge. */
+.occ-scrolly.is-sticky #occ-fig3-block .clouds {
+  transform-origin: top center;
+  overflow: visible;
 }
 
 .occ-scrolly.is-sticky #occ-chord-cap,
@@ -69,39 +358,150 @@ html[data-dev-plain] .occ-scrolly.is-sticky .occ-pin {
 }
 
 .occ-scrolly.is-sticky #occ-chord-note {
-  order: 4;
-}
-
-.occ-scrolly.is-sticky #src-occ {
   order: 5;
 }
 
-/* !important: interrupted FLIP can leave inline opacity/visibility:visible on
-   both layers; without this, Fig. 3 and 3a stack after rapid reloads. */
-.occ-scrolly.is-sticky.is-clouds:not(.is-flipping) #occ-chord-block {
-  opacity: 0 !important;
-  visibility: hidden !important;
-  pointer-events: none !important;
+/* Keep the finding out of layout until 3b - opacity:0 alone still left a hole
+   that made 3a feel like it jumped when the note later appeared. */
+.occ-scrolly.is-sticky:not(.is-chord) #occ-chord-note {
+  height: 0;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
 }
 
+.occ-scrolly.is-sticky.is-chord #occ-chord-note {
+  height: auto;
+  opacity: 1;
+}
+
+.occ-scrolly.is-sticky #src-occ {
+  order: 6;
+}
+
+/* Stacks live inside the chart: scrub bottom → park → top. */
+.occ-comments {
+  display: none;
+}
+
+.occ-scrolly.is-sticky .occ-comments {
+  display: block;
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  z-index: 4;
+  margin: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.occ-slip {
+  box-sizing: border-box;
+  margin: 0;
+  max-width: min(36rem, 92%);
+  width: max-content;
+  padding: 0.42rem 0.7rem;
+  border: 1px solid rgba(26, 26, 26, 0.55);
+  background: rgba(255, 255, 255, 0.94);
+  font: inherit;
+  font-size: 0.95rem;
+  font-weight: 600;
+  line-height: 1.35;
+  letter-spacing: -0.01em;
+  color: #1a1a1a;
+  text-wrap: pretty;
+}
+
+.occ-scrolly.is-sticky .occ-slip {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  opacity: 0;
+  pointer-events: none;
+  will-change: transform, opacity;
+  /* Scroll RAF owns motion - no CSS transition fighting the scrub. */
+  transition: none;
+  text-align: center;
+}
+
+.occ-scrolly.is-sticky .occ-slip.is-live {
+  pointer-events: auto;
+}
+
+/* 3a + 3b stay in layout always (opacity/visibility only). display:none
+   made FLIP measure 0×0 boxes - that is why hexes stopped flying.
+   Rain can hard-hide: it is not part of the morph. */
+.occ-scrolly.is-sticky.is-rain:not(.is-rain-fading) #occ-fig3-block,
+.occ-scrolly.is-sticky.is-rain:not(.is-rain-fading) #occ-chord-block,
+.occ-scrolly.is-sticky.is-clouds:not(.is-flipping) #occ-chord-block,
 .occ-scrolly.is-sticky.is-chord:not(.is-flipping) #occ-fig3-block {
   opacity: 0 !important;
   visibility: hidden !important;
   pointer-events: none !important;
+  z-index: 0;
 }
 
-/* Hide cloud labels only while leaving Fig. 3 → 3a. On the way back
-   (is-chord + is-flipping) keep them visible — a fade-in after reverse
-   felt like captions arriving late. */
-.occ-scrolly.is-sticky.is-flipping.is-clouds #occ-fig3-block .group figcaption {
+.occ-scrolly.is-sticky.is-clouds:not(.is-rain-fading) #occ-rain-block,
+.occ-scrolly.is-sticky.is-chord #occ-rain-block,
+.occ-scrolly.is-sticky.is-flipping #occ-rain-block {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+.occ-scrolly.is-sticky.is-rain-fading #occ-rain-block,
+.occ-scrolly.is-sticky.is-rain-fading #occ-fig3-block {
+  pointer-events: none;
+  z-index: 2;
+}
+
+.occ-scrolly.is-sticky.is-rain-fading #occ-chord-block {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+.occ-scrolly.is-sticky.is-flipping #occ-fig3-block,
+.occ-scrolly.is-sticky.is-flipping #occ-chord-block {
+  opacity: 1 !important;
+  visibility: visible !important;
+  z-index: 2;
+}
+
+.occ-scrolly.is-sticky.is-rain #occ-legend {
   opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.occ-scrolly.is-sticky.is-rain-fading #occ-legend {
+  visibility: visible;
+  pointer-events: none;
+  transition: opacity 0.45s ease;
+}
+
+/* Hide cloud captions only while flying 3a → 3b. On the reverse they must
+   already be readable - waiting until FLIP ends felt like a late arrival. */
+.occ-scrolly.is-sticky.is-flipping.is-chord #occ-fig3-block .group figcaption {
+  opacity: 0 !important;
+  visibility: hidden !important;
 }
 
 .occ-scrolly.is-sticky.is-clouds:not(.is-flipping) .occ-compound-wash,
 .occ-scrolly.is-sticky.is-clouds:not(.is-flipping) .occ-compound-hull,
 .occ-scrolly.is-sticky.is-clouds:not(.is-flipping) .occ-compound-svg-label,
 .occ-scrolly.is-sticky.is-clouds:not(.is-flipping) .occ-compound-stems,
-.occ-scrolly.is-sticky.is-clouds:not(.is-flipping) #occ-chord-note {
+.occ-scrolly.is-sticky.is-clouds:not(.is-flipping) #occ-chord-note,
+.occ-scrolly.is-sticky.is-rain:not(.is-flipping) .occ-compound-wash,
+.occ-scrolly.is-sticky.is-rain:not(.is-flipping) .occ-compound-hull,
+.occ-scrolly.is-sticky.is-rain:not(.is-flipping) .occ-compound-svg-label,
+.occ-scrolly.is-sticky.is-rain:not(.is-flipping) .occ-compound-stems,
+.occ-scrolly.is-sticky.is-rain:not(.is-flipping) #occ-chord-note {
   opacity: 0;
 }
 
@@ -110,16 +510,78 @@ html[data-dev-plain] .occ-scrolly.is-sticky .occ-pin {
 }
 
 .occ-step {
-  /* svh = smallest viewport; does not grow when the URL bar hides. */
-  height: 24vh;
-  height: 24svh;
-  min-height: 140px;
+  /* Long runway - stack travel reads as a glide, not a snap. */
+  height: 48vh;
+  height: 48svh;
+  min-height: 260px;
+}
+
+.occ-step[data-step="rain"] {
+  height: 52vh;
+  height: 52svh;
+  min-height: 280px;
 }
 
 .occ-step[data-step="chord"] {
-  height: 22vh;
-  height: 22svh;
-  min-height: 120px;
+  height: 36vh;
+  height: 36svh;
+  min-height: 200px;
+}
+
+.occ-step[data-step="triple"] {
+  height: 40vh;
+  height: 40svh;
+  min-height: 220px;
+}
+
+.occ-step[data-step="civic"] {
+  /* Last slip - room to park, then exit upward. */
+  height: 42vh;
+  height: 42svh;
+  min-height: 230px;
+}
+
+/* Newspaper Matrix-rain of Pravda occupation leads (ink, not green code). */
+.occ-rain-block {
+  width: 100%;
+}
+
+.occ-rain {
+  position: relative;
+  height: clamp(400px, 72vh, 720px);
+  overflow: hidden;
+  padding: 0;
+  /* Neutral newsprint - cover the warm section cream so type doesn’t yellow. */
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(255, 255, 255, 0.55), transparent 55%),
+    linear-gradient(180deg, #f7f6f3 0%, #f1f0ec 45%, #f7f6f3 100%);
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, #000 8%, #000 92%, transparent 100%);
+  mask-image: linear-gradient(to bottom, transparent 0%, #000 8%, #000 92%, transparent 100%);
+  cursor: default;
+}
+
+html[data-dev-plain] .occ-rain {
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(255, 255, 255, 0.7), transparent 55%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(244, 244, 244, 0.85) 45%, rgba(255, 255, 255, 0.98));
+}
+
+.occ-rain-canvas {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+/* Atm blur lives in CSS compositing - never ctx.filter each frame. */
+.occ-rain-canvas--atm {
+  z-index: 0;
+}
+
+.occ-rain-canvas--fg {
+  z-index: 1;
 }
 
 .clouds {
@@ -132,9 +594,26 @@ html[data-dev-plain] .occ-scrolly.is-sticky .occ-pin {
   overflow: visible;
 }
 
-/* Desktop: keep Fig. 3 in one row so Fig. 3a can mirror each cloud’s box. */
+/* Sticky: two rows of three - readable labels, no one-line squeeze. */
+.occ-scrolly.is-sticky .clouds {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1.85rem 1.4rem;
+  justify-items: center;
+  align-items: end;
+}
+
+.occ-scrolly.is-sticky .clouds .group {
+  width: 100%;
+  max-width: 100%;
+}
+
+.occ-scrolly.is-sticky .clouds .group figcaption .caption-line {
+  white-space: normal;
+}
+
 @media (min-width: 641px) {
-  .clouds {
+  .occ-scrolly:not(.is-sticky) .clouds {
     flex-wrap: nowrap;
     justify-content: space-between;
     gap: 20px 12px;
@@ -174,7 +653,8 @@ html[data-dev-plain] .occ-scrolly.is-sticky .occ-pin {
 
 .group figcaption .caption-line {
   display: block;
-  white-space: nowrap;
+  white-space: normal;
+  text-wrap: balance;
 }
 
 /* Narrow: two columns so each label owns its cell (no overlapping captions). */

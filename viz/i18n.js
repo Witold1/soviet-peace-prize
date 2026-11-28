@@ -135,6 +135,81 @@ var COUNTRY = {
   "West Germany": "ФРГ"
 };
 
+// Genitive for «Представитель …» (Pravda’s country line).
+var COUNTRY_GEN = {
+  "Algeria": "Алжира",
+  "Angola": "Анголы",
+  "Argentina": "Аргентины",
+  "Australia": "Австралии",
+  "Austria": "Австрии",
+  "Belgium": "Бельгии",
+  "Brazil": "Бразилии",
+  "Bulgaria": "Болгарии",
+  "Burma": "Бирмы",
+  "Canada": "Канады",
+  "Ceylon": "Цейлона",
+  "Chile": "Чили",
+  "China": "Китая",
+  "Colombia": "Колумбии",
+  "Croatia": "Хорватии",
+  "Cuba": "Кубы",
+  "Czech Republic": "Чехии",
+  "Czechoslovakia": "Чехословакии",
+  "Denmark": "Дании",
+  "East Germany": "ГДР",
+  "Egypt": "Египта",
+  "Finland": "Финляндии",
+  "France": "Франции",
+  "Germany": "Германии",
+  "Ghana": "Ганы",
+  "Greece": "Греции",
+  "Guatemala": "Гватемалы",
+  "Guinea": "Гвинеи",
+  "Hungary": "Венгрии",
+  "India": "Индии",
+  "Indonesia": "Индонезии",
+  "Iraq": "Ирака",
+  "Ireland": "Ирландии",
+  "Italy": "Италии",
+  "Japan": "Японии",
+  "Lebanon": "Ливана",
+  "Mali": "Мали",
+  "Mandatory Palestine": "Подмандатной Палестины",
+  "Mexico": "Мексики",
+  "Mongolia": "Монголии",
+  "Mozambique": "Мозамбика",
+  "Namibia": "Намибии",
+  "Netherlands": "Нидерландов",
+  "Nicaragua": "Никарагуа",
+  "Nigeria": "Нигерии",
+  "North Korea": "КНДР",
+  "Norway": "Норвегии",
+  "Pakistan": "Пакистана",
+  "Palestine": "Палестины",
+  "People's Republic of China": "КНР",
+  "Peru": "Перу",
+  "Poland": "Польши",
+  "Romania": "Румынии",
+  "Russia": "России",
+  "Slovenia": "Словении",
+  "South Africa": "ЮАР",
+  "South Vietnam": "Южного Вьетнама",
+  "Soviet Union": "СССР",
+  "Spain": "Испании",
+  "Sudan": "Судана",
+  "Sweden": "Швеции",
+  "Switzerland": "Швейцарии",
+  "Syria": "Сирии",
+  "Tanzania": "Танзании",
+  "Ukraine": "Украины",
+  "United Kingdom": "Великобритании",
+  "United States": "США",
+  "Uruguay": "Уругвая",
+  "Venezuela": "Венесуэлы",
+  "Vietnam": "Вьетнама",
+  "West Germany": "ФРГ"
+};
+
 var I18N = {
   en: {
     title: "From the Stalin Prize to the Lenin Prize: the Soviet international prize for strengthening peace among the peoples",
@@ -160,17 +235,22 @@ var I18N = {
     pressPlateWho: "of the Presidium of the Supreme Soviet of the USSR",
     fn1: "For example, here are two lists of peace prizes: <a href=\"https://en.wikipedia.org/wiki/List_of_peace_prizes\">List of peace prizes from English Wikipedia</a> and <a href=\"https://peacebellfoundation.org/peace-prizes/\">Peace Prizes, from the Peace Bell Foundation (501(c)(3) non-profit)</a>.",
     fn2: "For example, see Taylor O’Connor’s account of seventy-two peace prizes: descriptions of each, then a generalization and an analysis. <a href=\"https://everydaypeacebuilding.com/peace-prize-award/\">Mapping 72 Peace Prize Award Programs Around the World, by Taylor O’Connor from Everyday Peacebuilding consultancy, 7 September 2023</a>.",
-    fn3: "The decree is also available online in the official bulletin of state acts of the Soviet Supreme Soviet — a rough analogue of the American Federal Register. <a href=\"https://docs.historyrussia.org/ru/nodes/521433-o-pereimenovanii-mezhdunarodnyh-stalinskih-premiy-v-mezhdunarodnye-leninskie-premii-locale-nil-za-ukreplenie-mira-mezhdu-narodami-locale-nil-ukaz-prezidiuma-verhovnogo-soveta-sssr-moskva-6-sentyabrya-1956-g#mode/inspect/page/1/zoom/4\">Scan: Vedomosti of the Supreme Soviet of the USSR, 1956, no. 18, art. 393, page 258</a>.",
-    fn4: "“Regions” here are working bins for the map, not political borders. Europe and Asia are split into geographic subregions from birth coordinates; in North America the United States, Canada, and Cuba stand alone, with Central America and the Caribbean as the rest; Africa, South America, and Oceania stay whole. That keeps the squares comparable even when twentieth-century state borders moved.",
+    fn3: "The decree is also available online in the official bulletin of state acts of the Soviet Supreme Soviet - a rough analogue of the American Federal Register. <a href=\"https://docs.historyrussia.org/ru/nodes/521433-o-pereimenovanii-mezhdunarodnyh-stalinskih-premiy-v-mezhdunarodnye-leninskie-premii-locale-nil-za-ukreplenie-mira-mezhdu-narodami-locale-nil-ukaz-prezidiuma-verhovnogo-soveta-sssr-moskva-6-sentyabrya-1956-g#mode/inspect/page/1/zoom/4\">Scan: Vedomosti of the Supreme Soviet of the USSR, 1956, no. 18, art. 393, page 258</a>.",
+    fn4: "The 19th and 20th centuries were a time of active, documented border change. States and polities appeared and vanished. Millions of people moved - by choice or against their will. So we first geocoded the laureates’ birthplaces on the basis of Wikidata to show the overall scatter, then aggregated them into “birthplace regions” that are easier to compare by eye. From the prize decrees we then took, for each laureate, the country as whose representative they were named (their affiliation) and likewise sorted those into “regions of activity” at the time of the prize. After that we compared these “regions” with each other.",
+    fn5: "“Classes” are set by the author of this work. First, for simplicity, we take the first word (phrase) in the decree and assign it to one of six “classes.” For example, “to the honorary director of the École Normale (Higher Normal School) at Sèvres” - scientist; “to a woman writer” - cultural figure.",
+    fn6: "66 out of 161 laureates are described in the decree with more than one phrase. For example, “to a professor, member of parliament”; “to a pastor, public figure”; “to a public and state figure”; “to a professor of international and church law at the University of Graz.” We classify both and visualize the overlap.",
+    fn7: "Also mentioned in the official bulletin of state acts of the Soviet Supreme Soviet, <a href=\"https://vedomosti.sssr.su/1989/29/\">1989, no. 27, art. 534</a>, but not scanned.",
+    fn8: "The most accessible online documents on the subject of this project. The <a href=\"https://ru.wikisource.org/wiki/Указ_Президиума_ВС_СССР_от_24.03.1951_о_дипломе_лауреата_международной_Сталинской_премии_«За_укрепление_мира_между_народами»\">decree on the diploma</a> and the <a href=\"https://ru.wikisource.org/wiki/Указ_Президиума_ВС_СССР_от_24.03.1951_о_золотой_нагрудной_медали_лауреата_международной_Сталинской_премии_«За_укрепление_мира_между_народами»\">decree on the gold breast medal</a> are on Wikisource. A transcription of the founding decree is also on <a href=\"https://oldgazette.org/pravda/21121949/text2.html#1\">oldgazette.org</a>.",
+    fn9: "For many freedom fighters, and often in the Cold War more broadly, award, announcement, and handover were not the same day. Take Nelson Mandela. <em>Award:</em> the decision was taken to give him the International Lenin Peace Prize. <em>Announcement:</em> the decision was made public, for example in <em>Pravda</em>. <em>Honoring:</em> Mandela was named a laureate. <em>Handover:</em> the prize was physically given to him - he collected it only twelve years later (<a href=\"https://www.deseret.com/2002/10/30/19685808/mandela-finally-picks-up-his-lenin-peace-prize/\">Deseret News, 30 October 2002</a>). The charts here follow the year named in the decree and the announcement day, not the day the medal changed hands.",
     h1: "From the Stalin Prize to the Lenin Prize: the Soviet international prize for strengthening peace among the peoples",
     opener: "For forty years, from 1950 to 1990, the Soviet Union awarded a peace prize of its own. It ended with the state that gave it.",
-    intro: "Peace prizes are awarded by many kinds of institutions<sup class=\"fn\"><button type=\"button\" class=\"fn-ref\" id=\"fnref-1\" data-fn=\"1\">1</button></sup>. Governments give them, and so do religious organizations, universities, and private foundations. Some are known around the world, and some are known mainly to the people who receive them. Some last only a few years and then disappear. Others are still awarded decades after they were founded. Each prize works from its own definition of peace and of peacebuilding, and each awarding committee judges by its own standards and its own biases<sup class=\"fn\"><button type=\"button\" class=\"fn-ref\" id=\"fnref-2\" data-fn=\"2\">2</button></sup>. The prize followed here is one of the long ones that later closed.",
+    intro: "Peace prizes are awarded by many kinds of institutions<sup class=\"fn\"><button type=\"button\" class=\"fn-ref\" id=\"fnref-1\" data-fn=\"1\">1</button></sup>. Governments give them, and so do religious organizations, universities, and private foundations. Some are known around the world, and some are known mainly to the people who receive them. Some last only a few years and then disappear. Others are still awarded decades after they were founded. Each prize works from its own definition of peace and of peacebuilding, and each awarding committee judges by its own standards and its own biases<sup class=\"fn\"><button type=\"button\" class=\"fn-ref\" id=\"fnref-2\" data-fn=\"2\">2</button></sup>. The story below is about one of the longest, most mass-scale, and most important peace prizes of the twentieth century.",
     hook: "<p>The International Lenin Prize for Strengthening Peace Among Peoples (until 1955: International Stalin Prize for Strengthening Peace Among Peoples) was established on December 20, 1949, by the Presidium of the Supreme Soviet of the USSR on the occasion of Joseph Stalin's seventieth birthday. It was awarded annually in Moscow to up to ten people.</p><p>The award was considered the Soviet Union's answer to the Nobel Peace Prize and was bestowed by an international prize committee. Usually, several people were honored at a time. The chairman of the prize committee was the physicist Dmitri Skobelzyn from 1950 to 1973, followed by the oncologist Nikolai Blokhin until 1987, and finally, after the prize was restructured in 1989, the welding engineer Borys Paton.</p><p>In the course of de-Stalinization, the name was changed by decree of the Presidium of the Supreme Soviet on September 6, 1956, to the International Lenin Prize for Strengthening Peace Among Peoples (Russian: Международная Ленинская премия «За укрепление мира между народами»). All previous laureates were asked to return their medals for exchange. Subsequently, the announcement of the laureates no longer took place on Stalin's birthday in December, but usually on May 1.</p><p>On December 11, 1989, the Supreme Soviet reorganized the awarding of the prize. It was to be awarded every two years; the recipient(s) were to be announced on Lenin's birthday, April 22. Only one more prize was awarded under the new rules until the dissolution of the Soviet Union in 1991.</p>",
-    coldWarEssay: "<p>The prize's founding document declared it to be an award for people who contributed to strengthening peace and fought against warmongers. It claimed to be free from political, religious, racial, or other biases. However, as multiple “fires” kept flaring up across various theaters of the global standoff popularized under the name of the Cold War, the Capitalist bloc came to frame the Soviet peace prize as an instrument of ideological influence from the Communist bloc. Unambiguous affiliation—the Soviet legislative branch established it and selected the international committee to discuss the nominations—with the leading player of the rival camp didn't ease the hostility. Notably, a very similar distrust existed on the other side of the “Iron Curtain” regarding the West’s own premier award, the Nobel Peace Prize.</p>",
+    coldWarEssay: "<p>The prize's founding document declared it to be an award for people who contributed to strengthening peace and fought against warmongers. It claimed to be free from political, religious, racial, or other biases. However, as multiple “fires” kept flaring up across various theaters of the global standoff popularized under the name of the Cold War, the Capitalist bloc came to frame the Soviet peace prize as an instrument of ideological influence from the Communist bloc. Unambiguous affiliation - the Soviet legislative branch established it and selected the international committee to discuss the nominations - with the leading player of the rival camp didn't ease the hostility. Notably, a very similar distrust existed on the other side of the “Iron Curtain” regarding the West’s own premier award, the Nobel Peace Prize.</p>",
     occEssay: "<p>The decree of 1949 assigns the prize to citizens of any country for the struggle against the instigators of war. The clouds show the kind of public life those people brought into the list.</p><p>Of the 161 people with portraits in this telling, 64 are classed as statesmen and 49 as cultural figures. Together they are most of the list. There are 15 scientists, 16 civic leaders, 10 religious figures, and 7 labor-movement figures. Twenty-seven are women. Twelve of the women are in the statesmen cloud, and seven are civic leaders. The cultural cloud holds four women, and so does the scientific cloud. The religious cloud and the labor cloud hold none.</p>",
     yearEssay: "<p>The decree of 1949 promised five to ten prizes a year. The columns keep that promise only at the start.</p><p>From 1950 through 1955 there are six full years and 45 people. The shortest of those columns has six, and in 1953 the column reaches ten, the ceiling the decree set for itself. From 1956 the prize goes on, but the columns sit lower, often at four or five, and from the late 1960s a cohort often covers two years. The span 1980-1982 covers three. There are twenty-nine cohorts in all. One of them, 1990, is a single person. The list has no cohort of its own for 1987, 1988, or 1989 in the portrait charts.</p><p>Women are in the prize from the first year: three of the seven in 1950. After that, whole years pass without them. They stand thickest in the 1977-1978 cohort, four of six. Among the Stalin-year laureates, 10 of 45 are women. Among the later laureates with portraits, 17 of 116.</p>",
-    renameEssay: "<p>On the chart, 1956 is not an empty year. That cohort has seven people with portraits, and the list already counts them as Lenin laureates. Between Stalin’s death and the renaming there are about three years of <em>Pravda</em> — on the order of a thousand issues. The carousel opens on the death announcement and then on ordinary front pages of a party struggle already under way: a crisis of leadership, and conflicting views and strategic plans in politics and the economy. The pattern is familiar — not a repeat, but a rhyme: like the Second Triumvirate after Caesar’s death (Octavian, Antony, Lepidus), or the Thermidorian Reaction in France after Robespierre’s execution. History doesn't repeat itself, but it often rhymes. Most of that carousel is noise for this story. Two frames matter: on 2 July 1956 the paper prints the Central Committee resolution “On overcoming the cult of personality and its consequences”; in September the prize changes its name, and the portrait on the medal.</p><p>The renaming decree is dated 6 September 1956. It does not found a new prize, and it does not close the old one. The first sentence explains the renaming by the wishes of the committees. The sum does not change: still 100,000 rubles. Point 3 extends to the laureates of 1950-1955 only the diploma and the medal, subparagraphs (a) and (b), and does not extend the cash. Those earlier laureates, as the text above has already said, were asked to hand the medal back for exchange: the old one bears Stalin, the new one bears Lenin. The decree still says each year, and up to ten. No column after 1953 reaches ten.</p>",
-    destalinLabel: "De-Stalinization in Pravda, 1953–1956",
+    renameEssay: "<p>On the chart, 1956 is not an empty year. That cohort has seven people with portraits, and the list already counts them as Lenin laureates. Between Stalin’s death and the renaming there are about three years of <em>Pravda</em> - on the order of a thousand issues. The carousel opens on the death announcement and then on ordinary front pages of a party struggle already under way: a crisis of leadership, and conflicting views and strategic plans in politics and the economy. The pattern is familiar - not a repeat, but a rhyme: like the Second Triumvirate after Caesar’s death (Octavian, Antony, Lepidus), or the Thermidorian Reaction in France after Robespierre’s execution. History doesn't repeat itself, but it often rhymes. Most of that carousel is noise for this story. Two frames matter: on 2 July 1956 the paper prints the Central Committee resolution “On overcoming the cult of personality and its consequences”; in September the prize changes its name, and the portrait on the medal.</p><p>The renaming decree is dated 6 September 1956. It does not found a new prize, and it does not close the old one. The first sentence explains the renaming by the wishes of the committees. The sum does not change: still 100,000 rubles. Point 3 extends to the laureates of 1950-1955 only the diploma and the medal, subparagraphs (a) and (b), and does not extend the cash. Those earlier laureates, as the text above has already said, were asked to hand the medal back for exchange: the old one bears Stalin, the new one bears Lenin. The decree still says each year, and up to ten. No column after 1953 reaches ten.</p>",
+    destalinLabel: "De-Stalinization in Pravda, 1953-1956",
     destalinNext: "Next",
     destalinPrev: "Previous",
     destalinWhy: "But why?",
@@ -188,28 +268,28 @@ var I18N = {
     destalinCapRename: "On 6 September 1956 the prize was renamed from the Stalin Prize to the Lenin Prize",
     destalinDeathScanAlt: "Pravda, 6 March 1953, page 1, announcing the death of J. V. Stalin.",
     destalinDeathSide: "Enlarge the death announcement",
-    destalinDeathSource: "Front page of <em>Pravda</em> announcing the death of J. V. Stalin, including the medical report. <a href=\"https://archive.org/details/195365_1389\">Scan of the issue: Pravda, 6 March 1953, no. 65 (12633), page 1</a>.",
+    destalinDeathSource: "Front page of <em>Pravda</em> announcing the death of J. V. Stalin, including the medical report. <a href=\"https://archive.org/details/195365_1389\" title=\"Pravda, 6 March 1953, no. 65 (12633), page 1\">Scan of the issue</a>.",
     destalin1953191ScanAlt: "Pravda, 10 July 1953, page 1, with the report on Beria’s removal.",
     destalinBeriaSide: "Enlarge the Beria report",
-    destalin1953191Source: "Front page of <em>Pravda</em> with the Central Committee report and the Presidium decree removing L. P. Beria. <a href=\"https://archive.org/details/1953191_3088\">Scan of the issue: Pravda, 10 July 1953, no. 191 (12759), page 1</a>.",
+    destalin1953191Source: "Front page of <em>Pravda</em> with the Central Committee report and the Presidium decree removing L. P. Beria. <a href=\"https://archive.org/details/1953191_3088\" title=\"Pravda, 10 July 1953, no. 191 (12759), page 1\">Scan of the issue</a>.",
     destalin1955040ScanAlt: "Pravda, 9 February 1955, page 1, with Malenkov’s resignation from the Council of Ministers.",
     destalinMalenkovSide: "Enlarge the Malenkov resignation",
-    destalin1955040Source: "Front page of <em>Pravda</em> with the Supreme Soviet session that accepted G. M. Malenkov’s resignation as Chairman of the Council of Ministers. <a href=\"https://archive.org/details/195540_9158\">Scan of the issue: Pravda, 9 February 1955, no. 40 (13338), page 1</a>.",
+    destalin1955040Source: "Front page of <em>Pravda</em> with the Supreme Soviet session that accepted G. M. Malenkov’s resignation as Chairman of the Council of Ministers. <a href=\"https://archive.org/details/195540_9158\" title=\"Pravda, 9 February 1955, no. 40 (13338), page 1\">Scan of the issue</a>.",
     destalinCultScanAlt: "Pravda, 2 July 1956, page 1, with the Central Committee resolution on overcoming the cult of personality.",
     destalinCultSide: "Enlarge the resolution title",
-    destalinCultSource: "Front page of <em>Pravda</em> with the Central Committee resolution on overcoming the cult of personality. <a href=\"https://archive.org/details/1956184_2372\">Scan of the issue: Pravda, 2 July 1956, no. 184 (13847), page 1</a>.",
+    destalinCultSource: "Front page of <em>Pravda</em> with the Central Committee resolution on overcoming the cult of personality. <a href=\"https://archive.org/details/1956184_2372\" title=\"Pravda, 2 July 1956, no. 184 (13847), page 1\">Scan of the issue</a>.",
     ageEssay: "<p>The decree speaks of outstanding service. On the age chart that service belongs to a long public life. The mean sits near sixty, and the dashed line stands about there. Only eight people were under forty. Eighteen were seventy-five or older. The mass of the list lies between those edges: 73 people from 40 to 59, and 62 from 60 to 74.</p><p>The women are a little younger than the men on average, about 57 against about 61. The gap is small. In this too the prize reads as a list of public lives already made. The youngest and the oldest are named in the line under this paragraph. The empty left end of the scale matters more than the extreme.</p>",
-    mapEssay: "<p>The same decree says: citizens of any country, with no regard to political, religious, and racial differences. The map tests the geography in that sentence. It does not test the rest. Birth is not citizenship, and it is not the country that put a person forward. A prize that was a domestic honor of the Soviet Union would have piled its births up there.</p><p>The births pile up elsewhere. The largest numbers on record are France, 12, then Germany, 12, the United States, 9, and India, 6. Germany is one label in the file, with East and West not split. Russia and Ukraine together account for eight births. No other Soviet republic appears as a birth country. More than fifty birth countries are named, so the list is wide. Every recorded birth has coordinates on the map. The world of this prize is mostly a world of people born outside the state that signed it.</p>",
+    mapEssay: "<p>The nineteenth and twentieth centuries were a time of well-documented border change. States appeared and vanished. Millions of people moved - by choice or against their will. So we first geocoded birthplaces from Wikidata to show the overall scatter, then grouped those points into “regions” that are easier to compare by eye. Finally we set those birth regions beside the regions of the countries named in the prize decree.</p>",
     decree: "<header class=\"ukaz-head\"><p class=\"ukaz-kicker\">Decree</p><p>of the Presidium of the Supreme Soviet of the USSR</p><p>On the establishment of the international</p><p>Stalin Prizes</p><p>\"For strengthening peace among the peoples\"</p></header><div class=\"ukaz-body\"><p>1. Establish the international Stalin Prizes \"For strengthening peace among the peoples.\"</p><p>The prizes are awarded to citizens of any country in the world, regardless of political, religious, and racial differences, for outstanding service in the struggle against the instigators of war and for the strengthening of peace.</p><p>2. Establish that persons awarded the international Stalin Prize receive:</p><ul class=\"ukaz-items\"><li>a) a diploma of laureate of the international Stalin Prize;</li><li>b) a gold breast medal with a portrait of J. V. Stalin;</li><li>c) a cash prize of 100,000 rubles.</li></ul><p>3. Establish that the international Stalin Prizes \"For strengthening peace among the peoples\" are awarded each year, from 5 to 10 prizes, by a special Committee for the International Stalin Prizes, formed by the Presidium of the Supreme Soviet of the USSR from representatives of the democratic forces of various countries of the world.</p><p>4. Award the prizes on the birthday of Joseph Vissarionovich Stalin - 21 December of each year.</p><p>Award the first prizes in 1950.</p></div><footer class=\"ukaz-signoff\"><p class=\"ukaz-sign\">Chairman of the Presidium of the Supreme Soviet of the USSR <span class=\"ukaz-who\">N. SHVERNIK.</span></p><p class=\"ukaz-sign\">Secretary of the Presidium of the Supreme Soviet of the USSR <span class=\"ukaz-who\">A. GORKIN.</span></p><p class=\"ukaz-place\">Moscow, the Kremlin. 20 December 1949.</p></footer>",
     seeOriginal: "See the original",
     seeText: "See the transcription",
     decreeAnnotTitle: "On the establishment of the international Stalin Prizes “For strengthening peace among the peoples”",
     decreeAnnotAnyone: "…citizens of any country in the world, regardless of their political, religious, and racial differences, for outstanding service in the struggle against the instigators of war and for the strengthening of peace.",
     decreeAnnotGifts: "…a gold breast medal; a cash prize of 100,000 rubles.",
-    decreeAnnotBirthday: "Award the prizes on the birthday of Joseph Vissarionovich Stalin — 21 December of each year.",
+    decreeAnnotBirthday: "Award the prizes on the birthday of Joseph Vissarionovich Stalin - 21 December of each year.",
     renameAnnotTitle: "On renaming the international Stalin Prizes as the international Lenin Prizes “For strengthening peace among the peoples”",
     renameAnnotMedal: "…a gold breast medal with a portrait of V. I. Lenin; a cash prize of 100,000 rubles.",
-    renameAnnotExchange: "Extend subparagraphs (a) and (b) of § 2 — the diploma and the medal, not the cash — also to persons who received the prize in 1950–1955.",
+    renameAnnotExchange: "Extend subparagraphs (a) and (b) of § 2 - the diploma and the medal, not the cash - also to persons who received the prize in 1950-1955.",
     renameAnnotTen: "…awarded each year, up to 10 prizes, by the Committee for the International Lenin Prizes.",
     destalinAnnotDeath: "On 5 March at 9:50 p.m., after a serious illness, the Chairman of the Council of Ministers … Joseph Vissarionovich STALIN passed away.",
     destalinAnnotBeria: "…having heard and discussed the report of Comrade G. M. Malenkov on the criminal anti-party and anti-state actions of L. P. Beria, aimed at undermining the Soviet state in the interests of foreign capital…",
@@ -218,14 +298,14 @@ var I18N = {
     decreeScanAlt: "Pravda, 21 December 1949, page 2, with the decree marked in the upper left column.",
     decreeSide: "Enlarge the decree",
     decreePage: "Whole page",
-    decreeSource: "The picture is a page of the official newspaper of the Soviet Communist Party devoted to the 70th anniversary of J. V. Stalin, with the printed decree establishing the prize. <a href=\"https://oldgazette.org/pravda/21121949/text2.html\">Transcription of the decree</a>. <a href=\"https://archive.org/details/1949355_7165\">Scan of the issue: Pravda, 21 December 1949, no. 355 (11462), page 2</a>.",
+    decreeSource: "The second page of <em>Pravda</em>, the official newspaper of the Soviet Communist Party - an issue devoted to the 70th anniversary of J. Stalin, with the printed decree establishing the Soviet peace prize.<sup class=\"fn\"><button type=\"button\" class=\"fn-ref\" id=\"fnref-8\" data-fn=\"8\">8</button></sup>",
     rename: "<header class=\"ukaz-head\"><p class=\"ukaz-kicker\">Decree</p><p>of the Presidium of the Supreme Soviet of the USSR</p><p>On renaming the international</p><p>Stalin Prizes</p><p>as the international Lenin Prizes</p><p>\"For strengthening peace among the peoples\"</p></header><div class=\"ukaz-body\"><p>1. Taking into account the wishes of the Committees for the International Stalin Prizes,<sup>1</sup> rename the international Stalin Prizes as the international Lenin Prizes \"For strengthening peace among the peoples.\"</p><p>2. Establish that persons awarded the international Lenin Prize receive:</p><ul class=\"ukaz-items\"><li>a) a diploma of laureate of the international Lenin Prize;</li><li>b) a gold breast medal with a portrait of V. I. Lenin;</li><li>c) a cash prize of 100,000 rubles.</li></ul><p>3. Extend subparagraphs (a) and (b) of § 2 of this Decree also to persons who received the International Prize \"For strengthening peace among the peoples\" in 1950-1955.</p><p>4. Establish that the international Lenin Prizes \"For strengthening peace among the peoples\" are awarded each year, up to 10 prizes, by the Committee for the International Lenin Prizes.</p><p>5. The procedure for nominating candidates for the international Lenin Prizes \"For strengthening peace among the peoples,\" and the conditions for awarding these prizes, are drawn up and published by the Committee for the International Lenin Prizes.</p></div><footer class=\"ukaz-signoff\"><p class=\"ukaz-place\">Moscow, the Kremlin. 6 September 1956.</p></footer><p class=\"ukaz-note\"><sup>1</sup> They were established by the Decree of the Presidium of the Supreme Soviet of the USSR of 20 December 1949 (Vedomosti of the Supreme Soviet of the USSR, 1949, no. 66).</p>",
     renameScanAlt: "Pravda, 8 September 1956, page 1, with the renaming decree marked in the lower left.",
-    renameSource: "The picture is a page of <em>Pravda</em> with the printed decree renaming the prize.<sup class=\"fn\"><button type=\"button\" class=\"fn-ref\" id=\"fnref-3\" data-fn=\"3\">3</button></sup> <a href=\"https://archive.org/details/1956252_3945\">Scan of the issue: Pravda, 8 September 1956, no. 252 (13915), page 1</a>.",
-    rename1989Essay: "<p>The resolution is dated 11 December 1989. The full text sits elsewhere — and it is more than a rename.</p><p>Only one prize was given under the new name: Mandela, for 1990. The Union dissolved the next year.</p>",
-    rename1989: "<header class=\"ukaz-head\"><p class=\"ukaz-kicker\">Resolution</p><p>of the Presidium of the Supreme Soviet of the USSR</p><p>of 11 December 1989, No. 905-1</p><p>On the International Lenin Peace Prize</p></header><div class=\"ukaz-body\"><p class=\"ukaz-note\"><em>Pravda</em>, 12 December 1989: “According to a report by the Committee of the Supreme Soviet of the USSR on International Affairs, presented by A. S. Dzasokhov, the issue of the International Lenin Peace Prize was considered. A new statute of the prize and the regulations on the Committee for International Lenin Peace Prizes were approved.”</p><p>Having considered the proposal of the Committee of the Supreme Soviet of the USSR on International Affairs on transforming the International Lenin Prize \"For strengthening peace among the peoples\" and improving the practice of its awarding in light of the present stage of the movement of broad public forces for the survival of humanity, the building of a nuclear-free and nonviolent world, and the establishment in international affairs of new political thinking, the Presidium of the Supreme Soviet of the USSR resolves:</p><p>1. Consider it expedient henceforth to name the International Lenin Prize \"For strengthening peace among the peoples\" the International Lenin Peace Prize.</p><p>2. Approve the Statute of the International Lenin Peace Prize.</p><p>3. Approve the Regulations on the Committee for the International Lenin Peace Prizes.</p><p>4. Consider as no longer in force:</p><ul class=\"ukaz-items\"><li>the Decree of the Presidium of the Supreme Soviet of the USSR of 6 September 1956 \"On the international Lenin Prizes 'For strengthening peace among the peoples'\" as amended by the Decrees of 15 February 1980 and 26 November 1986;</li><li>the Decree of the Presidium of the Supreme Soviet of the USSR of 22 April 1957 \"On the approval of the diploma and the gold breast medal of a laureate of the International Lenin Prize 'For strengthening peace among the peoples'\" as amended by the Decree of 15 February 1980;</li><li>the Resolution of the Presidium of the Supreme Soviet of the USSR of 22 April 1966 \"On the Committee for the international Lenin Prizes 'For strengthening peace among the peoples'\" as amended by the Decrees of 15 February 1980 and 26 November 1986.</li></ul></div><header class=\"ukaz-head\"><p class=\"ukaz-kicker\">From the Statute</p><p>of the International Lenin Peace Prize</p><p>(approved by the same resolution)</p></header><div class=\"ukaz-body\"><p>1. The International Lenin Peace Prize is awarded to citizens of any country, irrespective of political views, nationality, race, religious belief and social status, for outstanding services in activities aimed at preventing nuclear catastrophe, ending the arms race and achieving disarmament, ensuring universal security, building a nuclear-free and nonviolent world, and strengthening the international community on the principles of new political thinking, and also for a contribution to the struggle for universal human interests and values.</p><p>3. Candidates for the prize may be nominated by: governments; academies of sciences; associations of scientists; unions of writers, journalists, artists, and composers; associations of lawyers; women’s and youth associations and organizations; initiative groups; national and international public funds, organizations and movements; scientific and research centers, institutes and institutions; educational institutions.</p><p>7. … The decision of the Committee on awarding the prize is published in the press on the birthday of V. I. Lenin — 22 April of the corresponding year.</p><p>9. Persons awarded the International Lenin Peace Prize receive: a diploma of laureate of the International Lenin Peace Prize; a gold breast medal with a portrait of V. I. Lenin; a cash part of the prize in the amount of 50,000 rubles or an equivalent sum in foreign currency. …</p></div><footer class=\"ukaz-signoff\"><p class=\"ukaz-place\">Moscow, the Kremlin. 11 December 1989.</p></footer>",
+    renameSource: "The picture is a page of <em>Pravda</em> with the printed decree renaming the prize.<sup class=\"fn\"><button type=\"button\" class=\"fn-ref\" id=\"fnref-3\" data-fn=\"3\">3</button></sup> <a href=\"https://archive.org/details/1956252_3945\" title=\"Pravda, 8 September 1956, no. 252 (13915), page 1\">Scan of the issue</a>.",
+    rename1989Essay: "<p>The resolution is dated 11 December 1989. The full text sits elsewhere - and it is more than a rename.</p><p>Only one prize was given under the new name: Mandela, for 1990. The Union dissolved the next year.</p>",
+    rename1989: "<header class=\"ukaz-head\"><p class=\"ukaz-kicker\">Resolution</p><p>of the Presidium of the Supreme Soviet of the USSR</p><p>of 11 December 1989, No. 905-1</p><p>On the International Lenin Peace Prize</p></header><div class=\"ukaz-body\"><p class=\"ukaz-note\"><em>Pravda</em>, 12 December 1989: “According to a report by the Committee of the Supreme Soviet of the USSR on International Affairs, presented by A. S. Dzasokhov, the issue of the International Lenin Peace Prize was considered. A new statute of the prize and the regulations on the Committee for International Lenin Peace Prizes were approved.”</p><p>Having considered the proposal of the Committee of the Supreme Soviet of the USSR on International Affairs on transforming the International Lenin Prize \"For strengthening peace among the peoples\" and improving the practice of its awarding in light of the present stage of the movement of broad public forces for the survival of humanity, the building of a nuclear-free and nonviolent world, and the establishment in international affairs of new political thinking, the Presidium of the Supreme Soviet of the USSR resolves:</p><p>1. Consider it expedient henceforth to name the International Lenin Prize \"For strengthening peace among the peoples\" the International Lenin Peace Prize.</p><p>2. Approve the Statute of the International Lenin Peace Prize.</p><p>3. Approve the Regulations on the Committee for the International Lenin Peace Prizes.</p><p>4. Consider as no longer in force:</p><ul class=\"ukaz-items\"><li>the Decree of the Presidium of the Supreme Soviet of the USSR of 6 September 1956 \"On the international Lenin Prizes 'For strengthening peace among the peoples'\" as amended by the Decrees of 15 February 1980 and 26 November 1986;</li><li>the Decree of the Presidium of the Supreme Soviet of the USSR of 22 April 1957 \"On the approval of the diploma and the gold breast medal of a laureate of the International Lenin Prize 'For strengthening peace among the peoples'\" as amended by the Decree of 15 February 1980;</li><li>the Resolution of the Presidium of the Supreme Soviet of the USSR of 22 April 1966 \"On the Committee for the international Lenin Prizes 'For strengthening peace among the peoples'\" as amended by the Decrees of 15 February 1980 and 26 November 1986.</li></ul></div><header class=\"ukaz-head\"><p class=\"ukaz-kicker\">From the Statute</p><p>of the International Lenin Peace Prize</p><p>(approved by the same resolution)</p></header><div class=\"ukaz-body\"><p>1. The International Lenin Peace Prize is awarded to citizens of any country, irrespective of political views, nationality, race, religious belief and social status, for outstanding services in activities aimed at preventing nuclear catastrophe, ending the arms race and achieving disarmament, ensuring universal security, building a nuclear-free and nonviolent world, and strengthening the international community on the principles of new political thinking, and also for a contribution to the struggle for universal human interests and values.</p><p>3. Candidates for the prize may be nominated by: governments; academies of sciences; associations of scientists; unions of writers, journalists, artists, and composers; associations of lawyers; women’s and youth associations and organizations; initiative groups; national and international public funds, organizations and movements; scientific and research centers, institutes and institutions; educational institutions.</p><p>7. … The decision of the Committee on awarding the prize is published in the press on the birthday of V. I. Lenin - 22 April of the corresponding year.</p><p>9. Persons awarded the International Lenin Peace Prize receive: a diploma of laureate of the International Lenin Peace Prize; a gold breast medal with a portrait of V. I. Lenin; a cash part of the prize in the amount of 50,000 rubles or an equivalent sum in foreign currency. …</p></div><footer class=\"ukaz-signoff\"><p class=\"ukaz-place\">Moscow, the Kremlin. 11 December 1989.</p></footer>",
     rename1989ScanAlt: "Pravda, 12 December 1989, page 1, with the Presidium meeting note marked in the upper right column.",
-    rename1989Source: "The picture is a page of <em>Pravda</em> reporting the Presidium meeting the day after the resolution; the paper does not print the ukaz itself. The full resolution and the statute it approved are elsewhere. <a href=\"http://pravo.levonevsky.org/baza/soviet/sssr1118.htm\">Transcription of the resolution and statute</a>. <a href=\"https://archive.org/details/1989346_4216\">Scan of the issue: Pravda, 12 December 1989, no. 346 (26064), page 1</a>. <a href=\"https://vedomosti.sssr.su/1989/29/\">Vedomosti of the Congress of People's Deputies of the USSR and the Supreme Soviet of the USSR, 1989, no. 27, art. 534</a>.",
+    rename1989Source: "The picture is a page of <em>Pravda</em> reporting the Presidium meeting the day after the resolution; details are not printed. The full resolution and the statute it approved are elsewhere. <a href=\"http://pravo.levonevsky.org/baza/soviet/sssr1118.htm\">Transcription of the resolution and statute</a>. <a href=\"https://archive.org/details/1989346_4216\" title=\"Pravda, 12 December 1989, no. 346 (26064), page 1\">Scan of the issue</a>. <a href=\"https://vedomosti.sssr.su/1989/29/\">Vedomosti of the Congress of People's Deputies of the USSR and the Supreme Soviet of the USSR, 1989, no. 27, art. 534</a>.",
     n1: "Fig. 1.",
     hAll: "Who received the prize",
     capAll: "Who received the prize",
@@ -236,7 +316,7 @@ var I18N = {
     n2: "Fig. 2.",
     capPress: "The (post)war world the prize was founded in",
     hOcc: "Who they were",
-    capOcc: "What work did they do?",
+    capOcc: "What work did they do, in brief?",
     capOccWorld: "Which “world” did they come from?",
     hWorlds: "Cold War worlds (scratch)",
     worldsParkNote: "Parked here while we decide whether they belong in the main telling.",
@@ -249,23 +329,33 @@ var I18N = {
     world_first: "“First world”",
     world_second: "“Second world”",
     world_third: "“Third world”",
-    srcOcc: "Each cloud is one class: statesman, civic leader, scientist, cultural figure, religious figure, or labor-movement figure. Writers, painters, composers, and filmmakers share cultural figure. Trade-union leaders are labor-movement figures. Women are drawn toward the center of their cloud. Where a portrait caption or decree line was read in <em>Pravda</em>, that wording sets the class; otherwise the class falls back to the Wikidata reading in laureates.csv. Tooltips show the <em>Pravda</em> line when we have it.",
+    srcOcc: "One main class per person. Women sit nearer the center of their cloud.",
     srcOccWorld: "Each cloud is a Cold War three-world reading of WINNER_COUNTRY: “First world” = US / Western sphere, “Second world” = Soviet / socialist sphere, “Third world” = other. Dual listings use the first country. Women are drawn toward the center of their cloud. Source: laureates.csv.",
     n3: "Fig. 3.",
     n3a: "Fig. 3a.",
-    capOccChord: "Where the classes overlap",
-    srcOccChord: "Each hexagon is a laureate with a <em>Pravda</em> occupation line. Clouds hold, and count, only people with a single class, so their numbers are smaller than in Fig. 3. The class that shares the most people sits in the center, and the other classes ring it like petals. Hexes on the stems between clouds are people <em>Pravda</em> placed in two classes; the number beside each stem counts them. Three-class lines fold to the strongest pair that keeps the person's Fig. 3 class. A cloud plus its stems counts everyone <em>Pravda</em> gave that class, so it can exceed Fig. 3, where each person has one main class. Fig. 3 still keeps a single main class per person.",
+    n3b: "Fig. 3b.",
+    capOccRain: "How the award decree introduced them",
+    srcOccRain: "Occupation lines from the award decrees published in Pravda, and from portrait captions.",
+    capOccChord: "Winners are many-sided",
+    srcOccChord: "Stems hold people Pravda placed in two classes.",
+    occStackRain: "The decrees were rather compact. “Perfection is achieved, not when there is nothing more to add, but when there is nothing left to take away.”",
+    occStackClouds: "Let’s try to classify them and show them in groups.<sup class=\"fn\"><button type=\"button\" class=\"fn-ref\" id=\"fnref-5\" data-fn=\"5\">5</button></sup>",
+    occStackChord: "Still, for 41% of laureates one class is not enough.<sup class=\"fn\"><button type=\"button\" class=\"fn-ref\" id=\"fnref-6\" data-fn=\"6\">6</button></sup>",
+    occStackCivic: "At the same time, 61 of those 66 multi-class people are also “civic leaders” - the label added most often. Bureaucratic decree language probably cannot hold a life story.",
+    occStackTriple: "Two laureates have three classes at once. That is hard to show visually, but they are scientists, state, public, and cultural figures.",
+    occStackHide: "(hide)",
+    occStackShow: "(open\nstory)",
     occChordAria: "Flower-shaped hex chart: civic leaders in the center, five other occupation classes as petals, and stems of people who belong to two classes.",
     occChordHint: "Of the {m} laureates Pravda described with two classes, {c} were also called “civic leaders”: the label the paper most often added to someone’s main occupation.",
     occChordBridge: "{n} people in intersection hubs",
     occChordPair: "{a} ∩ {b}: {n}",
 
     hYear: "When it was awarded",
-    capYear: "Which year did each person receive it?",
+    capYear: "In which years were they awarded?",
     srcYear: "Each column is one prize cohort, placed at the middle of the year or span in the decree. Women are drawn at the foot of the column. The Stalin Prize runs through 1955; from 1956 the prize is the Lenin Prize, and 1990 is the single Lenin Peace Prize. Source: laureates.csv.",
     srcYearWorld: "Each column is one prize cohort, placed at the middle of the year or span in the decree. Marks are colored by a Cold War three-world reading of WINNER_COUNTRY: “First world” = US / Western sphere, “Second world” = Soviet / socialist sphere, “Third world” = other. “First world” sits at the foot of the column. Source: laureates.csv.",
-    srcYearSpan: "Scroll stretches each multi-year cohort across the years named in the decree; the hatch marks those spans. Single-year prizes stay one square. Women stay at the foot of the stack. Source: laureates.csv.",
-    srcYearSpanWorld: "Scroll stretches each multi-year cohort across the years named in the decree; the hatch marks those spans. Marks stay colored by Cold War world. “First world” sits at the foot of the stack. Source: laureates.csv.",
+    srcYearSpan: "Multi-year cohorts stretch across the years named in the decree; the hatch marks those spans. Single-year prizes stay one square. Women stay at the foot of the stack. Source: laureates.csv.",
+    srcYearSpanWorld: "Multi-year cohorts stretch across the years named in the decree; the hatch marks those spans. Marks stay colored by Cold War world. “First world” sits at the foot of the stack. Source: laureates.csv.",
     yearAriaWorld: "Laureates by prize year. Each square is one person, colored by Cold War world.",
     n4: "Fig. 4.",
     n4a: "Fig. 4a.",
@@ -284,8 +374,8 @@ var I18N = {
     announceNoteRename: "After Stalin’s death there are about two years of pause before the prize settles again under Lenin’s name; the 1956 cohort is only announced in early 1958.",
     announceNoteAnnualLenin: "Through the mid-1960s Lenin prizes were usually announced around 1 May for the previous year.",
     announceNoteBiennial: "From the late 1960s a cohort often covers two years named together in the decree.",
-    announceNoteGap3: "The 1980–1982 cohort names three years in one decree — the widest span on the chart.",
-    announceNotePerestroika: "Deep in perestroika the prize goes quiet, then returns once more in 1990 — about three years from the last regular cohort.",
+    announceNoteGap3: "The 1980-1982 cohort names three years in one decree - the widest span on the chart.",
+    announceNotePerestroika: "Deep in perestroika the prize goes quiet, then returns once more in 1990 - about three years from the last regular cohort.",
     announceAria: "Two parallel time rails. Top: year or span named in the decree. Bottom: announcement day. Ribbons join award time to announcement; diamond size is the number of people.",
     srcAnnounce: "Top rail: year or span named in the decree. Bottom rail: announcement or decision day (META_announced_date). A ribbon joins the two; diamond size is the number of people in that announcement. Short notes open explanations: the annual rhythm, the pause after Stalin’s death, two- and three-year cohorts, and the long gap into the last prize. Source: laureates.csv.",
     hAge: "How old they were",
@@ -297,8 +387,20 @@ var I18N = {
     aliveNo: "Deceased",
     aliveAria: "Same age beeswarm as Fig. 6. Deceased laureates are faded; the living mark stays in color with a ring.",
     srcAlive: "Same age beeswarm as Fig. 6. Marks without a recorded death date stay in color; the rest fade. Living status is WINNER_BIO_living from laureates.csv (no death date on Wikidata). Source: laureates.csv.",
+    n6b: "Fig. 6b.",
+    capPosthumous: "Who was awarded posthumously?",
+    posthumousYes: "Posthumous",
+    posthumousNo: "Awarded in life",
+    posthumousAria: "Same age beeswarm as Fig. 6. Posthumous laureates stay in color with a ring; the rest fade.",
+    srcPosthumous: "Same age beeswarm as Fig. 6. A mark is posthumous when the decree says so, or when the recorded death year falls before the announcement year. Source: laureates.csv; decree wording in pravda_occupations.js.",
+    n6c: "Fig. 6c.",
+    capCentury: "Who was born in the 19th century?",
+    centuryYes: "Born in the 19th century",
+    centuryNo: "Born in the 20th century",
+    centuryAria: "Same age beeswarm as Fig. 6. Laureates born before 1900 stay in color with a ring; the rest fade.",
+    srcCentury: "Same age beeswarm as Fig. 6. Marks with birth year before 1900 stay in color; the rest fade. Source: laureates.csv (WINNER_BIRTH_year).",
     n7: "Fig. 7.",
-    capRename1989: "From the Lenin Prize to the International Lenin Prize in perestroika",
+    capRename1989: "From “For Strengthening Peace Among Peoples” to the International Lenin Prize in perestroika",
     rename1989Label: "The 1989 rewriting of the prize",
     rename1989Side: "Enlarge the note",
     rename1989UkazSide: "Enlarge the resolution",
@@ -309,7 +411,7 @@ var I18N = {
     rename1989AnnotRename: "1. Consider it expedient henceforth to name the International Lenin Prize “For strengthening peace among the peoples” the International Lenin Peace Prize.",
     rename1989AnnotIdeology: "…for outstanding services in activities aimed at preventing nuclear catastrophe, ending the arms race and disarmament, ensuring universal and equal security, building a nuclear-free and nonviolent world, and strengthening mutual understanding and cooperation among peoples; for a real contribution to establishing new political thinking, to the demilitarization, democratization and humanization of international relations on the basis of generally accepted norms of morality and law, and to solving the global problems of our time; for active peacekeeping and tireless struggle in defense of universal human interests and values.",
     rename1989AnnotGroups: "3. Candidates for the prize may be: citizens of any country irrespective of political views and worldview; initiative groups; national and international public funds, organizations and movements; scientific and research centers, institutes and institutions; educational institutions.",
-    rename1989AnnotApril: "…published in the press on Lenin’s birthday — 22 April…",
+    rename1989AnnotApril: "…published in the press on Lenin’s birthday - 22 April…",
     rename1989AnnotCash: "…a gold medal with a portrait of V. I. Lenin and a cash part of the prize in the amount of 50,000 rubles or an equivalent sum in foreign currency.",
     rename1989CapPravda: "By late 1989 the country was already deep in perestroika: shortages, political instability, and an internal crisis. Pravda printed only a short note, but the changes in politics and society did not leave the prize untouched",
     rename1989AskPravda: "So what did it say?",
@@ -320,41 +422,33 @@ var I18N = {
     rename1989ScanAlt: "Pravda, 12 December 1989, page 1, with the Presidium meeting note marked in the upper right column.",
     rename1989UkazScanAlt: "Resolution of the Presidium of the Supreme Soviet of the USSR of 11 December 1989, No. 905-1, on the International Lenin Peace Prize.",
     rename1989StatuteScanAlt: "Statute of the International Lenin Peace Prize, approved 11 December 1989.",
-    rename1989PravdaSource: "Front page of <em>Pravda</em> with a short note on the Presidium meeting. The paper does not print the ukaz. <a href=\"https://archive.org/details/1989346_4216\">Scan of the issue: Pravda, 12 December 1989, no. 346 (26064), page 1</a>.",
-    rename1989UkazSource: "Resolution of the Presidium of the Supreme Soviet of the USSR of 11 December 1989, No. 905-1. <a href=\"http://pravo.levonevsky.org/baza/soviet/sssr1118.htm\">Full text of the resolution</a>. <a href=\"https://vedomosti.sssr.su/1989/29/\">Vedomosti, 1989, no. 27, art. 534</a>.",
+    rename1989PravdaSource: "Front page of <em>Pravda</em> with a short note on the Presidium meeting. Details are not printed. <a href=\"https://archive.org/details/1989346_4216\" title=\"Pravda, 12 December 1989, no. 346 (26064), page 1\">Scan of the issue</a>.",
+    rename1989UkazSource: "Resolution on the last change to the prize.<sup class=\"fn\"><button type=\"button\" class=\"fn-ref\" id=\"fnref-7\" data-fn=\"7\">7</button></sup> <a href=\"http://pravo.levonevsky.org/baza/soviet/sssr1118.htm\">Full text</a>.",
     rename1989StatuteSource: "Statute of the International Lenin Peace Prize, approved by the same resolution. <a href=\"http://pravo.levonevsky.org/baza/soviet/sssr1118.htm\">Full text of the statute</a>.",
     n8: "Fig. 8.",
-    n8a: "Fig. 8a.",
-    n8c: "Fig. 8c.",
-    n8ya: "Fig. 8я.",
     n9: "Fig. 9.",
     hMap: "Where they came from",
-    capMap: "Where were they born?",
-    capMapSquares: "Births by region",
-    capMapFlight: "From birth region to Pravda’s region",
     capMapSeq: "Where are they from?",
-    mapSquaresAria: "Mercator map that gathers open birth dots from raw coordinates into proportional regional squares. Europe and Asia are split into geographic subregions; North America is split by country; other parts of the world stay whole.",
-    mapFlightAria: "Mercator map: open dots start in birth-region packs (as in Fig. 8a), then fly into the region Pravda named. Colored squares are the finish; dashed squares mark the start. Dots that change region fill red.",
     mapSeqAria: "Mercator map in three stages: raw birth-place scatter, then aggregation by birth region, then aggregation by the region Pravda named. Scroll through the figure to advance. Movers fill red.",
-    mapSeqScrubAria: "Scrub Fig. 8я animation: births, regions, Pravda",
+    occScrubAria: "Scrub Fig. 3 stages: decree lines, occupation groups, class overlaps",
+    mapSeqScrubAria: "Scrub Fig. 8 animation: births, regions, Pravda",
     mapSeqCard1Title: "Where were they born?",
     mapSeqCard1Body: "Each open circle is a birthplace.",
     mapSeqCard2Title: "In which \"regions\" of the world?<sup class=\"fn\"><button type=\"button\" class=\"fn-ref\" id=\"fnref-4\" data-fn=\"4\">4</button></sup>",
     mapSeqCard2Body: "Country borders change; \"region\" borders hold steadier.",
     mapSeqCard3Title: "And what did Pravda write?",
     mapSeqCard3Body: "The decree named a country. Sometimes it differed from the birth \"region\".",
-    mapSquaresLegend: "People per region",
     mapSqUnitedStates: "United States",
     mapSqCanada: "Canada",
     mapSqCuba: "Cuba",
     mapSqCentralAmerica: "Central America",
     mapSqCaribbean: "Caribbean",
     mapSqSouthAmerica: "South America",
-    mapSqWesternEurope: "W. Europe",
-    mapSqCentralEurope: "C. Europe",
-    mapSqNorthernEurope: "N. Europe",
-    mapSqSouthernEurope: "S. Europe",
-    mapSqEasternEurope: "E. Europe",
+    mapSqWesternEurope: "Western Europe",
+    mapSqCentralEurope: "Central Europe",
+    mapSqNorthernEurope: "Northern Europe",
+    mapSqSouthernEurope: "Southern Europe",
+    mapSqEasternEurope: "Eastern Europe",
     mapSqAfrica: "Africa",
     mapSqWestAsia: "West Asia",
     mapSqSouthAsia: "South Asia",
@@ -366,9 +460,9 @@ var I18N = {
     hGhost: "Ghost winners",
     capGhost: "Not on this list?",
     srcGhost: "Each cell is one disputed name. Faces come from the English Wikipedia lead image, not from a Pravda decree plate. Archival documents will join this wall later.",
-    ghostEssay: "<p>Six names sit outside the portrait charts above. Louis Aragon, Funmilayo Ransome-Kuti, Hikmat Abu Zayd, Sam Nujoma, Charilaos Florakis, and Abdul Sattar Edhi appear on secondary lists, but this telling does not count them with the 161 until the paper trail is settled.</p><p>Online pages, language Wikipedias, and even the Yearbook of the Great Soviet Encyclopedia do not always agree. Other Soviet orders and medals, and other international prizes, can pull a name into an encyclopedia entry or a web list without proving a Lenin Peace Prize decree in <em>Pravda</em>. The decisive holding would be fond R-9522 in the State Archive of the Russian Federation — read in person, not only through a database record.</p><p>The wall below holds those six. Sample scans, neighboring awards, and pictures of where they came from will join them here. Until the paper trail is settled, the charts above stay with faces we can show.</p>",
+    ghostEssay: "<p>Six names sit outside the portrait charts above. Louis Aragon, Funmilayo Ransome-Kuti, Hikmat Abu Zayd, Sam Nujoma, Charilaos Florakis, and Abdul Sattar Edhi appear on secondary lists, but this telling does not count them with the 161 until the paper trail is settled.</p><p>Online pages, language Wikipedias, and even the Yearbook of the Great Soviet Encyclopedia do not always agree. Other Soviet orders and medals, and other international prizes, can pull a name into an encyclopedia entry or a web list without proving a Lenin Peace Prize decree in <em>Pravda</em>. The decisive holding would be fond R-9522 in the State Archive of the Russian Federation - read in person, not only through a database record.</p><p>The wall below holds those six. Sample scans, neighboring awards, and pictures of where they came from will join them here. Until the paper trail is settled, the charts above stay with faces we can show.</p>",
     methTitle: "Methodology",
-    meth1: "Primary source for the list: scanned issues of <em>Pravda</em>, read decree by decree. Secondary checks: year-by-year lists on the prize pages in <a href=\"https://de.wikipedia.org/wiki/Internationaler_Lenin-Friedenspreis\">German</a>, <a href=\"https://ru.wikipedia.org/wiki/%D0%9C%D0%B5%D0%B6%D0%B4%D1%83%D0%BD%D0%B0%D1%80%D0%BE%D0%B4%D0%BD%D0%B0%D1%8F_%D0%9B%D0%B5%D0%BD%D0%B8%D0%BD%D1%81%D0%BA%D0%B0%D1%8F_%D0%BF%D1%80%D0%B5%D0%BC%D0%B8%D1%8F_%C2%AB%D0%97%D0%B0_%D1%83%D0%BA%D1%80%D0%B5%D0%BF%D0%BB%D0%B5%D0%BD%D0%B8%D0%B5_%D0%BC%D0%B8%D1%80%D0%B0_%D0%BC%D0%B5%D0%B6%D0%B4%D1%83_%D0%BD%D0%B0%D1%80%D0%BE%D0%B4%D0%B0%D0%BC%D0%B8%C2%BB\">Russian</a>, and <a href=\"https://en.wikipedia.org/wiki/Lenin_Peace_Prize\">English</a> Wikipedia; the Yearbook of the Great Soviet Encyclopedia (Ежегодник Большой советской энциклопедии); and a database of the archive of the Committee on the International Lenin Peace Prizes, 1949–1991 (<a href=\"https://guides.rusarchives.ru/terms/6/346/mezhdunarodnye-otnosheniya\">fond R-9522, 1 inventory, 194 files, extreme dates 1949–1991, State Archive of the Russian Federation</a>).",
+    meth1: "Primary source for the list: scanned issues of <em>Pravda</em>, read decree by decree. Secondary checks: year-by-year lists on the prize pages in <a href=\"https://de.wikipedia.org/wiki/Internationaler_Lenin-Friedenspreis\">German</a>, <a href=\"https://ru.wikipedia.org/wiki/%D0%9C%D0%B5%D0%B6%D0%B4%D1%83%D0%BD%D0%B0%D1%80%D0%BE%D0%B4%D0%BD%D0%B0%D1%8F_%D0%9B%D0%B5%D0%BD%D0%B8%D0%BD%D1%81%D0%BA%D0%B0%D1%8F_%D0%BF%D1%80%D0%B5%D0%BC%D0%B8%D1%8F_%C2%AB%D0%97%D0%B0_%D1%83%D0%BA%D1%80%D0%B5%D0%BF%D0%BB%D0%B5%D0%BD%D0%B8%D0%B5_%D0%BC%D0%B8%D1%80%D0%B0_%D0%BC%D0%B5%D0%B6%D0%B4%D1%83_%D0%BD%D0%B0%D1%80%D0%BE%D0%B4%D0%B0%D0%BC%D0%B8%C2%BB\">Russian</a>, and <a href=\"https://en.wikipedia.org/wiki/Lenin_Peace_Prize\">English</a> Wikipedia; the Yearbook of the Great Soviet Encyclopedia (Ежегодник Большой советской энциклопедии); and a database of the archive of the Committee on the International Lenin Peace Prizes, 1949-1991 (<a href=\"https://guides.rusarchives.ru/terms/6/346/mezhdunarodnye-otnosheniya\">fond R-9522, 1 inventory, 194 files, extreme dates 1949-1991, State Archive of the Russian Federation</a>).",
     meth2: "Where a Wikipedia footnote or encyclopedia year-list points to a decree, the issue is read in the scanned <em>Pravda</em> archives and the paper is treated as decisive. Disagreements between language Wikipedias, the Yearbook of the Great Soviet Encyclopedia, and other online lists are held for the ghost section. Picasso and Niemeyer keep the years those pages give them when a matching decree line is still open. Fond R-9522 would be the fullest FOIA-like holding; that fund was not opened in person for this project.",
     meth3: "The prize year is the year named in the decree, not the day the medal was handed over.",
     meth4: "Stalin prizes for 1951-1955 were announced in December of that year. The 1950 prize was announced on 6 April 1951. Lenin prizes were usually announced around 1 May and named the previous year, or a span such as 1968-1969.",
@@ -388,17 +482,10 @@ var I18N = {
     series_lenin: "Lenin Peace Prize",
     series_lenin_peace: "Lenin Peace Prize",
     yearAria: "Laureates by prize year. Each square is one person. Pink squares are women, teal squares are men.",
-    mapAria: "Waterman butterfly world map of laureates at their recorded birth coordinates. Each circle is one person. The Americas are on one wing and Africa, Eurasia, and Australia are on the other, with the southern continents kept large.",
-    mapAriaRegion: "Regional Mercator map of laureates at their recorded birth coordinates. Each circle is one person.",
-    mapRegionAmericas: "Americas",
-    mapRegionEuropeAfrica: "Europe, Africa, and West Asia",
-    mapRegionAsiaOceania: "Asia and Oceania",
     mapSeqFacetEurope: "Europe",
     mapSeqFacetAfrica: "Africa",
     mapSeqFacetNorthAmerica: "North & Central America",
     mapSeqFacetSouthAmerica: "South America",
-    mapSeqFacetAsia: "Asia",
-    mapSeqFacetOceania: "Oceania",
     mapSeqFacetAsiaOceania: "Asia & Oceania"
   },
   ru: {
@@ -426,16 +513,21 @@ var I18N = {
     fn1: "Например, вот два списка премий мира: <a href=\"https://en.wikipedia.org/wiki/List_of_peace_prizes\">List of peace prizes from English Wikipedia</a> и <a href=\"https://peacebellfoundation.org/peace-prizes/\">Peace Prizes, авторства Peace Bell Foundation (501(c)(3) non-profit)</a>.",
     fn2: "Например, смотрите разбор семидесяти двух премий мира от Taylor O’Connor: описания, обобщение и затем анализ. <a href=\"https://everydaypeacebuilding.com/peace-prize-award/\">Mapping 72 Peace Prize Award Programs Around the World, авторства Taylor O’Connor из Everyday Peacebuilding consultancy, 7 September 2023</a>.",
     fn3: "Указ также доступен онлайн в официальном бюллетене государственных актов советского Верховного Совета. <a href=\"https://docs.historyrussia.org/ru/nodes/521433-o-pereimenovanii-mezhdunarodnyh-stalinskih-premiy-v-mezhdunarodnye-leninskie-premii-locale-nil-za-ukreplenie-mira-mezhdu-narodami-locale-nil-ukaz-prezidiuma-verhovnogo-soveta-sssr-moskva-6-sentyabrya-1956-g#mode/inspect/page/1/zoom/4\">Скан: «Ведомости Верховного Совета СССР», 1956, № 18, ст. 393, стр. 258</a>.",
-    fn4: "«Регионы» здесь — рабочие бины для карты, а не политические границы. Европа и Азия разрезаны по координатам рождения на географические подрегионы; в Северной Америке отдельно стоят США, Канада и Куба, а остальное — Центральная Америка и Карибы; Африка, Южная Америка и Океания взяты целиком. Так квадраты остаются сравнимыми, даже когда государственные границы на шкале XX века сдвигались.",
+    fn4: "XIX и XX века были временем активного, документированного изменения границ. Страны и политические образования появлялись и исчезали. Миллионы людей переезжали - добровольно или против своей воли. Поэтому мы сначала геокодировали места рождения лауреатов на основе Викиданных, чтобы показать общее распределение, а затем собрали их в «регионы мест рождения», удобные для визуального сравнения. Далее из указов о премии мы взяли у каждого лауреата страну, представителем которой его объявляли (аффилиацию), и также разделили их на «регионы активной деятельности» на момент премии. После мы сравнили эти «регионы» между собой.",
+    fn5: "«Классы» задаёт автор этой работы. Сначала для простоты берём первое слово (фразу) в указе и относим его к одному из шести «классов». Например, «почетному директору Эколь Нормаль (Высшей нормальной школы) в Севре» - учёный; «писательнице» - деятель культуры.",
+    fn6: "66 из 161 лауреатов в указе описаны больше чем одной фразой. Например, «профессору, депутату парламента», «пастору, общественному деятелю», «общественному и государственному деятелю», «профессору международного и церковного права университета гор. Грац». Мы классифицируем оба и визуализируем пересечение.",
+    fn7: "Также упомянут в официальном бюллетене государственных актов советского Верховного Совета от <a href=\"https://vedomosti.sssr.su/1989/29/\">1989, № 27, ст. 534</a>, но не отсканирован.",
+    fn8: "Самый доступный в интернете документ на тему проекта. <a href=\"https://ru.wikisource.org/wiki/Указ_Президиума_ВС_СССР_от_24.03.1951_о_дипломе_лауреата_международной_Сталинской_премии_«За_укрепление_мира_между_народами»\">Указ о дипломе</a>, <a href=\"https://ru.wikisource.org/wiki/Указ_Президиума_ВС_СССР_от_24.03.1951_о_золотой_нагрудной_медали_лауреата_международной_Сталинской_премии_«За_укрепление_мира_между_народами»\">указ о золотой нагрудной медали</a> - есть на Wikisource. Расшифровка указа об учреждении есть также на <a href=\"https://oldgazette.org/pravda/21121949/text2.html#1\">oldgazette.org</a>.",
+    fn9: "Для многих борцов за свободу, и нередко во времена холодной войны шире, между этими шагами была большая разница. На примере Нельсона Манделы. <em>Присуждение:</em> принято решение присудить ему Международную Ленинскую премию мира. <em>Объявление:</em> решение публично объявлено, например опубликовано в газете «Правда». <em>Награждение:</em> Мандела удостоен премии. <em>Вручение:</em> ему фактически передали награду - он получил её только через 12 лет (<a href=\"https://www.deseret.com/2002/10/30/19685808/mandela-finally-picks-up-his-lenin-peace-prize/\">Deseret News, 30 октября 2002</a>). Графики здесь следуют году из указа и дню объявления, а не дню, когда медаль оказалась в руках.",
     h1: "От Сталинской до Ленинской: советская международная премия «За укрепление мира между народами»",
     opener: "Сорок лет, с 1950 по 1990 год, Советский Союз присуждал собственную премию мира. Она закончилась вместе с государством, которое её давало.",
-    intro: "Премии мира присуждают самые разные учреждения<sup class=\"fn\"><button type=\"button\" class=\"fn-ref\" id=\"fnref-1\" data-fn=\"1\">1</button></sup>. Их дают правительства, и их дают религиозные организации, университеты и частные фонды. Одни известны по всему миру, другие известны главным образом тем, кто их получил. Одни длятся всего несколько лет и затем исчезают. Другие присуждают и десятилетия спустя после учреждения. У каждой премии своё определение мира и миростроительства, и каждый наградный комитет судит по своим критериям и своим пристрастиям<sup class=\"fn\"><button type=\"button\" class=\"fn-ref\" id=\"fnref-2\" data-fn=\"2\">2</button></sup>. Премия, о которой здесь речь, из числа долгих, которые потом прекратились.",
+    intro: "Премии мира присуждают самые разные учреждения<sup class=\"fn\"><button type=\"button\" class=\"fn-ref\" id=\"fnref-1\" data-fn=\"1\">1</button></sup>. Их дают правительства, и их дают религиозные организации, университеты и частные фонды. Одни известны по всему миру, другие известны главным образом тем, кто их получил. Одни длятся всего несколько лет и затем исчезают. Другие присуждают и десятилетия спустя после учреждения. У каждой премии своё определение мира и миростроительства, и каждый наградный комитет судит по своим критериям и своим пристрастиям<sup class=\"fn\"><button type=\"button\" class=\"fn-ref\" id=\"fnref-2\" data-fn=\"2\">2</button></sup>. История ниже - об одной из самых долгих, массовых и важных премий мира XX века.",
     hook: "<p>Международная Ленинская премия «За укрепление мира между народами» (до 1955 года: Международная Сталинская премия «За укрепление мира между народами») учреждена 20 декабря 1949 года Президиумом Верховного Совета СССР к семидесятилетию Иосифа Сталина. Её присуждали ежегодно в Москве, не более чем десяти человекам.</p><p>Премия считалась ответом Советского Союза на Нобелевскую премию мира, и её присуждал международный комитет. Обычно награждали сразу нескольких человек. Председателем комитета с 1950 по 1973 год был физик Дмитрий Скобельцын, затем до 1987 года онколог Николай Блохин и, наконец, после того как в 1989 году порядок премии изменили, инженер-сварщик Борис Патон.</p><p>В ходе десталинизации название изменили указом Президиума Верховного Совета от 6 сентября 1956 года на Международную Ленинскую премию «За укрепление мира между народами». Всех прежних лауреатов попросили вернуть медали для обмена. После этого лауреатов объявляли уже не в день рождения Сталина в декабре, а обычно 1 мая.</p><p>11 декабря 1989 года Верховный Совет заново установил порядок присуждения премии. Её должны были присуждать раз в два года, а лауреата или лауреатов объявлять в день рождения Ленина, 22 апреля. До распада Советского Союза в 1991 году по новым правилам премию присудили только ещё один раз.</p>",
-    coldWarEssay: "<p>Учредительный документ объявил премию наградой людям, которые способствовали укреплению мира и боролись против поджигателей войны. Он заявлял о свободе от политических, религиозных, расовых и иных пристрастий. Однако по мере того как во всё новых театрах глобального противостояния, известного как холодная война, вспыхивали всё новые «пожары», капиталистический блок стал представлять советскую премию мира орудием идеологического влияния коммунистического блока. Однозначная связь с ведущим игроком противоположного лагеря — премию учредила советская законодательная власть и она же формировала международный комитет для рассмотрения номинаций — не смягчала враждебности. Примечательно, что очень похожее недоверие существовало и по другую сторону «железного занавеса» в отношении главной западной награды — Нобелевской премии мира.</p>",
+    coldWarEssay: "<p>Учредительный документ объявил премию наградой людям, которые способствовали укреплению мира и боролись против поджигателей войны. Он заявлял о свободе от политических, религиозных, расовых и иных пристрастий. Однако по мере того как во всё новых театрах глобального противостояния, известного как холодная война, вспыхивали всё новые «пожары», капиталистический блок стал представлять советскую премию мира орудием идеологического влияния коммунистического блока. Однозначная связь с ведущим игроком противоположного лагеря - премию учредила советская законодательная власть и она же формировала международный комитет для рассмотрения номинаций - не смягчала враждебности. Примечательно, что очень похожее недоверие существовало и по другую сторону «железного занавеса» в отношении главной западной награды - Нобелевской премии мира.</p>",
     occEssay: "<p>Указ 1949 года назначает премию гражданам любой страны за борьбу против поджигателей войны. Облака показывают, из какой публичной жизни эти люди попали в список.</p><p>Из 161 человека с портретами в этом рассказе 64 отнесены к государственным деятелям и 49 к деятелям культуры. Вместе они составляют большую часть списка. Ученых 15, общественных деятелей 16, религиозных деятелей 10, деятелей рабочего движения 7. Женщин 27. Двенадцать из них стоят в облаке государственных деятелей, семь среди общественных деятелей. В культурном облаке женщин четыре, и столько же среди ученых. Среди религиозных деятелей и в рабочем движении женщин нет.</p>",
     yearEssay: "<p>Указ 1949 года обещал от пяти до десяти премий в год. Столбики держат это обещание только вначале.</p><p>На 1950-1955 годы приходятся шесть полных лет и 45 человек. Самый короткий из этих столбиков насчитывает шесть человек, а в 1953 году столбик доходит до десяти, до потолка, который указ сам себе поставил. С 1956 года премия не прерывается, но столбики становятся ниже, часто в четыре или пять человек, а с конца 1960-х одна группа часто покрывает два года. Промежуток 1980-1982 покрывает три года. Всего групп двадцать девять. Одна из них, за 1990 год, состоит из одного человека. Отдельной группы за 1987, 1988 и 1989 год на портретных графиках нет.</p><p>Женщины в премии с первого года: в 1950-м их трое из семи. Дальше целые годы проходят без них. Плотнее всего они стоят в группе 1977-1978 годов: четыре из шести. Среди лауреатов сталинских лет женщин 10 из 45, среди более поздних с портретами 17 из 116.</p>",
-    renameEssay: "<p>На графике 1956 год не пустой. В этой группе семь человек с портретами, и в списке они уже идут как лауреаты Ленинской премии. Между смертью Сталина и переименованием — около трёх лет «Правды», порядка тысячи номеров. Карусель начинается с сообщения о смерти и дальше идёт через обычные полосы уже начавшейся партийной борьбы: кризис лидерства, конфликт взглядов и планов — стратегий в политике и экономике. Рисунок знаком — не повтор, а рифма: как Второй триумвират после смерти Цезаря (Октавиан, Антоний, Лепид) или термидорианский переворот во Франции после казни Робеспьера. История не повторяется, но часто рифмуется. Для этой истории почти вся карусель — шум. Важны два кадра: 2 июля 1956 года газета печатает постановление ЦК «О преодолении культа личности и его последствий»; в сентябре премия меняет имя и портрет на медали.</p><p>Указ о переименовании датирован 6 сентября 1956 года. Он не учреждает новую премию и не закрывает старую. Первая фраза объясняет переименование пожеланиями комитетов. Сумма не меняется: по-прежнему 100 тысяч рублей. Пункт 3 распространяет на лауреатов 1950-1955 годов только диплом и медаль, подпункты «а» и «б», и не распространяет на них денежную часть. Прежних лауреатов, как уже сказано выше, просили вернуть медаль для обмена: на старой портрет Сталина, на новой портрет Ленина. Указ по-прежнему говорит «ежегодно» и «до десяти». Ни один столбик после 1953 года до десяти не доходит.</p>",
-    destalinLabel: "Десталинизация в «Правде», 1953–1956",
+    renameEssay: "<p>На графике 1956 год не пустой. В этой группе семь человек с портретами, и в списке они уже идут как лауреаты Ленинской премии. Между смертью Сталина и переименованием - около трёх лет «Правды», порядка тысячи номеров. Карусель начинается с сообщения о смерти и дальше идёт через обычные полосы уже начавшейся партийной борьбы: кризис лидерства, конфликт взглядов и планов - стратегий в политике и экономике. Рисунок знаком - не повтор, а рифма: как Второй триумвират после смерти Цезаря (Октавиан, Антоний, Лепид) или термидорианский переворот во Франции после казни Робеспьера. История не повторяется, но часто рифмуется. Для этой истории почти вся карусель - шум. Важны два кадра: 2 июля 1956 года газета печатает постановление ЦК «О преодолении культа личности и его последствий»; в сентябре премия меняет имя и портрет на медали.</p><p>Указ о переименовании датирован 6 сентября 1956 года. Он не учреждает новую премию и не закрывает старую. Первая фраза объясняет переименование пожеланиями комитетов. Сумма не меняется: по-прежнему 100 тысяч рублей. Пункт 3 распространяет на лауреатов 1950-1955 годов только диплом и медаль, подпункты «а» и «б», и не распространяет на них денежную часть. Прежних лауреатов, как уже сказано выше, просили вернуть медаль для обмена: на старой портрет Сталина, на новой портрет Ленина. Указ по-прежнему говорит «ежегодно» и «до десяти». Ни один столбик после 1953 года до десяти не доходит.</p>",
+    destalinLabel: "Десталинизация в «Правде», 1953-1956",
     destalinNext: "Дальше",
     destalinPrev: "Назад",
     destalinWhy: "Но почему?",
@@ -453,16 +545,16 @@ var I18N = {
     destalinCapRename: "6 сентября 1956 премию переименовали из сталинской в ленинскую",
     destalinDeathScanAlt: "«Правда», 6 марта 1953 г., стр. 1. Сообщение о смерти И. В. Сталина.",
     destalinDeathSide: "Увеличить сообщение о смерти",
-    destalinDeathSource: "Первая полоса «Правды» с сообщением о смерти И. В. Сталина, включая медицинское заключение. <a href=\"https://archive.org/details/195365_1389\">Скан номера: «Правда», 6 марта 1953 г., № 65 (12633), стр. 1</a>.",
+    destalinDeathSource: "Первая полоса «Правды» с сообщением о смерти И. В. Сталина, включая медицинское заключение. <a href=\"https://archive.org/details/195365_1389\" title=\"«Правда», 6 марта 1953 г., № 65 (12633), стр. 1\">Скан номера</a>.",
     destalin1953191ScanAlt: "«Правда», 10 июля 1953 г., стр. 1. Сообщение о снятии Берии.",
     destalinBeriaSide: "Увеличить сообщение о Берии",
-    destalin1953191Source: "Первая полоса «Правды» с сообщением ЦК и указом Президиума о снятии Л. П. Берии. <a href=\"https://archive.org/details/1953191_3088\">Скан номера: «Правда», 10 июля 1953 г., № 191 (12759), стр. 1</a>.",
+    destalin1953191Source: "Первая полоса «Правды» с сообщением ЦК и указом Президиума о снятии Л. П. Берии. <a href=\"https://archive.org/details/1953191_3088\" title=\"«Правда», 10 июля 1953 г., № 191 (12759), стр. 1\">Скан номера</a>.",
     destalin1955040ScanAlt: "«Правда», 9 февраля 1955 г., стр. 1. Освобождение Маленкова от обязанностей Председателя Совета Министров.",
     destalinMalenkovSide: "Увеличить сообщение об отставке Маленкова",
-    destalin1955040Source: "Первая полоса «Правды» с заседанием Верховного Совета, принявшим заявление Г. М. Маленкова об освобождении от обязанностей Председателя Совета Министров. <a href=\"https://archive.org/details/195540_9158\">Скан номера: «Правда», 9 февраля 1955 г., № 40 (13338), стр. 1</a>.",
+    destalin1955040Source: "Первая полоса «Правды» с заседанием Верховного Совета, принявшим заявление Г. М. Маленкова об освобождении от обязанностей Председателя Совета Министров. <a href=\"https://archive.org/details/195540_9158\" title=\"«Правда», 9 февраля 1955 г., № 40 (13338), стр. 1\">Скан номера</a>.",
     destalinCultScanAlt: "«Правда», 2 июля 1956 г., стр. 1. Постановление ЦК о преодолении культа личности.",
     destalinCultSide: "Увеличить заголовок постановления",
-    destalinCultSource: "Первая полоса «Правды» с постановлением ЦК о преодолении культа личности. <a href=\"https://archive.org/details/1956184_2372\">Скан номера: «Правда», 2 июля 1956 г., № 184 (13847), стр. 1</a>.",
+    destalinCultSource: "Первая полоса «Правды» с постановлением ЦК о преодолении культа личности. <a href=\"https://archive.org/details/1956184_2372\" title=\"«Правда», 2 июля 1956 г., № 184 (13847), стр. 1\">Скан номера</a>.",
     ageEssay: "<p>Указ говорит о выдающихся заслугах. На графике возраста эти заслуги принадлежат долгой публичной жизни. Средний возраст около шестидесяти лет, и пунктир стоит примерно там. Моложе сорока только восемь человек. Семидесяти пяти и старше восемнадцать человек. Основная масса списка между этими краями: 73 человека от 40 до 59 лет и 62 человека от 60 до 74.</p><p>Женщины в среднем немного моложе мужчин: около 57 лет против около 61. Разрыв небольшой. И в этом премия читается как список уже состоявшихся общественных биографий. Самых молодых и самых старых называет строка под этим абзацем. Важнее не край, а то, как пуст левый конец шкалы.</p>",
     mapEssay: "<p>Тот же указ говорит: граждане любой страны, независимо от политических, религиозных и расовых различий. Карта проверяет географию в этой фразе и не проверяет остальное. Рождение не есть гражданство и не есть страна, от которой человека выдвинули. Будь премия домашней почестью Советского Союза, рождения сгустились бы там.</p><p>Они сгустились в других местах. Больше всего записанных рождений во Франции, 12, затем в Германии, 12, в США, 9, и в Индии, 6. Германия в файле одна подпись, без деления на восточную и западную. Россия и Украина вместе дают восемь рождений. Других советских республик среди стран рождения нет. Названных стран рождения больше пятидесяти, так что список широкий. У каждого записанного рождения есть координаты на карте. Мир этой премии - по большей части мир людей, родившихся вне государства, которое её подписало.</p>",
     decree: "<header class=\"ukaz-head\"><p class=\"ukaz-kicker\">Указ</p><p>Президиума Верховного Совета СССР</p><p>Об учреждении международных</p><p>Сталинских премий</p><p>«За укрепление мира между народами»</p></header><div class=\"ukaz-body\"><p>1. Учредить международные Сталинские премии «За укрепление мира между народами».</p><p>Премии присуждаются гражданам любой страны мира, независимо от их политических, религиозных и расовых различий, за выдающиеся заслуги в деле борьбы против поджигателей войны и за укрепление мира.</p><p>2. Установить, что лица, награждаемые международной Сталинской премией, получают:</p><ul class=\"ukaz-items\"><li>а) диплом лауреата международной Сталинской премии;</li><li>б) золотую нагрудную медаль с изображением И. В. Сталина;</li><li>в) денежную премию в размере 100 тысяч рублей.</li></ul><p>3. Установить, что международные Сталинские премии «За укрепление мира между народами» присуждаются ежегодно в количестве от 5 до 10 премий специальным Комитетом по международным Сталинским премиям, образуемым Президиумом Верховного Совета СССР из представителей демократических сил различных стран мира.</p><p>4. Присуждение премий производить в день рождения Иосифа Виссарионовича Сталина - 21 декабря каждого года.</p><p>Первые премии присудить в 1950 году.</p></div><footer class=\"ukaz-signoff\"><p class=\"ukaz-sign\">Председатель Президиума Верховного Совета СССР <span class=\"ukaz-who\">Н. ШВЕРНИК.</span></p><p class=\"ukaz-sign\">Секретарь Президиума Верховного Совета СССР <span class=\"ukaz-who\">А. ГОРКИН.</span></p><p class=\"ukaz-place\">Москва, Кремль. 20 декабря 1949 г.</p></footer>",
@@ -471,10 +563,10 @@ var I18N = {
     decreeAnnotTitle: "Об учреждении международных Сталинских премий «За укрепление мира между народами»",
     decreeAnnotAnyone: "…гражданам любой страны мира, независимо от их политических, религиозных и расовых различий, за выдающиеся заслуги в деле борьбы против поджигателей войны и за укрепление мира.",
     decreeAnnotGifts: "…золотую нагрудную медаль; денежную премию в размере 100 тысяч рублей.",
-    decreeAnnotBirthday: "Присуждение премий производить в день рождения Иосифа Виссарионовича Сталина — 21 декабря каждого года.",
+    decreeAnnotBirthday: "Присуждение премий производить в день рождения Иосифа Виссарионовича Сталина - 21 декабря каждого года.",
     renameAnnotTitle: "О переименовании международных Сталинских премий в международные Ленинские премии «За укрепление мира между народами»",
     renameAnnotMedal: "…золотую нагрудную медаль с изображением В. И. Ленина; денежную премию в размере 100 тысяч рублей.",
-    renameAnnotExchange: "П.п. а) и б) § 2 — диплом и медаль, без денег — распространить также на получивших премию в 1950–1955 гг.",
+    renameAnnotExchange: "П.п. а) и б) § 2 - диплом и медаль, без денег - распространить также на получивших премию в 1950-1955 гг.",
     renameAnnotTen: "…присуждаются ежегодно в количестве до 10 премий Комитетом по международным Ленинским премиям.",
     destalinAnnotDeath: "5 марта в 9 час. 50 минут вечера после тяжелой болезни скончался Председатель Совета Министров … Иосиф Виссарионович СТАЛИН.",
     destalinAnnotBeria: "…заслушав и обсудив доклад тов. Маленкова Г. М. о преступных антипартийных и антигосударственных действиях Л. П. Берия, направленных на подрыв Советского государства в интересах иностранного капитала…",
@@ -483,14 +575,14 @@ var I18N = {
     decreeScanAlt: "«Правда», 21 декабря 1949 г., стр. 2. Указ отмечен в левой колонке сверху.",
     decreeSide: "Увеличить указ",
     decreePage: "Вся полоса",
-    decreeSource: "На снимке полоса официальной газеты советской компартии, посвящённая 70-летию И. В. Сталина, с напечатанным указом об учреждении премии. <a href=\"https://oldgazette.org/pravda/21121949/text2.html\">Расшифровка указа</a>. <a href=\"https://archive.org/details/1949355_7165\">Скан номера: «Правда», 21 декабря 1949 г., № 355 (11462), стр. 2</a>.",
+    decreeSource: "Вторая страница «Правды», официальной газеты советской компартии, выпуск посвящённый 70-летию И. Сталина с напечатанным указом об учреждении советской премии мира.<sup class=\"fn\"><button type=\"button\" class=\"fn-ref\" id=\"fnref-8\" data-fn=\"8\">8</button></sup>",
     rename: "<header class=\"ukaz-head\"><p class=\"ukaz-kicker\">Указ</p><p>Президиума Верховного Совета СССР</p><p>О переименовании международных</p><p>Сталинских премий</p><p>в международные Ленинские премии</p><p>«За укрепление мира между народами»</p></header><div class=\"ukaz-body\"><p>1. Учитывая пожелания Комитетов по международным Сталинским премиям<sup>1</sup>, переименовать международные Сталинские премии в международные Ленинские премии «За укрепление мира между народами».</p><p>2. Установить, что лица, награждаемые международной Ленинской премией, получают:</p><ul class=\"ukaz-items\"><li>а) диплом лауреата международной Ленинской премии;</li><li>б) золотую нагрудную медаль с изображением В. И. Ленина;</li><li>в) денежную премию в размере 100 тысяч рублей.</li></ul><p>3. П. п. а) и б) § 2 настоящего Указа распространить также и на лиц, получивших Международную премию «За укрепление мира между народами» в период 1950-1955 гг.</p><p>4. Установить, что международные Ленинские премии «За укрепление мира между народами» присуждаются ежегодно в количестве до 10 премий Комитетом по международным Ленинским премиям.</p><p>5. Порядок выдвижения кандидатов на международные Ленинские премии «За укрепление мира между народами» и условия присуждения этих премий разрабатывает и публикует Комитет по международным Ленинским премиям.</p></div><footer class=\"ukaz-signoff\"><p class=\"ukaz-place\">Москва, Кремль. 6 сентября 1956 г.</p></footer><p class=\"ukaz-note\"><sup>1</sup> Были учреждены Указом Президиума Верховного Совета СССР от 20 декабря 1949 г. («Ведомости Верховного Совета СССР», 1949, № 66).</p>",
     renameScanAlt: "«Правда», 8 сентября 1956 г., стр. 1. Указ о переименовании отмечен слева внизу.",
-    renameSource: "На снимке полоса «Правды» с напечатанным указом о переименовании премии.<sup class=\"fn\"><button type=\"button\" class=\"fn-ref\" id=\"fnref-3\" data-fn=\"3\">3</button></sup> <a href=\"https://archive.org/details/1956252_3945\">Скан номера: «Правда», 8 сентября 1956 г., № 252 (13915), стр. 1</a>.",
-    rename1989Essay: "<p>Постановление датировано 11 декабря 1989 года. Полный текст — в другом месте, и это больше, чем переименование.</p><p>Под новым именем премию присудили только один раз: Манделе, за 1990 год. На следующий год Союз распался.</p>",
-    rename1989: "<header class=\"ukaz-head\"><p class=\"ukaz-kicker\">Постановление</p><p>Президиума Верховного Совета СССР</p><p>от 11 декабря 1989 г. № 905-1</p><p>О Международной Ленинской премии мира</p></header><div class=\"ukaz-body\"><p class=\"ukaz-note\"><em>«Правда»</em>, 12 декабря 1989 г.: «По сообщению Комитета Верховного Совета СССР по международным делам, с которым выступил А. С. Дзасохов, рассмотрен вопрос о международной Ленинской премии мира. Утверждены новый статус премии и положение о Комитете по международным Ленинским премиям мира.»</p><p>Рассмотрев предложение Комитета Верховного Совета СССР по международным делам о преобразовании международной Ленинской премии «За укрепление мира между народами» и совершенствовании практики ее присуждения с учетом современного этапа движения широких общественных сил за выживание человечества, строительство безъядерного и ненасильственного мира, утверждение в международных делах нового политического мышления, Президиум Верховного Совета СССР постановляет:</p><p>1. Считать целесообразным впредь именовать международную Ленинскую премию «За укрепление мира между народами» международной Ленинской премией мира.</p><p>2. Утвердить Статут международной Ленинской премии мира.</p><p>3. Утвердить Положение о Комитете по международным Ленинским премиям мира.</p><p>4. Считать утратившими силу:</p><ul class=\"ukaz-items\"><li>Указ Президиума Верховного Совета СССР от 6 сентября 1956 года «О международных Ленинских премиях «За укрепление мира между народами»» в редакции Указов от 15 февраля 1980 года и 26 ноября 1986 года;</li><li>Указ Президиума Верховного Совета СССР от 22 апреля 1957 года «Об утверждении диплома и золотой нагрудной медали лауреата международной Ленинской премии «За укрепление мира между народами»» в редакции Указа от 15 февраля 1980 года;</li><li>Постановление Президиума Верховного Совета СССР от 22 апреля 1966 года «О Комитете по международным Ленинским премиям «За укрепление мира между народами»» в редакции Указов от 15 февраля 1980 года и 26 ноября 1986 года.</li></ul></div><header class=\"ukaz-head\"><p class=\"ukaz-kicker\">Из статута</p><p>Международной Ленинской премии мира</p><p>(утверждён тем же постановлением)</p></header><div class=\"ukaz-body\"><p>1. Международная Ленинская премия мира присуждается гражданам любой страны независимо от их политических взглядов, национальности, расы, вероисповедания и общественного положения за выдающиеся заслуги в деятельности, направленной на предотвращение ядерной катастрофы, прекращение гонки вооружений и достижение разоружения, обеспечение всеобщей безопасности, строительство безъядерного и ненасильственного мира, укрепление международного сообщества на принципах нового политического мышления, а также за вклад в борьбу за общечеловеческие интересы и ценности.</p><p>3. Кандидатов на соискание премии могут выдвигать: правительства; академии наук; ассоциации научных работников; союзы писателей, журналистов, художников, композиторов; объединения юристов; женские и молодежные ассоциации и организации; инициативные группы; национальные и международные общественные фонды, организации и движения; научные и исследовательские центры, институты и учреждения; учебные заведения.</p><p>7. … Решение Комитета о присуждении премии публикуется в печати в день рождения В. И. Ленина — 22 апреля соответствующего года.</p><p>9. Лица, удостоенные Международной Ленинской премии мира, получают: диплом лауреата Международной Ленинской премии мира; золотую нагрудную медаль с изображением В. И. Ленина; денежную часть премии в размере 50 тысяч рублей или эквивалентную сумму в иностранной валюте. …</p></div><footer class=\"ukaz-signoff\"><p class=\"ukaz-place\">Москва, Кремль. 11 декабря 1989 г.</p></footer>",
+    renameSource: "На снимке полоса «Правды» с напечатанным указом о переименовании премии.<sup class=\"fn\"><button type=\"button\" class=\"fn-ref\" id=\"fnref-3\" data-fn=\"3\">3</button></sup> <a href=\"https://archive.org/details/1956252_3945\" title=\"«Правда», 8 сентября 1956 г., № 252 (13915), стр. 1\">Скан номера</a>.",
+    rename1989Essay: "<p>Постановление датировано 11 декабря 1989 года. Полный текст - в другом месте, и это больше, чем переименование.</p><p>Под новым именем премию присудили только один раз: Манделе, за 1990 год. На следующий год Союз распался.</p>",
+    rename1989: "<header class=\"ukaz-head\"><p class=\"ukaz-kicker\">Постановление</p><p>Президиума Верховного Совета СССР</p><p>от 11 декабря 1989 г. № 905-1</p><p>О Международной Ленинской премии мира</p></header><div class=\"ukaz-body\"><p class=\"ukaz-note\"><em>«Правда»</em>, 12 декабря 1989 г.: «По сообщению Комитета Верховного Совета СССР по международным делам, с которым выступил А. С. Дзасохов, рассмотрен вопрос о международной Ленинской премии мира. Утверждены новый статус премии и положение о Комитете по международным Ленинским премиям мира.»</p><p>Рассмотрев предложение Комитета Верховного Совета СССР по международным делам о преобразовании международной Ленинской премии «За укрепление мира между народами» и совершенствовании практики ее присуждения с учетом современного этапа движения широких общественных сил за выживание человечества, строительство безъядерного и ненасильственного мира, утверждение в международных делах нового политического мышления, Президиум Верховного Совета СССР постановляет:</p><p>1. Считать целесообразным впредь именовать международную Ленинскую премию «За укрепление мира между народами» международной Ленинской премией мира.</p><p>2. Утвердить Статут международной Ленинской премии мира.</p><p>3. Утвердить Положение о Комитете по международным Ленинским премиям мира.</p><p>4. Считать утратившими силу:</p><ul class=\"ukaz-items\"><li>Указ Президиума Верховного Совета СССР от 6 сентября 1956 года «О международных Ленинских премиях «За укрепление мира между народами»» в редакции Указов от 15 февраля 1980 года и 26 ноября 1986 года;</li><li>Указ Президиума Верховного Совета СССР от 22 апреля 1957 года «Об утверждении диплома и золотой нагрудной медали лауреата международной Ленинской премии «За укрепление мира между народами»» в редакции Указа от 15 февраля 1980 года;</li><li>Постановление Президиума Верховного Совета СССР от 22 апреля 1966 года «О Комитете по международным Ленинским премиям «За укрепление мира между народами»» в редакции Указов от 15 февраля 1980 года и 26 ноября 1986 года.</li></ul></div><header class=\"ukaz-head\"><p class=\"ukaz-kicker\">Из статута</p><p>Международной Ленинской премии мира</p><p>(утверждён тем же постановлением)</p></header><div class=\"ukaz-body\"><p>1. Международная Ленинская премия мира присуждается гражданам любой страны независимо от их политических взглядов, национальности, расы, вероисповедания и общественного положения за выдающиеся заслуги в деятельности, направленной на предотвращение ядерной катастрофы, прекращение гонки вооружений и достижение разоружения, обеспечение всеобщей безопасности, строительство безъядерного и ненасильственного мира, укрепление международного сообщества на принципах нового политического мышления, а также за вклад в борьбу за общечеловеческие интересы и ценности.</p><p>3. Кандидатов на соискание премии могут выдвигать: правительства; академии наук; ассоциации научных работников; союзы писателей, журналистов, художников, композиторов; объединения юристов; женские и молодежные ассоциации и организации; инициативные группы; национальные и международные общественные фонды, организации и движения; научные и исследовательские центры, институты и учреждения; учебные заведения.</p><p>7. … Решение Комитета о присуждении премии публикуется в печати в день рождения В. И. Ленина - 22 апреля соответствующего года.</p><p>9. Лица, удостоенные Международной Ленинской премии мира, получают: диплом лауреата Международной Ленинской премии мира; золотую нагрудную медаль с изображением В. И. Ленина; денежную часть премии в размере 50 тысяч рублей или эквивалентную сумму в иностранной валюте. …</p></div><footer class=\"ukaz-signoff\"><p class=\"ukaz-place\">Москва, Кремль. 11 декабря 1989 г.</p></footer>",
     rename1989ScanAlt: "«Правда», 12 декабря 1989 г., стр. 1. Заметка о заседании Президиума отмечена в правой колонке сверху.",
-    rename1989Source: "На снимке полоса «Правды» с сообщением о заседании Президиума на следующий день после постановления; сам указ газета не печатает. Полный текст постановления и утверждённого им статута — в другом месте. <a href=\"http://pravo.levonevsky.org/baza/soviet/sssr1118.htm\">Расшифровка постановления и статута</a>. <a href=\"https://archive.org/details/1989346_4216\">Скан номера: «Правда», 12 декабря 1989 г., № 346 (26064), стр. 1</a>. <a href=\"https://vedomosti.sssr.su/1989/29/\">«Ведомости Съезда народных депутатов СССР и Верховного Совета СССР», 1989, № 27, ст. 534</a>.",
+    rename1989Source: "На снимке полоса «Правды» с сообщением о заседании Президиума на следующий день после постановления; детали не печатают. Полный текст постановления и утверждённого им статута - в другом месте. <a href=\"http://pravo.levonevsky.org/baza/soviet/sssr1118.htm\">Расшифровка постановления и статута</a>. <a href=\"https://archive.org/details/1989346_4216\" title=\"«Правда», 12 декабря 1989 г., № 346 (26064), стр. 1\">Скан номера</a>. <a href=\"https://vedomosti.sssr.su/1989/29/\">«Ведомости Съезда народных депутатов СССР и Верховного Совета СССР», 1989, № 27, ст. 534</a>.",
     n1: "Рис. 1.",
     hAll: "Кто получил премию",
     capAll: "Кто получил премию",
@@ -501,7 +593,7 @@ var I18N = {
     n2: "Рис. 2.",
     capPress: "(После)военный мир, в котором учреждали премию",
     hOcc: "Кем они были",
-    capOcc: "Чем они занимались?",
+    capOcc: "Чем они занимались, если кратко?",
     capOccWorld: "Из какого «мира» они были?",
     hWorlds: "Миры холодной войны (черновик)",
     worldsParkNote: "Отложено сюда, пока решаем, вписываются ли они в основной рассказ.",
@@ -514,23 +606,33 @@ var I18N = {
     world_first: "«Первый мир»",
     world_second: "«Второй мир»",
     world_third: "«Третий мир»",
-    srcOcc: "Каждое облако — один класс: государственный деятель, общественный деятель, ученый, деятель культуры, религиозный деятель или деятель рабочего движения. Писатели, художники, композиторы и кинематографисты вместе в «деятеле культуры». Профсоюзные лидеры — в «деятелях рабочего движения». Женщины ближе к центру своего облака. Если подпись к портрету или строка указа прочитаны в «Правде», класс берётся из этой формулировки; иначе — из чтения Викиданных в laureates.csv. Во всплывающих подсказках, где есть строка из «Правды», показывается она.",
+    srcOcc: "Один главный класс на человека. Женщины ближе к центру своего облака.",
     srcOccWorld: "Каждое облако - чтение WINNER_COUNTRY по трём мирам холодной войны: «Первый мир» = сфера США / Запада, «Второй мир» = советская / социалистическая сфера, «Третий мир» = остальные. При двух странах берётся первая. Женщины ближе к центру своего облака. Источник: laureates.csv.",
     n3: "Рис. 3.",
     n3a: "Рис. 3а.",
-    capOccChord: "Где классы пересекаются",
-    srcOccChord: "Каждый гексагон — лауреат с описанием рода занятий в «Правде». В облаках — и в их подписях — только люди одного класса, поэтому числа меньше, чем на рис. 3. Класс, который делит больше всего людей с другими, стоит в центре, остальные расходятся вокруг него лепестками. Гексагоны на стеблях между облаками — люди, которых «Правда» отнесла к двум классам; число у стебля — их количество. Трёхклассовые описания свёрнуты в сильнейшую пару, сохраняющую класс человека с рис. 3. Облако вместе со стеблями охватывает всех, кому «Правда» дала этот класс, поэтому число может быть больше, чем на рис. 3, где у каждого один главный класс. На рис. 3 у каждого по-прежнему один главный класс.",
-    occChordAria: "Гекс-диаграмма в форме цветка: общественные деятели в центре, пять других классов — лепестки, стебли — люди сразу из двух классов.",
-    occChordHint: "Из {m} лауреатов, которых «Правда» описала двумя классами, {c} — ещё и «общественные деятели»: этот ярлык газета чаще всего добавляла к основной профессии.",
+    n3b: "Рис. 3б.",
+    capOccRain: "Кем их представили в указе о награждении",
+    srcOccRain: "Строки о занятиях из указов о присуждении, опубликованных в «Правде», и из подписей к портретам.",
+    capOccChord: "Победители многогранны",
+    srcOccChord: "На стеблях - люди, которых «Правда» отнесла к двум классам.",
+    occStackRain: "Указы были довольно ёмкие. «Совершенство достигается не тогда, когда уже нечего прибавить, а когда уже ничего нельзя отнять».",
+    occStackClouds: "Попробуем их классифицировать и показать группами.<sup class=\"fn\"><button type=\"button\" class=\"fn-ref\" id=\"fnref-5\" data-fn=\"5\">5</button></sup>",
+    occStackChord: "Однако, для 41% лауреатов одного класса мало.<sup class=\"fn\"><button type=\"button\" class=\"fn-ref\" id=\"fnref-6\" data-fn=\"6\">6</button></sup>",
+    occStackCivic: "В то же время, 61 из 66 человек с несколькими классами - «общественные деятели»: этот ярлык добавляли чаще всего. Вероятно, бюрократический язык указов не может уместить истории жизни.",
+    occStackTriple: "У двоих сразу три класса. Это сложно показать визуально, но они ученые, государственные, общественные, и культурные деятели.",
+    occStackHide: "(скрыть)",
+    occStackShow: "(открыть\nисторию)",
+    occChordAria: "Гекс-диаграмма в форме цветка: общественные деятели в центре, пять других классов - лепестки, стебли - люди сразу из двух классов.",
+    occChordHint: "Из {m} лауреатов, которых «Правда» описала двумя классами, {c} - ещё и «общественные деятели»: этот ярлык газета чаще всего добавляла к основной профессии.",
     occChordBridge: "{n} человек в хабах пересечений",
     occChordPair: "{a} ∩ {b}: {n}",
 
     hYear: "Когда присуждали премию",
-    capYear: "В каком году каждый её получил?",
+    capYear: "В каких годах они были награждены?",
     srcYear: "Каждый столбик - одна группа премии, на середине года или промежутка в указе. Женщины внизу столбика. Сталинская премия идет по 1955 год. С 1956 года это Ленинская премия, а 1990 год - единственная Ленинская премия мира. Источник: laureates.csv.",
     srcYearWorld: "Каждый столбик - одна группа премии, на середине года или промежутка в указе. Знаки окрашены по трём мирам холодной войны из WINNER_COUNTRY: «Первый мир» = сфера США / Запада, «Второй мир» = советская / социалистическая сфера, «Третий мир» = остальные. «Первый мир» внизу столбика. Источник: laureates.csv.",
-    srcYearSpan: "При прокрутке группы за несколько лет растягиваются на годы из указа; штриховка отмечает эти промежутки. Однолетние премии остаются квадратом. Женщины по-прежнему внизу столбика. Источник: laureates.csv.",
-    srcYearSpanWorld: "При прокрутке группы за несколько лет растягиваются на годы из указа; штриховка отмечает эти промежутки. Окраска по миру холодной войны сохраняется. «Первый мир» внизу столбика. Источник: laureates.csv.",
+    srcYearSpan: "Группы за несколько лет растянуты на годы из указа; штриховка отмечает эти промежутки. Однолетние премии остаются квадратом. Женщины по-прежнему внизу столбика. Источник: laureates.csv.",
+    srcYearSpanWorld: "Группы за несколько лет растянуты на годы из указа; штриховка отмечает эти промежутки. Окраска по миру холодной войны сохраняется. «Первый мир» внизу столбика. Источник: laureates.csv.",
     yearAriaWorld: "Лауреаты по году премии. Каждый квадрат - один человек, цвет - мир холодной войны.",
     n4: "Рис. 4.",
     n4a: "Рис. 4а.",
@@ -549,10 +651,10 @@ var I18N = {
     announceNoteRename: "После смерти Сталина около двух лет паузы, пока премия снова не устаканивается уже под именем Ленина; группу 1956 года объявляют только в начале 1958-го.",
     announceNoteAnnualLenin: "До середины 1960-х Ленинские премии обычно объявляли около 1 мая за предыдущий год.",
     announceNoteBiennial: "С конца 1960-х одна группа часто покрывает два года, названных вместе в указе.",
-    announceNoteGap3: "Группа 1980–1982 называет три года в одном указе — самый широкий промежуток на графике.",
-    announceNotePerestroika: "В разгар перестройки премия затихает и возвращается ещё раз в 1990-м — примерно три года от последней обычной группы.",
-    announceAria: "Две параллельные оси времени. Вверху — год или промежуток в указе. Внизу — день объявления. Ленты соединяют присуждение с объявлением; размер ромба — число людей.",
-    srcAnnounce: "Верхняя ось — год или промежуток в указе. Нижняя — день объявления или решения (META_announced_date). Лента соединяет их; размер ромба — число людей в объявлении. Короткие заметки открывают пояснения: ежегодный ритм, паузу после смерти Сталина, двух- и трёхлетние группы и длинный разрыв до последней премии. Источник: laureates.csv.",
+    announceNoteGap3: "Группа 1980-1982 называет три года в одном указе - самый широкий промежуток на графике.",
+    announceNotePerestroika: "В разгар перестройки премия затихает и возвращается ещё раз в 1990-м - примерно три года от последней обычной группы.",
+    announceAria: "Две параллельные оси времени. Вверху - год или промежуток в указе. Внизу - день объявления. Ленты соединяют присуждение с объявлением; размер ромба - число людей.",
+    srcAnnounce: "Верхняя ось - год или промежуток в указе. Нижняя - день объявления или решения (META_announced_date). Лента соединяет их; размер ромба - число людей в объявлении. Короткие заметки открывают пояснения: ежегодный ритм, паузу после смерти Сталина, двух- и трёхлетние группы и длинный разрыв до последней премии. Источник: laureates.csv.",
     hAge: "Сколько им было лет",
     capAge: "Сколько им было лет, когда их наградили?",
     n6: "Рис. 6.",
@@ -561,9 +663,21 @@ var I18N = {
     aliveYes: "Живы сегодня",
     aliveNo: "Умерли",
     aliveAria: "Тот же рой возрастов, что на рис. 6. Умершие лауреаты приглушены; живой знак остаётся в цвете и с кольцом.",
-    srcAlive: "Тот же рой возрастов, что на рис. 6. Знаки без записанной даты смерти остаются в цвете; остальные бледнеют. Живы сегодня — WINNER_BIO_living из laureates.csv (нет даты смерти в Викиданных). Источник: laureates.csv.",
+    srcAlive: "Тот же рой возрастов, что на рис. 6. Знаки без записанной даты смерти остаются в цвете; остальные бледнеют. Живы сегодня - WINNER_BIO_living из laureates.csv (нет даты смерти в Викиданных). Источник: laureates.csv.",
+    n6b: "Рис. 6б.",
+    capPosthumous: "Кого наградили посмертно?",
+    posthumousYes: "Посмертно",
+    posthumousNo: "При жизни",
+    posthumousAria: "Тот же рой возрастов, что на рис. 6. Посмертные лауреаты остаются в цвете и с кольцом; остальные приглушены.",
+    srcPosthumous: "Тот же рой возрастов, что на рис. 6. Посмертно - если так сказано в указе, или если год смерти раньше года объявления. Источник: laureates.csv; формулировка указа в pravda_occupations.js.",
+    n6c: "Рис. 6в.",
+    capCentury: "Кто родился в XIX веке?",
+    centuryYes: "Родились в XIX веке",
+    centuryNo: "Родились в XX веке",
+    centuryAria: "Тот же рой возрастов, что на рис. 6. Родившиеся до 1900 года остаются в цвете и с кольцом; остальные приглушены.",
+    srcCentury: "Тот же рой возрастов, что на рис. 6. Знаки с годом рождения до 1900 остаются в цвете; остальные бледнеют. Источник: laureates.csv (WINNER_BIRTH_year).",
     n7: "Рис. 7.",
-    capRename1989: "От Ленинской к Международной Ленинской в «перестройку»",
+    capRename1989: "От «За укрепление мира между народами» к Международной Ленинской в «перестройку»",
     rename1989Label: "Переписывание премии в 1989 году",
     rename1989Side: "Увеличить заметку",
     rename1989UkazSide: "Увеличить постановление",
@@ -574,66 +688,58 @@ var I18N = {
     rename1989AnnotRename: "1. Считать целесообразным впредь именовать международную Ленинскую премию «За укрепление мира между народами» международной Ленинской премией мира.",
     rename1989AnnotIdeology: "…за выдающиеся заслуги в деятельности, направленной на предотвращение ядерной катастрофы, прекращение гонки вооружений и разоружение, обеспечение всеобщей и равной безопасности, строительство безъядерного и ненасильственного мира, укрепление взаимопонимания и сотрудничества между народами; за реальный вклад в утверждение нового политического мышления, в демилитаризацию, демократизацию и гуманизацию международных отношений на основе общепринятых норм морали и права, в решение глобальных проблем современности; за активную миротворческую деятельность и неустанную борьбу в защиту общечеловеческих интересов и ценностей.",
     rename1989AnnotGroups: "3. Соискателями премии могут быть: граждане любой страны независимо от политических взглядов и мировоззренческих позиций; инициативные группы; национальные и международные общественные фонды, организации и движения; научные и исследовательские центры, институты и учреждения, учебные заведения.",
-    rename1989AnnotApril: "…публикуется в печати в день рождения В. И. Ленина — 22 апреля…",
+    rename1989AnnotApril: "…публикуется в печати в день рождения В. И. Ленина - 22 апреля…",
     rename1989AnnotCash: "…золотая медаль с изображением В. И. Ленина и денежная часть премии в размере 50 тысяч рублей или эквивалентная сумма в иностранной валюте.",
     rename1989CapPravda: "К концу 1989 года страна уже была глубоко в «перестройке»: дефицит, политическая нестабильность и внутренний кризис. «Правда» напечатала только короткую заметку, но изменение в политике и обществе не обошли и премию стороной",
     rename1989AskPravda: "А что там сказано?",
-    rename1989CapUkaz: "Постановление переименовывает премию и формулирует новую идею — движение масс за выживание человечества, строительство безъядерного мира без насилия, новое политическое мышление. Также впервые появляется и довольно широкий статут о премии",
+    rename1989CapUkaz: "Постановление переименовывает премию и формулирует новую идею - движение масс за выживание человечества, строительство безъядерного мира без насилия, новое политическое мышление. Также впервые появляется и довольно широкий статут о премии",
     rename1989AskUkaz: "А что в статуте?",
     rename1989CapStatute: "Статут поясняет идею из постановления, говоря о равной безопасности, укреплении взаимопонимания, демилитаризации, демократизации, общей морали и праве, глобальных проблемах. Также говорит, что премию теперь могут получать группы людей и организации",
     rename1989AskStatute: "А что написала «Правда»?",
     rename1989ScanAlt: "«Правда», 12 декабря 1989 г., стр. 1. Заметка о заседании Президиума отмечена в правой колонке сверху.",
     rename1989UkazScanAlt: "Постановление Президиума Верховного Совета СССР от 11 декабря 1989 г. № 905-1 о Международной Ленинской премии мира.",
     rename1989StatuteScanAlt: "Статут Международной Ленинской премии мира, утверждён 11 декабря 1989 г.",
-    rename1989PravdaSource: "Первая полоса «Правды» с короткой заметкой о заседании Президиума. Сам указ газета не печатает. <a href=\"https://archive.org/details/1989346_4216\">Скан номера: «Правда», 12 декабря 1989 г., № 346 (26064), стр. 1</a>.",
-    rename1989UkazSource: "Постановление Президиума Верховного Совета СССР от 11 декабря 1989 г. № 905-1. <a href=\"http://pravo.levonevsky.org/baza/soviet/sssr1118.htm\">Полный текст постановления</a>. <a href=\"https://vedomosti.sssr.su/1989/29/\">«Ведомости», 1989, № 27, ст. 534</a>.",
+    rename1989PravdaSource: "Первая полоса «Правды» с короткой заметкой о заседании Президиума. Детали не печатают. <a href=\"https://archive.org/details/1989346_4216\" title=\"«Правда», 12 декабря 1989 г., № 346 (26064), стр. 1\">Скан номера</a>.",
+    rename1989UkazSource: "Постановление о последнем изменении премии.<sup class=\"fn\"><button type=\"button\" class=\"fn-ref\" id=\"fnref-7\" data-fn=\"7\">7</button></sup> <a href=\"http://pravo.levonevsky.org/baza/soviet/sssr1118.htm\">Полный текст</a>.",
     rename1989StatuteSource: "Статут Международной Ленинской премии мира, утверждён тем же постановлением. <a href=\"http://pravo.levonevsky.org/baza/soviet/sssr1118.htm\">Полный текст статута</a>.",
     n8: "Рис. 8.",
-    n8a: "Рис. 8a.",
-    n8c: "Рис. 8в.",
-    n8ya: "Рис. 8я.",
     n9: "Рис. 9.",
     hMap: "Откуда они родом",
-    capMap: "Где они родились?",
-    capMapSquares: "Рождения по регионам",
-    capMapFlight: "От региона рождения к региону «Правды»",
     capMapSeq: "Откуда они родом?",
-    mapSquaresAria: "Карта Меркатора: открытые точки рождения сначала на сырых координатах, затем стягиваются в пропорциональные региональные квадраты. Европа и Азия — подрегионы; Северная Америка — по странам; остальные части света целиком.",
-    mapFlightAria: "Карта Меркатора: открытые точки стартуют в паках региона рождения (как на рис. 8a), затем перелетают в регион по «Правде». Цветные квадраты — финиш; пунктир — старт. Кто сменил регион, заливается красным.",
     mapSeqAria: "Карта Меркатора в три стадии: сырое распределение мест рождения, затем агрегация по регионам рождения, затем агрегация по региону «Правды». Скролл по фигуре ведёт стадии. Кто сменил регион, заливается красным.",
-    mapSeqScrubAria: "Перемотка анимации рис. 8я: рождения, регионы, «Правда»",
+    occScrubAria: "Перемотка рис. 3: строки указа, группы занятий, пересечения классов",
+    mapSeqScrubAria: "Перемотка анимации рис. 8: рождения, регионы, «Правда»",
     mapSeqCard1Title: "Где они родились?",
-    mapSeqCard1Body: "Каждый кружок — место рождения.",
+    mapSeqCard1Body: "Каждый кружок - место рождения.",
     mapSeqCard2Title: "В каких \"регионах\" мира?<sup class=\"fn\"><button type=\"button\" class=\"fn-ref\" id=\"fnref-4\" data-fn=\"4\">4</button></sup>",
     mapSeqCard2Body: "Границы стран меняются, границы \"регионов\" стабильнее.",
     mapSeqCard3Title: "А что написали в «Правде»?",
     mapSeqCard3Body: "В указе была принадлежность к стране. Порой она отличалась от \"региона\" рождения.",
-    mapSquaresLegend: "Людей на регион",
     mapSqUnitedStates: "США",
     mapSqCanada: "Канада",
     mapSqCuba: "Куба",
     mapSqCentralAmerica: "Центральная Америка",
     mapSqCaribbean: "Карибы",
     mapSqSouthAmerica: "Южная Америка",
-    mapSqWesternEurope: "З. Европа",
-    mapSqCentralEurope: "Ц. Европа",
-    mapSqNorthernEurope: "С. Европа",
-    mapSqSouthernEurope: "Ю. Европа",
-    mapSqEasternEurope: "В. Европа",
+    mapSqWesternEurope: "Западная Европа",
+    mapSqCentralEurope: "Центральная Европа",
+    mapSqNorthernEurope: "Северная Европа",
+    mapSqSouthernEurope: "Южная Европа",
+    mapSqEasternEurope: "Восточная Европа",
     mapSqAfrica: "Африка",
     mapSqWestAsia: "Западная Азия",
     mapSqSouthAsia: "Южная Азия",
-    mapSqSoutheastAsia: "ЮВ Азия",
+    mapSqSoutheastAsia: "Юго-Восточная Азия",
     mapSqEastAsia: "Восточная Азия",
     mapSqOceania: "Океания",
     female: "Женщины",
     male: "Мужчины",
     hGhost: "«Призраки» списков",
     capGhost: "В «Правде» не значатся?",
-    srcGhost: "Каждая ячейка — одно спорное имя. Лица взяты с заглавного снимка английской Википедии, а не с портретной полосы указа в «Правде». Архивные документы присоединятся к этой стене позже.",
-    ghostEssay: "<p>Шесть имён стоят вне портретных графиков выше. Луи Арагон, Фунмилайо Рэнсем-Кути, Хикмат Абу-Зейд, Сэм Нуйома, Харилаос Флоракис и Абдул Саттар Эдхи есть во вторичных списках, но в этом рассказе они не входят в счёт 161, пока не сведена бумажная цепочка.</p><p>Сетевые страницы, языковые Википедии и даже Ежегодник Большой советской энциклопедии не всегда совпадают. Другие советские ордена и медали, как и другие международные премии, могут втянуть имя в энциклопедическую статью или веб-список, не доказывая указа о Ленинской премии мира в «Правде». Решающим корпусом был бы фонд Р-9522 в Государственном архиве Российской Федерации — прочитанный лично, а не только по записи в базе.</p><p>Стена ниже держит этих шестерых. Образцы сканов, соседние награды и картинки того, откуда они, вероятно, пришли, присоединятся сюда. Пока бумажная цепочка не сведена, графики выше держатся лиц, которые мы можем показать.</p>",
+    srcGhost: "Каждая ячейка - одно спорное имя. Лица взяты с заглавного снимка английской Википедии, а не с портретной полосы указа в «Правде». Архивные документы присоединятся к этой стене позже.",
+    ghostEssay: "<p>Шесть имён стоят вне портретных графиков выше. Луи Арагон, Фунмилайо Рэнсем-Кути, Хикмат Абу-Зейд, Сэм Нуйома, Харилаос Флоракис и Абдул Саттар Эдхи есть во вторичных списках, но в этом рассказе они не входят в счёт 161, пока не сведена бумажная цепочка.</p><p>Сетевые страницы, языковые Википедии и даже Ежегодник Большой советской энциклопедии не всегда совпадают. Другие советские ордена и медали, как и другие международные премии, могут втянуть имя в энциклопедическую статью или веб-список, не доказывая указа о Ленинской премии мира в «Правде». Решающим корпусом был бы фонд Р-9522 в Государственном архиве Российской Федерации - прочитанный лично, а не только по записи в базе.</p><p>Стена ниже держит этих шестерых. Образцы сканов, соседние награды и картинки того, откуда они, вероятно, пришли, присоединятся сюда. Пока бумажная цепочка не сведена, графики выше держатся лиц, которые мы можем показать.</p>",
     methTitle: "Методология",
-    meth1: "Главный источник списка: сканы номеров «Правды», прочитанные указ за указом. Дополнительные проверки: списки по годам на страницах премии в <a href=\"https://de.wikipedia.org/wiki/Internationaler_Lenin-Friedenspreis\">немецкой</a>, <a href=\"https://ru.wikipedia.org/wiki/%D0%9C%D0%B5%D0%B6%D0%B4%D1%83%D0%BD%D0%B0%D1%80%D0%BE%D0%B4%D0%BD%D0%B0%D1%8F_%D0%9B%D0%B5%D0%BD%D0%B8%D0%BD%D1%81%D0%BA%D0%B0%D1%8F_%D0%BF%D1%80%D0%B5%D0%BC%D0%B8%D1%8F_%C2%AB%D0%97%D0%B0_%D1%83%D0%BA%D1%80%D0%B5%D0%BF%D0%BB%D0%B5%D0%BD%D0%B8%D0%B5_%D0%BC%D0%B8%D1%80%D0%B0_%D0%BC%D0%B5%D0%B6%D0%B4%D1%83_%D0%BD%D0%B0%D1%80%D0%BE%D0%B4%D0%B0%D0%BC%D0%B8%C2%BB\">русской</a> и <a href=\"https://en.wikipedia.org/wiki/Lenin_Peace_Prize\">английской</a> Википедии; Ежегодник Большой советской энциклопедии; база архива Комитета по Международным Ленинским премиям мира, 1949–1991 (<a href=\"https://guides.rusarchives.ru/terms/6/346/mezhdunarodnye-otnosheniya\">Ф. Р-9522, 1 оп., 194 ед. хр., крайние даты: 1949–1991, Государственный архив Российской Федерации</a>).",
+    meth1: "Главный источник списка: сканы номеров «Правды», прочитанные указ за указом. Дополнительные проверки: списки по годам на страницах премии в <a href=\"https://de.wikipedia.org/wiki/Internationaler_Lenin-Friedenspreis\">немецкой</a>, <a href=\"https://ru.wikipedia.org/wiki/%D0%9C%D0%B5%D0%B6%D0%B4%D1%83%D0%BD%D0%B0%D1%80%D0%BE%D0%B4%D0%BD%D0%B0%D1%8F_%D0%9B%D0%B5%D0%BD%D0%B8%D0%BD%D1%81%D0%BA%D0%B0%D1%8F_%D0%BF%D1%80%D0%B5%D0%BC%D0%B8%D1%8F_%C2%AB%D0%97%D0%B0_%D1%83%D0%BA%D1%80%D0%B5%D0%BF%D0%BB%D0%B5%D0%BD%D0%B8%D0%B5_%D0%BC%D0%B8%D1%80%D0%B0_%D0%BC%D0%B5%D0%B6%D0%B4%D1%83_%D0%BD%D0%B0%D1%80%D0%BE%D0%B4%D0%B0%D0%BC%D0%B8%C2%BB\">русской</a> и <a href=\"https://en.wikipedia.org/wiki/Lenin_Peace_Prize\">английской</a> Википедии; Ежегодник Большой советской энциклопедии; база архива Комитета по Международным Ленинским премиям мира, 1949-1991 (<a href=\"https://guides.rusarchives.ru/terms/6/346/mezhdunarodnye-otnosheniya\">Ф. Р-9522, 1 оп., 194 ед. хр., крайние даты: 1949-1991, Государственный архив Российской Федерации</a>).",
     meth2: "Там, где сноска Википедии или годовой список энциклопедии указывает на указ, номер читается по сканам «Правды», и газета считается решающей. Расхождения между языковыми Википедиями, Ежегодником Большой советской энциклопедии и другими сетевыми списками оставлены для раздела о призраках. Пикассо и Нимейер стоят в годах, которые дают эти статьи, пока строка указа ещё открыта. Фонд Р-9522 был бы самым полным «FOIA-подобным» корпусом; лично для проекта к нему доступа не было.",
     meth3: "Год премии - это год в заголовке указа, а не день вручения медали.",
     meth4: "Сталинские премии за 1951-1955 годы объявляли в декабре того же года. Премию за 1950 год объявили 6 апреля 1951 года. Ленинские премии обычно объявляли около 1 мая и называли предыдущим годом или промежутком, например 1968-1969.",
@@ -653,17 +759,10 @@ var I18N = {
     series_lenin: "Международная Ленинская премия",
     series_lenin_peace: "Международная Ленинская премия мира",
     yearAria: "Лауреаты по году премии. Каждый квадрат - один человек. Розовые квадраты - женщины, бирюзовые - мужчины.",
-    mapAria: "Карта лауреатов в координатах рождения, проекция «бабочка Уотермана». Каждый кружок - один человек. Америки на одном крыле, Африка, Евразия и Австралия на другом, южные материки остаются крупными.",
-    mapAriaRegion: "Региональная карта лауреатов в координатах рождения, проекция Меркатора. Каждый кружок - один человек.",
-    mapRegionAmericas: "Америки",
-    mapRegionEuropeAfrica: "Европа, Африка и Западная Азия",
-    mapRegionAsiaOceania: "Азия и Океания",
     mapSeqFacetEurope: "Европа",
     mapSeqFacetAfrica: "Африка",
     mapSeqFacetNorthAmerica: "С. и Центр. Америка",
     mapSeqFacetSouthAmerica: "Южная Америка",
-    mapSeqFacetAsia: "Азия",
-    mapSeqFacetOceania: "Океания",
     mapSeqFacetAsiaOceania: "Азия и Океания"
   }
 };
@@ -696,10 +795,41 @@ function personName(person) {
   return person.name;
 }
 
+function personNativeName(person) {
+  return (person && person.nameNative) ? String(person.nameNative).trim() : "";
+}
+
 function personAlt(person) {
   var primary = personName(person);
-  var alt = lang === "ru" ? person.name : person.nameRu;
-  return alt && alt !== primary ? alt : "";
+  var native = personNativeName(person);
+  if (native && native !== primary) return native;
+  return "";
+}
+
+function tipBornAffiliatedLine(person) {
+  var born = birthPlaceText(person);
+  if (!born && person && person.birthCountry) born = countryLabel(person.birthCountry);
+  var linkedKey = "";
+  if (typeof pravdaCountryKey === "function") {
+    linkedKey = pravdaCountryKey(person) || "";
+  }
+  if (!linkedKey && person && person.country) {
+    linkedKey = String(person.country).split(";")[0].trim();
+  }
+  var female = !!(person && person.gender === "female");
+  if (lang === "ru") {
+    var ru = [];
+    if (born) ru.push((female ? "Родилась в г. " : "Родился в г. ") + born);
+    // Pravda line: «представитель [страны]».
+    if (linkedKey) {
+      ru.push((female ? "Представительница " : "Представитель ") + countryGenitiveLabel(linkedKey));
+    }
+    return ru.join(". ") + (ru.length ? "." : "");
+  }
+  var en = [];
+  if (born) en.push("Born in " + born);
+  if (linkedKey) en.push("Affiliated with " + countryLabel(linkedKey));
+  return en.join(". ") + (en.length ? "." : "");
 }
 
 function sortName(person) {
@@ -736,9 +866,6 @@ function occCountCaption(key, n) {
 }
 
 function cloudCaption(n, key) {
-  if (typeof occSplitMode === "function" && occSplitMode() === "world") {
-    return n + " " + worldLabel(key);
-  }
   return occCountCaption(key, n);
 }
 
@@ -751,6 +878,16 @@ function countryLabel(value) {
   return value.split(";").map(function (part) {
     var name = part.trim();
     if (lang === "ru" && COUNTRY[name]) return COUNTRY[name];
+    return name;
+  }).join(", ");
+}
+
+function countryGenitiveLabel(value) {
+  if (!value) return "";
+  return value.split(";").map(function (part) {
+    var name = part.trim();
+    if (COUNTRY_GEN[name]) return COUNTRY_GEN[name];
+    if (COUNTRY[name]) return COUNTRY[name];
     return name;
   }).join(", ");
 }
@@ -829,12 +966,13 @@ function groupBorn(n) {
   return countNoun(n, "laureate", "laureates", "", "", "") + " born here";
 }
 
-function groupCountryModeMeta(n, mode) {
+function groupPackMeta(n, mode) {
   var count = countNoun(n, "laureate", "laureates", "лауреат", "лауреата", "лауреатов");
   if (mode === "affiliation") {
-    return lang === "ru" ? count + " · страна в «Правде»" : count + " · Pravda country";
+    // Pravda’s country line - not birthplace.
+    return lang === "ru" ? count + " названы здесь в «Правде»" : count + " named here in Pravda";
   }
-  return lang === "ru" ? count + " · страна рождения" : count + " · country of birth";
+  return groupBorn(n);
 }
 
 function heroAria(n) {
@@ -926,34 +1064,27 @@ function tallyMid() {
   return lang === "ru" ? ", " : ", there are ";
 }
 
+function tallyYears(n) {
+  if (lang === "ru") return countNoun(n, "", "", "год", "года", "лет");
+  return countNoun(n, "year", "years", "", "", "");
+}
+
+function tallyPrizes(n) {
+  if (lang === "ru") return countNoun(n, "", "", "премия", "премии", "премий");
+  return countNoun(n, "prize", "prizes", "", "", "");
+}
+
 function yearLead(d) {
-  var scrollHint = d.canScroll
-    ? (lang === "ru"
-      ? " Прокрутите дальше - и они растянутся на свой промежуток."
-      : " Keep scrolling to stretch them across that span.")
-    : "";
   if (d.color === "world") {
-    if (d.mode === "span") {
-      if (lang === "ru") {
-        return "Группы вроде 1968-1969 теперь закрывают годы из указа; штриховка отмечает промежуток. Цвет - мир холодной войны. Больше всего из одного мира в группе - " + d.peakCount + " из " + worldLabel(d.peakWorld) + ", в " + d.year + ".";
-      }
-      return "Cohorts such as 1968-1969 now cover the years named in the decree; the hatch marks the span. Color is Cold War world. The most from one world in a cohort is " + d.peakCount + " from " + worldLabel(d.peakWorld) + ", in " + d.year + ".";
-    }
     if (lang === "ru") {
-      return "Каждый квадрат - один лауреат, цвет - мир холодной войны." + scrollHint + " " + worldLabel("first") + " внизу столбика. Больше всего из одного мира в группе - " + d.peakCount + " из " + worldLabel(d.peakWorld) + ", в " + d.year + ".";
+      return "Группы вроде 1968-1969 закрывают годы из указа; штриховка отмечает промежуток. Цвет - мир холодной войны. Больше всего из одного мира в группе - " + d.peakCount + " из " + worldLabel(d.peakWorld) + ", в " + d.year + ".";
     }
-    return "Each square is one laureate, colored by Cold War world." + scrollHint + " " + worldLabel("first") + " at the foot. The most from one world in a cohort is " + d.peakCount + " from " + worldLabel(d.peakWorld) + ", in " + d.year + ".";
-  }
-  if (d.mode === "span") {
-    if (lang === "ru") {
-      return "Каждый квадрат - один лауреат. Женщины внизу. Иногда премия вручалась за каждый год, например «за 1954 год», а иногда за группу в несколько лет. Больше всего женщин - " + d.women + ", в «группе» «за " + d.year + "гг.». Штриховка выделяет группы.";
-    }
-    return "Cohorts such as 1968-1969 now cover the years named in the decree («за 1968—69 гг.»); the hatch marks the span. One person is still one mark. The most women in one cohort is " + d.women + ", in " + d.year + ".";
+    return "Cohorts such as 1968-1969 cover the years named in the decree; the hatch marks the span. Color is Cold War world. The most from one world in a cohort is " + d.peakCount + " from " + worldLabel(d.peakWorld) + ", in " + d.year + ".";
   }
   if (lang === "ru") {
-    return "Каждый квадрат - один лауреат. Женщины внизу. Иногда премия вручалась за каждый год, например «за 1954 год», а иногда за группу в несколько лет. Больше всего женщин - " + d.women + ", в «группе» «за " + d.year + "гг.»." + scrollHint;
+    return "Каждый квадрат - один лауреат. Женщины внизу. Иногда премия вручалась за каждый год, например «за 1954 год», а иногда за группу в несколько лет. Больше всего женщин - " + d.women + ", в «группе» «за " + d.year + "гг.». Штриховка выделяет группы.";
   }
-  return "Each square is one laureate. A cohort sits at the middle of its decree year or span." + scrollHint + " Women at the foot. The most in one cohort is " + d.women + ", in " + d.year + ".";
+  return "Cohorts such as 1968-1969 cover the years named in the decree («за 1968-69 гг.»); the hatch marks the span. One person is still one mark. The most women in one cohort is " + d.women + ", in " + d.year + ".";
 }
 
 function ageLead(d) {
@@ -1003,34 +1134,55 @@ function aliveMarkAria(person) {
   return base + (person.living ? ", alive today" : ", deceased");
 }
 
-function mapLead(d) {
+function posthumousLead(d) {
   if (lang === "ru") {
-    var ruCore = countNoun(d.plotted, "", "", "лауреат", "лауреата", "лауреатов") + " в координатах рождения из файла. ";
-    var ruMap = d.narrow
-      ? "На узком экране вместо бабочки Уотермана - три региональных панели в проекции Меркатора. "
-      : "Карта - бабочка Уотермана: глобус разрезан по океанам, Америки на одном крыле, Африка, Евразия и Австралия на другом, южные материки остаются крупными. ";
-    return ruCore + ruMap + d.sharedPeople + " из них " + ruPlural(d.sharedPeople, "делит", "делят", "делят") + " " + d.sharedPlaces + " " + ruPlural(d.sharedPlaces, "точку", "точки", "точек") + ", эти метки стоят маленьким кольцом вокруг точки.";
+    if (d.postN === 0) {
+      return "Из " + d.n + " с портретами посмертных награждений в этом списке нет.";
+    }
+    if (d.postN === 1) {
+      return "Из " + d.n + " с портретами посмертно награждена одна: " + d.names + ".";
+    }
+    return "Из " + d.n + " с портретами посмертно награждены " + d.postN + ": " + d.names + ".";
   }
-  var enCore = d.plotted + " laureates, each at the birth latitude and longitude in the file. ";
-  var enMap = d.narrow
-    ? "On a narrow screen the Waterman butterfly gives way to three regional Mercator panels. "
-    : "The map is a Waterman butterfly: the globe is opened along the oceans so the Americas sit on one wing and Africa, Eurasia, and Australia on the other, with the southern continents kept large. ";
-  return enCore + enMap + d.sharedPeople + " of them share " + d.sharedPlaces + " recorded points; those dots sit in a small ring around that point.";
+  if (d.postN === 0) {
+    return "Of the " + d.n + " with portraits, none were awarded posthumously in this list.";
+  }
+  if (d.postN === 1) {
+    return "Of the " + d.n + " with portraits, one was awarded posthumously: " + d.names + ".";
+  }
+  return "Of the " + d.n + " with portraits, " + d.postN + " were awarded posthumously: " + d.names + ".";
 }
 
-function mapSource(d) {
-  var base = lang === "ru"
-    ? "WINNER_BIRTH_lat и WINNER_BIRTH_lon. Проекция: " + (d.narrow ? "Меркатор, три региональных панели" : "бабочка Уотермана") + ". "
-    : "WINNER_BIRTH_lat and WINNER_BIRTH_lon. Projection: " + (d.narrow ? "Mercator, three regional panels" : "Waterman butterfly") + ". ";
-  var mid;
-  if (!d.missingCount) {
-    mid = lang === "ru" ? "Координаты есть у каждого." : "Every laureate has coordinates.";
-  } else if (lang === "ru") {
-    mid = "Без координат и вне карты " + countNoun(d.missingCount, "", "", "лауреат", "лауреата", "лауреатов") + ": " + d.missingNames + ".";
-  } else {
-    mid = d.missingCount + " " + enPlural(d.missingCount, "laureate has", "laureates have") + " no coordinates and " + enPlural(d.missingCount, "is", "are") + " left off the map: " + d.missingNames + ".";
+function posthumousMarkAria(person, posthumous) {
+  var base = ageMarkAria(person);
+  if (lang === "ru") {
+    return base + (posthumous ? ", посмертно" : ", при жизни");
   }
-  return base + mid + (lang === "ru" ? " Источник: laureates.csv." : " Source: laureates.csv.");
+  return base + (posthumous ? ", posthumous" : ", awarded in life");
+}
+
+function centuryLead(d) {
+  if (lang === "ru") {
+    if (d.bornN === 0) {
+      return "Из " + d.n + " с портретами никто не родился в XIX веке.";
+    }
+    return "Из " + d.n + " с портретами в XIX веке родились " + d.bornN +
+      " - с " + d.minBirth + " (" + d.oldestNames + ") по " + d.maxBirth + ".";
+  }
+  if (d.bornN === 0) {
+    return "Of the " + d.n + " with portraits, none were born in the 19th century.";
+  }
+  return "Of the " + d.n + " with portraits, " + d.bornN +
+    " were born in the 19th century - from " + d.minBirth + " (" + d.oldestNames + ") to " + d.maxBirth + ".";
+}
+
+function centuryMarkAria(person, born19) {
+  var base = ageMarkAria(person);
+  if (lang === "ru") {
+    var born = person.gender === "female" ? "родилась" : "родился";
+    return base + ", " + born + (born19 ? " в XIX веке" : " в XX веке");
+  }
+  return base + (born19 ? ", born in the 19th century" : ", born in the 20th century");
 }
 
 function applyChrome() {
@@ -1052,6 +1204,8 @@ function applyChrome() {
     if (typeof syncDecreeAnnotChrome === "function") syncDecreeAnnotChrome();
     if (typeof syncDestalin === "function") syncDestalin();
     if (typeof syncRename1989 === "function") syncRename1989();
+    if (typeof refreshOccMorphCopy === "function") refreshOccMorphCopy();
+    if (typeof syncMethod === "function") syncMethod();
   document.querySelectorAll("[data-set-lang]").forEach(function (button) {
     if (button.getAttribute("data-set-lang") === lang) button.setAttribute("aria-current", "true");
     else button.removeAttribute("aria-current");

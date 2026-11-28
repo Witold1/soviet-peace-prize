@@ -377,7 +377,8 @@ html[data-dev-press-click] .press-rain-line.is-hot:focus-visible {
   padding: 1.25rem 0.75rem 1.5rem;
 }
 
-/* Core founding Pravda (1949): becomes the main stage piece as fade rises. */
+/* Core founding Pravda (1949): becomes the main stage piece as fade rises.
+   No card chrome - other decrees are scan + plain source, not a framed panel. */
 .press-stage > .doc {
   position: absolute;
   z-index: 4;
@@ -389,18 +390,14 @@ html[data-dev-press-click] .press-rain-line.is-hot:focus-visible {
   height: fit-content;
   max-height: calc(100% - 1rem);
   margin: auto;
-  padding: 0.55rem 0.55rem 0.65rem;
-  overflow: hidden;
-  border: 1px solid rgba(70, 70, 68, 0.34);
-  background: #f4f3f0;
-  box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.65) inset,
-    0 14px 34px rgba(40, 40, 38, 0.18);
+  padding: 0;
+  overflow: visible;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
   opacity: var(--fade, 0);
   transition:
     opacity 0.35s linear,
-    border-color 0.25s linear,
-    box-shadow 0.25s linear,
     width 0.25s linear;
 }
 
@@ -422,10 +419,11 @@ html[data-dev-press-click] .press-rain-line.is-hot:focus-visible {
 }
 
 .press-stage > .doc figcaption {
-  margin: 0.55rem 0 0;
-  padding: 0.35rem 0.15rem 0.1rem;
-  border-top: 1px solid rgba(70, 70, 68, 0.16);
-  background: #f4f3f0;
+  margin: 0.75rem 0 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  line-height: 1.5;
 }
 
 .press-stage:has(#decree-1949 .ukaz:not(.is-open)) > .doc {
@@ -445,7 +443,6 @@ html[data-dev-press-click] .press-rain-line.is-hot:focus-visible {
 .press-stage > .doc.is-awaiting {
   z-index: 2;
   pointer-events: none;
-  box-shadow: 0 6px 16px rgba(40, 40, 38, 0.06);
 }
 
 .press-stage > .doc.is-awaiting .ukaz-original,

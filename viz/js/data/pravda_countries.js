@@ -247,8 +247,17 @@ function pravdaCountryFromText(text) {
 
 function pravdaCountryKey(person) {
   var row = typeof pravdaOccFor === "function" ? pravdaOccFor(person) : null;
-  var fromText = row && row.text ? pravdaCountryFromText(row.text) : null;
+  if (row && row.country && PRAVDA_COUNTRY_PAREN[row.country]) {
+    return PRAVDA_COUNTRY_PAREN[row.country];
+  }
+  var text = typeof pravdaOccText === "function" ? pravdaOccText(row) : (row && row.text);
+  var fromText = text ? pravdaCountryFromText(text) : null;
   if (fromText) return fromText;
+  // Fall back: reconstruct paren form for older rows / inline wording.
+  if (row && row.country) {
+    fromText = pravdaCountryFromText("(" + row.country + ")");
+    if (fromText) return fromText;
+  }
   if (person && person.country) {
     return String(person.country).split(";")[0].trim() || null;
   }

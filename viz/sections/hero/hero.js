@@ -12,14 +12,14 @@ var heroAnimDur = 0;
 var heroAnimTimer = 0;
 var heroFaceTimer = 0;
 var heroMorphing = false;
-// True until the first scroll-sync after render — reload mid-dove snaps, no flight.
+// True until the first scroll-sync after render - reload mid-dove snaps, no flight.
 var heroCold = true;
 var heroCountReveal = 0;
 var heroCountRaf = 0;
 var heroCountTs = 0;
 var heroChartH0 = 0;
 var heroChartH1 = 0;
-// Canvas flight duration — feel, not a per-frame DOM cost.
+// Canvas flight duration - feel, not a per-frame DOM cost.
 var HERO_MORPH_MS = 1350;
 // Morph ~halfway; the second half is mostly for the caption ride.
 var HERO_MORPH_PROGRESS = 0.4;
@@ -142,7 +142,7 @@ function heroPinBudgetH() {
   var pin = document.getElementById("hero-pin");
   var intro = pin ? pin.querySelector(".intro") : null;
   var introH = intro ? intro.offsetHeight + 28 : 120;
-  // Sticky `top` inset — air above Fig. 1 when pinned, not extra flow gap.
+  // Sticky `top` inset - air above Fig. 1 when pinned, not extra flow gap.
   var inset = pin ? (parseFloat(getComputedStyle(pin).top) || 0) : 0;
   return Math.max(180, vh - introH - inset - 12);
 }
@@ -253,7 +253,7 @@ function heroPaintCountRide(t) {
   heroCountReveal = t;
   var board = document.getElementById("hero-board");
   var boardH = board ? board.clientHeight : 0;
-  // Enter from below the chart; leave by flying out past the top — same ease both ways.
+  // Enter from below the chart; leave by flying out past the top - same ease both ways.
   var travelIn = Math.max(200, boardH * 0.58);
   var travelOut = Math.max(140, boardH * 0.36);
   var restT = 0.46;
@@ -433,7 +433,7 @@ function heroDriveFromScroll(section) {
   if (heroMorphing) return;
   var want = heroWantDove();
   // Reload (or late layout) while the dove is already on screen: snap.
-  // Replaying wall→dove left absolute marks unpositioned at (0,0) for a spell —
+  // Replaying wall→dove left absolute marks unpositioned at (0,0) for a spell -
   // Mandela is last in DOM and sat on top of the stack.
   if (heroCold) {
     heroCold = false;

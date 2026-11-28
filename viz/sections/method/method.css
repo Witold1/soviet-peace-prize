@@ -44,18 +44,35 @@
   cursor: pointer;
 }
 
-.methodology li.is-clamped:not(.is-open)::after {
-  content: "\2026 >";
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  padding-left: 1.75em;
-  background: linear-gradient(to right, transparent, var(--bg) 1.25em);
+/* Float the “… >” onto the last visible line, right after the cut text
+   (not pinned to the box’s right edge). */
+.methodology li.is-clamped:not(.is-open) .meth-clamp-slot {
+  float: right;
+  width: 0;
+  height: 1.5em;
+}
+
+.methodology li.is-clamped:not(.is-open) .meth-clamp-more {
+  float: right;
+  clear: right;
+  margin-left: 0.2em;
   color: #000;
   font-weight: 500;
   letter-spacing: 0.02em;
   line-height: 1.5;
-  pointer-events: none;
+  /* Match section wash so the marker sits in the text, not on a white island. */
+  background: #fce5cd;
+}
+
+html[data-dev-plain] .methodology li.is-clamped:not(.is-open) .meth-clamp-more {
+  background: var(--bg);
+}
+
+.methodology li.is-open .meth-clamp-slot,
+.methodology li.is-open .meth-clamp-more,
+.methodology li:not(.is-clamped) .meth-clamp-slot,
+.methodology li:not(.is-clamped) .meth-clamp-more {
+  display: none;
 }
 
 .methodology li.is-open {

@@ -1,5 +1,19 @@
+function ensureMethodClampChrome(item) {
+  if (item.querySelector(".meth-clamp-slot")) return;
+  var slot = document.createElement("span");
+  slot.className = "meth-clamp-slot";
+  slot.setAttribute("aria-hidden", "true");
+  var more = document.createElement("span");
+  more.className = "meth-clamp-more";
+  more.setAttribute("aria-hidden", "true");
+  more.textContent = "\u2026 >";
+  item.insertBefore(more, item.firstChild);
+  item.insertBefore(slot, more);
+}
+
 function markMethodClamp() {
   document.querySelectorAll(".methodology li").forEach(function (item) {
+    ensureMethodClampChrome(item);
     var open = item.classList.contains("is-open");
     if (open) {
       item.classList.add("is-clamped");

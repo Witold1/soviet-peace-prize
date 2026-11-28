@@ -6,8 +6,8 @@ function yearChartNarrow() {
 }
 
 function yearRowsAllYears(cohorts) {
-  // Same span as the desktop timeline: every calendar year 1950–1990.
-  // Multi-year cohorts sit on the midpoint year, matching the wide chart.
+  // Same span as the desktop timeline: every calendar year 1950-1990.
+  // Multi-year cohorts are placed by midpoint for row labels; marks stretch across years.
   const minYear = 1950;
   const maxYear = 1990;
   const atYear = new Map();
@@ -47,17 +47,22 @@ function yearHatchDefs() {
 function renderYearsStacked(cohorts) {
   const minYear = 1950;
   const rows = yearRowsAllYears(cohorts);
-  const step = 16;
-  const size = 13;
-  const rowH = 22;
-  const padL = 64;
-  // Rail to the right for announce ribbons/dots (scroll step 3).
-  const padR = 168;
+  const padR = 6;
   const padT = 8;
   const padB = 8;
   const maxStack = Math.max.apply(null, rows.map(function (entry) { return entry[1].length; }).concat([1]));
-  const width = padL + maxStack * step + padR;
+  const host = document.getElementById("year-chart");
+  const width = Math.max(host && host.clientWidth ? host.clientWidth : 0, 280);
+  // Fill the host: step grows with plotW so marks aren't tiny on the left of a wide viewBox.
+  const labelSlot = 48;
+  const padL = labelSlot + 10;
+  const plotW = Math.max(width - padL - padR, maxStack);
+  const step = plotW / maxStack;
+  const size = Math.max(12, step * 0.74);
+  const rowH = Math.max(24, Math.round(size + 8));
+  const labelPx = Math.max(15, Math.round(size * 0.76));
   const height = padT + rows.length * rowH + padB;
+  const markOrigin = padL;
 
   function yYear(year) {
     return padT + (year - minYear) * rowH + rowH / 2;
@@ -81,10 +86,11 @@ function renderYearsStacked(cohorts) {
   rows.forEach(function (entry, row) {
     const y = padT + row * rowH + rowH / 2;
     const label = svgEl("text");
-    label.setAttribute("x", padL - 10);
-    label.setAttribute("y", y + 4);
+    label.setAttribute("x", markOrigin - 8);
+    label.setAttribute("y", y + labelPx * 0.35);
     label.setAttribute("text-anchor", "end");
     label.setAttribute("class", "axis");
+    label.setAttribute("style", "font-size:" + labelPx + "px");
     label.textContent = entry[0];
     svg.appendChild(label);
   });
@@ -92,44 +98,28 @@ function renderYearsStacked(cohorts) {
   cohorts.forEach(function (entry) {
     const bounds = cohortBounds(entry[0]);
     const isSpan = bounds[1] > bounds[0];
-    const mid = Math.round((bounds[0] + bounds[1]) / 2);
-    const midY = yYear(mid) - size / 2;
     const spanY = yYear(bounds[0]) - size / 2;
     const spanH = yYear(bounds[1]) - yYear(bounds[0]) + size;
     const ordered = entry[1].slice().sort(sortYearStack);
     ordered.forEach(function (person, index) {
-      const x = padL + index * step;
+      const x = markOrigin + index * step;
       const rect = svgEl("rect");
       rect.setAttribute("x", x.toFixed(2));
-      rect.setAttribute("y", midY.toFixed(2));
-      rect.setAttribute("width", size);
-      rect.setAttribute("height", size);
+      rect.setAttribute("y", spanY.toFixed(2));
+      rect.setAttribute("width", size.toFixed(2));
+      rect.setAttribute("height", spanH.toFixed(2));
       paintYearMark(rect, person);
-      let hatchRect = null;
       if (isSpan) {
-        hatchRect = svgEl("rect");
+        const hatchRect = svgEl("rect");
         hatchRect.setAttribute("x", x.toFixed(2));
-        hatchRect.setAttribute("y", midY.toFixed(2));
-        hatchRect.setAttribute("width", size);
-        hatchRect.setAttribute("height", size);
+        hatchRect.setAttribute("y", spanY.toFixed(2));
+        hatchRect.setAttribute("width", size.toFixed(2));
+        hatchRect.setAttribute("height", spanH.toFixed(2));
         hatchRect.setAttribute("fill", "url(#year-span-hatch)");
-        hatchRect.setAttribute("opacity", "0");
+        hatchRect.setAttribute("opacity", "1");
         hatchRect.setAttribute("pointer-events", "none");
         hatchGroup.appendChild(hatchRect);
       }
-      YEAR_MARKS.push({
-        el: rect,
-        hatch: hatchRect,
-        isSpan: isSpan,
-        midX: x,
-        midY: midY,
-        midW: size,
-        midH: size,
-        spanX: x,
-        spanY: spanY,
-        spanW: size,
-        spanH: spanH
-      });
       (person.series === "stalin" ? stalinGroup : leninGroup).appendChild(rect);
     });
   });

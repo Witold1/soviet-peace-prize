@@ -1,5 +1,3 @@
-#map-squares-chart,
-#map-flight-chart,
 #map-seq-chart {
   overflow-x: visible;
 }
@@ -143,10 +141,9 @@ html[data-dev-plain] .map-seq-scrub-marks span {
   background: #fce5cd;
 }
 
-/* Desktop sticky: fit the whole pin (title + map + slips) in the viewport
-   so the map bottom is not cut off while stuck. */
+/* Desktop sticky: leave room for a taller Mercator (more N/S), still fit pin. */
 .map-seq-block.is-sticky #map-seq-chart:not(.is-regions) svg.wide {
-  max-height: calc(100svh - 11rem);
+  max-height: calc(100svh - 8.5rem);
   width: auto;
   max-width: 100%;
   margin-left: auto;
@@ -246,32 +243,6 @@ html[data-display="phone"] .map-seq-block.is-sticky .map-seq-pin {
   background: #f4f1ea;
 }
 
-/* Soft land edge inside the oval; dashed ring stays crisp. */
-.map-seq-facet-frame svg.wide {
-  -webkit-mask-image: radial-gradient(
-    closest-side,
-    #000 70%,
-    rgba(0, 0, 0, 0.45) 86%,
-    transparent 100%
-  );
-  mask-image: radial-gradient(
-    closest-side,
-    #000 70%,
-    rgba(0, 0, 0, 0.45) 86%,
-    transparent 100%
-  );
-}
-
-.map-seq-facet-frame::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  box-shadow: inset 0 0 16px 9px #f4f1ea;
-  pointer-events: none;
-  z-index: 3;
-}
-
 .map-seq-facet-frame::after {
   content: "";
   position: absolute;
@@ -282,7 +253,7 @@ html[data-display="phone"] .map-seq-block.is-sticky .map-seq-pin {
   z-index: 4;
 }
 
-/* Asia+Oceania: free-form crop — flat west (Middle East) and
+/* Asia+Oceania: free-form crop - flat west (Middle East) and
    bottom-right (Oceania / SE Asia), soft elsewhere. */
 .map-seq-facet.is-asia .map-seq-facet-frame {
   border-radius: 9% 34% 11% 9% / 46% 46% 38% 46%;
@@ -301,6 +272,27 @@ html[data-display="phone"] .map-seq-block.is-sticky .map-seq-pin {
   color: #444;
   text-align: center;
   pointer-events: none;
+}
+
+.map-seq-facet-n {
+  display: inline-block;
+  color: inherit;
+  font-variant-numeric: tabular-nums;
+}
+
+.map-seq-facet-n.is-pulse {
+  animation: map-seq-cap-pulse 0.4s ease-out;
+}
+
+@keyframes map-seq-cap-pulse {
+  0% { color: #5a7a94; }
+  100% { color: #444; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .map-seq-facet-n.is-pulse {
+    animation: none;
+  }
 }
 
 .map-seq-facet.is-asia .map-seq-facet-cap {
@@ -329,12 +321,32 @@ html[data-display="phone"] .map-seq-block.is-sticky .map-seq-pin {
   stroke-width: 1;
 }
 
+/* Screen-constant black rings - viewBox scale was making some facets look gray. */
 .map-seq-facet .map-square-dot {
-  stroke-width: 1.15;
+  fill: transparent;
+  stroke: #000;
+  stroke-width: 1.35px;
+  vector-effect: non-scaling-stroke;
+}
+
+.map-seq-facet .map-square-dot.is-moved {
+  fill: #c43c3c;
+  stroke: #8f1f1f;
+}
+
+.map-seq-facet .map-square-dot.is-hot:not(.is-moved) {
+  stroke: #000;
+  stroke-width: 1.85px;
 }
 
 .map-seq-facet .map-squares-tile {
-  stroke-width: 1.2;
+  stroke-width: 1.2px;
+  vector-effect: non-scaling-stroke;
+}
+
+.map-seq-facet .map-squares-tile.is-hot {
+  stroke: #000;
+  stroke-width: 1.7px;
 }
 
 .map-seq-comments {
@@ -412,7 +424,7 @@ html[data-display="phone"] .map-seq-block.is-sticky .map-seq-pin {
   stroke-width: 1.2;
 }
 
-/* No opacity transition here — scroll scrub drives opacity every frame. */
+/* No opacity transition here - scroll scrub drives opacity every frame. */
 
 /* Phone: stacks sit under the map so they don't cover the chart. */
 html[data-display="phone"] .map-seq-comments {
@@ -464,6 +476,9 @@ html[data-display="phone"] .map-seq-block .figcap {
   margin-bottom: 0.28rem;
 }
 
+/* Same narrow layout when the page container is phone-wide but
+   data-display is not "phone" (manual display / resize). Keep in sync
+   with the html[data-display="phone"] rules above. */
 @container page (max-width: 640px) {
   .map-seq-comments {
     position: relative;
@@ -475,10 +490,27 @@ html[data-display="phone"] .map-seq-block .figcap {
     gap: 0.32rem;
   }
 
+  .map-seq-rail {
+    height: 2.6rem;
+  }
+
+  .map-seq-rail-note {
+    height: 2.5rem;
+  }
+
   .map-seq-slip {
     max-width: 100%;
     width: auto;
     padding: 0.32rem 0.5rem;
+    font-size: 0.88rem;
+  }
+
+  .map-seq-rail-ask .map-seq-slip {
+    font-size: 0.9rem;
+  }
+
+  .map-seq-rail-note .map-seq-slip {
+    font-size: 0.84rem;
   }
 
   .map-seq-scrub {
@@ -492,16 +524,14 @@ html[data-display="phone"] .map-seq-block .figcap {
     margin-right: calc(var(--pad) * -0.75);
   }
 
+  .map-seq-block .figcap {
+    margin-bottom: 0.28rem;
+  }
+
   .map-seq-step {
     height: 42vh;
     height: 42svh;
     min-height: 180px;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .map-seq-card {
-    transition: opacity 0.2s ease;
   }
 }
 
@@ -512,22 +542,20 @@ html[data-display="phone"] .map-seq-block .figcap {
   max-width: 100%;
 }
 
-/* Soften the hard north/south crop of the Mercator window. */
-#map-squares-chart svg.wide,
-#map-flight-chart svg.wide,
+/* Soften the hard north/south crop - light fade, keep most of the land. */
 #map-seq-chart:not(.is-regions) svg.wide {
   -webkit-mask-image: linear-gradient(
     to bottom,
     transparent 0%,
-    #000 5%,
-    #000 94%,
+    #000 2.5%,
+    #000 97.5%,
     transparent 100%
   );
   mask-image: linear-gradient(
     to bottom,
     transparent 0%,
-    #000 5%,
-    #000 94%,
+    #000 2.5%,
+    #000 97.5%,
     transparent 100%
   );
 }
@@ -541,8 +569,7 @@ html[data-display="phone"] .map-seq-block .figcap {
   cursor: pointer;
 }
 
-.map-square-dot,
-.map-flight-dot {
+.map-square-dot {
   fill: transparent;
   stroke: #111;
   stroke-width: 1.45;
@@ -550,66 +577,16 @@ html[data-display="phone"] .map-seq-block .figcap {
   pointer-events: all;
 }
 
-.map-squares.is-aggregating .map-squares-leader,
-.map-squares.is-aggregating .map-squares-tile-label {
-  opacity: 0;
-}
-
 .map-squares .map-squares-leader,
 .map-squares .map-squares-tile-label {
   transition: opacity 0.45s ease;
 }
 
-.map-flight-dot.is-moved {
-  fill: #c43c3c;
-  stroke: #8f1f1f;
-  stroke-width: 1.2;
-}
-
-.map-flight.is-flying .map-squares-leader,
-.map-flight.is-flying .map-squares-tile-label {
-  opacity: 0;
-}
-
-.map-flight .map-squares-leader,
-.map-flight .map-squares-tile-label {
-  transition: opacity 0.45s ease;
-}
-
-.map-flight-origin {
-  fill: none;
-  stroke: #666;
-  stroke-width: 1;
-  stroke-dasharray: 4 3;
-  opacity: 0.55;
-  pointer-events: none;
-  transition: opacity 0.5s ease;
-}
-
-.map-flight.is-settled .map-flight-origin {
-  opacity: 0;
-}
-
-.map-squares-tile-label,
-.map-squares-tile-count {
+.map-squares-tile-label {
   fill: #111;
   font-size: 1rem;
   font-family: "Segoe UI", Helvetica, Arial, sans-serif;
   pointer-events: none;
-}
-
-.map-squares-tile-count {
-  font-weight: 600;
-}
-
-.map-squares-tile-label-inside {
-  fill: #111;
-}
-
-.map-seq-facet .map-squares-tile-label-inside {
-  fill: #0d0d0d;
-  stroke: rgba(244, 241, 234, 0.92);
-  stroke-width: 0.34em;
 }
 
 .map-squares-leader {

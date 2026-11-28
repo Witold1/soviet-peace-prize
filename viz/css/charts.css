@@ -19,6 +19,11 @@ svg.wide {
   max-width: 100%;
 }
 
+/* Narrow years sets per-label px so marks and years stay in proportion. */
+#year-chart .axis {
+  font-size: inherit;
+}
+
 .axis {
   fill: #000;
   font-size: 1rem;
@@ -41,13 +46,14 @@ svg.wide {
 
 /* Map + years reflow in JS when narrow. Ages + announce keep a wide SVG and scroll. */
 @container page (max-width: 640px) {
-  #map-chart,
   #year-chart {
     overflow-x: visible;
   }
 
   #age-chart svg.wide,
-  #alive-chart svg.wide {
+  #alive-chart svg.wide,
+  #posthumous-chart svg.wide,
+  #century-chart svg.wide {
     width: 920px;
     max-width: none;
   }
@@ -59,7 +65,9 @@ svg.wide {
 }
 
 html[data-display="phone"] #age-chart svg.wide,
-html[data-display="phone"] #alive-chart svg.wide {
+html[data-display="phone"] #alive-chart svg.wide,
+html[data-display="phone"] #posthumous-chart svg.wide,
+html[data-display="phone"] #century-chart svg.wide {
   width: 920px;
   max-width: none;
 }

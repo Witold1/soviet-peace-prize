@@ -157,7 +157,7 @@ function pressRainByYear(items) {
 }
 
 function pressRainColumnCount() {
-  // One column per year, 1945–1950.
+  // One column per year, 1945-1950.
   return PRESS_RAIN_YEARS.length;
 }
 
@@ -286,7 +286,7 @@ function renderPress() {
   list.textContent = "";
   pressRows = [];
   items.forEach(function (item) {
-    // Aside lines (e.g. Korea) stay in the year wall only — no foreground zoom.
+    // Aside lines (e.g. Korea) stay in the year wall only - no foreground zoom.
     if ((!item.instability && !item.prize) || item.aside) return;
     var line = document.createElement("li");
     var text = pressLineText(item);

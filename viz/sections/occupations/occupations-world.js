@@ -1,4 +1,4 @@
-// Optional product: Cold War “world” grouping — parked at #worlds for now.
+// Optional product: Cold War “world” grouping - parked at #worlds for now.
 // Does not overwrite main occupations.js split hooks.
 
 function worldOccSplitGroups() {
@@ -9,11 +9,10 @@ function worldOccSplitGroups() {
     buckets.get(key).push(person);
   });
   return Array.from(buckets.entries()).map(function (entry) {
-    var people = entry[1].slice().sort(function (a, b) {
-      if (a.gender !== b.gender) return a.gender === "female" ? -1 : 1;
-      return byYear(a, b);
-    });
-    return { key: entry[0], people: people };
+    return {
+      key: entry[0],
+      people: entry[1].slice().sort(occSortPeople)
+    };
   }).sort(function (a, b) {
     return WORLD_ORDER.indexOf(a.key) - WORLD_ORDER.indexOf(b.key);
   });
@@ -55,33 +54,12 @@ function renderWorldParkOcc() {
   var groups = worldOccSplitGroups();
   host.replaceChildren();
   groups.forEach(function (group) {
-    var figure = document.createElement("figure");
-    figure.className = "group";
-    figure.dataset.worldKey = group.key;
-    var svg = renderCloud(
-      group.people,
-      typeof occHexSize === "function" ? occHexSize() : 12,
-      function (person) { return person.gender === "female" ? FEMALE : MALE; },
-      function (person) { return person.gender === "female" ? FEMALE_HOT : MALE_HOT; }
-    );
-    var womenHere = group.people.filter(function (person) { return person.gender === "female"; }).length;
-    svg.setAttribute("role", "img");
-    svg.setAttribute("aria-label", cloudAria(group.people.length, worldLabel(group.key), womenHere));
-    svg.setAttribute("width", svg.dataset.w);
-    svg.setAttribute("height", svg.dataset.h);
-    var caption = document.createElement("figcaption");
-    var line = document.createElement("span");
-    line.className = "caption-line";
-    line.textContent = group.people.length + " " + worldLabel(group.key);
-    caption.appendChild(line);
-    figure.appendChild(svg);
-    figure.appendChild(caption);
-    host.appendChild(figure);
-    if (typeof occChartNarrow === "function" && occChartNarrow()) {
-      line.style.whiteSpace = "normal";
-    } else if (typeof fitCaptionTitle === "function") {
-      fitCaptionTitle(line, Number(svg.dataset.w));
-    }
+    occAppendCloudFigure(host, group, {
+      dataAttr: "worldKey",
+      label: worldLabel(group.key),
+      caption: group.people.length + " " + worldLabel(group.key),
+      fitTitle: true
+    });
   });
 }
 

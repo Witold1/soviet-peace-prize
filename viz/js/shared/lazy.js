@@ -57,9 +57,10 @@ function watchNear(id, margin, onNear) {
   obs.observe(el);
 }
 
-// Stub until map-narrow.js loads — keeps resize gating honest before lazy load.
+// Stub until map-sequence-narrow.js loads - keeps resize gating honest before lazy load.
 function mapChartNarrow() {
-  var el = document.getElementById("map-chart");
+  if (typeof mapSeqNarrow === "function") return mapSeqNarrow();
+  var el = document.getElementById("map-seq-chart");
   if (!el) return false;
   if (el.clientWidth > 0) return el.clientWidth < 640;
   return document.documentElement.getAttribute("data-display") === "phone";
@@ -67,16 +68,12 @@ function mapChartNarrow() {
 
 var mapLoadPromise = null;
 function ensureMapLoaded() {
-  if (typeof renderMapChart === "function") return Promise.resolve();
+  if (typeof renderMapSequence === "function") return Promise.resolve();
   if (mapLoadPromise) return mapLoadPromise;
   mapLoadPromise = loadScripts([
     "js/data/land.js",
     "js/data/lakes.js",
-    "sections/map/map-projection.js",
-    "sections/map/map-narrow.js",
-    "sections/map/map.js",
     "sections/map/map-squares.js",
-    "sections/map/map-pravda.js",
     "sections/map/map-sequence-narrow.js",
     "sections/map/map-sequence.js"
   ]).catch(function (err) {
@@ -88,10 +85,6 @@ function ensureMapLoaded() {
 
 function renderMap() {
   ensureMapLoaded().then(function () {
-    if (typeof renderMapChart === "function") renderMapChart();
-    if (typeof renderMapSquares === "function") renderMapSquares();
-    if (typeof renderMapFlight === "function") renderMapFlight();
-    else if (typeof renderMapPravda === "function") renderMapPravda();
     if (typeof renderMapSequence === "function") renderMapSequence();
   });
 }
@@ -134,13 +127,7 @@ function ensureOccChordLoaded() {
 }
 
 function bootLazySections() {
-  watchNear("births", 600, function () { ensureMapLoaded().then(function () {
-    if (typeof renderMapChart === "function") renderMapChart();
-    if (typeof renderMapSquares === "function") renderMapSquares();
-    if (typeof renderMapFlight === "function") renderMapFlight();
-    else if (typeof renderMapPravda === "function") renderMapPravda();
-    if (typeof renderMapSequence === "function") renderMapSequence();
-  }); });
+  watchNear("births", 600, function () { renderMap(); });
   watchNear("worlds", 600, function () { renderWorldParkIfReady(); });
   watchNear("occupation", 800, function () {
     ensureOccChordLoaded().then(function () {

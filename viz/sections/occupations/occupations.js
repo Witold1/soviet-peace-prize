@@ -43,19 +43,123 @@ function occChartNarrow() {
 
 function occHexSize() {
   if (occChartNarrow()) return 9;
-  // Slightly smaller on mid widths so six clouds stay one row for Fig. 3a.
+  // Sticky 3×2 grid has room - keep hexes readable.
+  if (typeof occUseSticky === "function" && occUseSticky()) return 14;
   var el = document.getElementById("clouds");
   var w = el && el.clientWidth > 0 ? el.clientWidth : 900;
   return w < 900 ? 10 : 12;
 }
 
+// Balanced two-line split (same idea as Fig. 3b). Shared with chord labels.
+function occWrapCaptionLines(text) {
+  if (!text || text.indexOf(" ") === -1) return [text];
+  var best = null;
+  for (var i = 0; i < text.length; i++) {
+    if (text.charAt(i) !== " ") continue;
+    var top = text.slice(0, i);
+    var bottom = text.slice(i + 1);
+    if (!bottom) continue;
+    var widest = Math.max(top.length, bottom.length);
+    var balance = Math.abs(top.length - bottom.length);
+    if (!best || widest < best.widest || (widest === best.widest && balance < best.balance)) {
+      best = { lines: [top, bottom], widest: widest, balance: balance };
+    }
+  }
+  if (!best || best.widest >= text.length) return [text];
+  return best.lines;
+}
+
+// Fig. 3a / 3b main class - also used as occClusterMain in chord.
 function occSplitKey(person) {
   var pravda = typeof pravdaOccClass === "function" ? pravdaOccClass(person) : null;
   return pravda || person.occupationClass;
 }
 
-function occSplitLabel(key) {
-  return occLabel(key);
+function occFillOf(person) {
+  return person.gender === "female" ? FEMALE : MALE;
+}
+
+function occHotOf(person) {
+  return person.gender === "female" ? FEMALE_HOT : MALE_HOT;
+}
+
+function occWomenCount(people) {
+  var n = 0;
+  for (var i = 0; i < people.length; i++) {
+    if (people[i].gender === "female") n++;
+  }
+  return n;
+}
+
+function occSortPeople(a, b) {
+  if (a.gender !== b.gender) return a.gender === "female" ? -1 : 1;
+  return byYear(a, b);
+}
+
+function occClearPolyMotion(poly) {
+  if (!poly || !poly.style) return;
+  poly.style.transition = "";
+  poly.style.transform = "";
+  poly.style.transformBox = "";
+  poly.style.transformOrigin = "";
+  poly.style.opacity = "";
+  if (poly.dataset) delete poly.dataset.enterDelay;
+}
+
+// Shared Fig. 3a / world-park cloud figure builder.
+// opts: { dataAttr, label, caption, wrapLines, fitTitle }
+function occAppendCloudFigure(host, group, opts) {
+  opts = opts || {};
+  var figure = document.createElement("figure");
+  figure.className = "group";
+  if (opts.dataAttr) figure.dataset[opts.dataAttr] = group.key;
+
+  var svg = renderCloud(
+    group.people,
+    typeof occHexSize === "function" ? occHexSize() : 12,
+    occFillOf,
+    occHotOf
+  );
+  var label = opts.label != null ? opts.label : occLabel(group.key);
+  var womenHere = occWomenCount(group.people);
+  svg.setAttribute("role", "img");
+  svg.setAttribute("aria-label", cloudAria(group.people.length, label, womenHere));
+  svg.setAttribute("width", svg.dataset.w);
+  svg.setAttribute("height", svg.dataset.h);
+
+  var caption = document.createElement("figcaption");
+  var line = document.createElement("span");
+  line.className = "caption-line";
+  var captionText = opts.caption != null
+    ? opts.caption
+    : cloudCaption(group.people.length, group.key);
+
+  if (opts.wrapLines) {
+    var parts = occWrapCaptionLines(captionText);
+    line.textContent = "";
+    parts.forEach(function (part, i) {
+      if (i) line.appendChild(document.createElement("br"));
+      line.appendChild(document.createTextNode(part));
+    });
+    line.style.whiteSpace = "normal";
+  } else {
+    line.textContent = captionText;
+  }
+
+  caption.appendChild(line);
+  figure.appendChild(svg);
+  figure.appendChild(caption);
+  host.appendChild(figure);
+
+  // Width probe needs a laid-out node - fit after append.
+  if (!opts.wrapLines) {
+    if (typeof occChartNarrow === "function" && occChartNarrow()) {
+      line.style.whiteSpace = "normal";
+    } else if (opts.fitTitle && typeof fitCaptionTitle === "function") {
+      fitCaptionTitle(line, Number(svg.dataset.w));
+    }
+  }
+  return figure;
 }
 
 function occSplitGroups() {
@@ -66,21 +170,24 @@ function occSplitGroups() {
     buckets.get(key).push(person);
   }
   return Array.from(buckets.entries()).map(function (entry) {
-    const people = entry[1].slice().sort(function (a, b) {
-      if (a.gender !== b.gender) return a.gender === "female" ? -1 : 1;
-      return byYear(a, b);
-    });
-    return { key: entry[0], people: people };
+    return { key: entry[0], people: entry[1].slice().sort(occSortPeople) };
   }).sort(function (a, b) {
-    return b.people.length - a.people.length || occSplitLabel(a.key).localeCompare(occSplitLabel(b.key), lang);
+    return b.people.length - a.people.length ||
+      occLabel(a.key).localeCompare(occLabel(b.key), lang);
   });
 }
 
 function syncOccSplitChrome() {
+  // Narrow stacks Fig. 3 rain + Fig. 3a clouds; sticky chrome swaps one shared caption.
   const cap = document.getElementById("cap-occ");
-  if (cap) {
+  if (cap && typeof occUseSticky === "function" && !occUseSticky()) {
     cap.setAttribute("data-i18n", "capOcc");
     cap.textContent = t("capOcc");
+    var figNo = document.getElementById("occ-fig-no");
+    if (figNo) {
+      figNo.setAttribute("data-i18n", "n3a");
+      figNo.textContent = t("n3a");
+    }
   }
   const source = document.getElementById("src-occ");
   if (source) {
@@ -90,73 +197,17 @@ function syncOccSplitChrome() {
 }
 
 function renderOccupations() {
-  if (typeof beforeRenderOccupations === "function") beforeRenderOccupations();
-
   const groups = occSplitGroups();
-  const women = PEOPLE_SEEN.filter(function (person) { return person.gender === "female"; });
-  const largest = groups.slice().sort(function (a, b) {
-    return b.people.length - a.people.length;
-  })[0];
-  const largestWomen = largest.people.filter(function (person) { return person.gender === "female"; }).length;
-  const otherWomenKeys = new Set(
-    women.filter(function (person) { return occSplitKey(person) !== largest.key; })
-      .map(function (person) { return occSplitKey(person); })
-  );
-
-  const mode = typeof occSplitMode === "function" ? occSplitMode() : "occupation";
-  document.getElementById("split-lead").textContent = splitLead({
-    n: PEOPLE_SEEN.length,
-    clouds: groups.length,
-    mode: mode
-  });
-  document.getElementById("split-finding").textContent = splitFinding({
-    mode: mode,
-    key: largest.key,
-    occupation: largest.key,
-    count: largest.people.length,
-    n: PEOPLE_SEEN.length,
-    womenHere: largestWomen,
-    women: women.length,
-    otherWomen: women.length - largestWomen,
-    otherOcc: otherWomenKeys.size,
-    worlds: groups.map(function (group) {
-      return { key: group.key, count: group.people.length };
-    })
-  });
 
   syncOccSplitChrome();
 
   const clouds = document.getElementById("clouds");
   clouds.replaceChildren();
   for (const group of groups) {
-    const figure = document.createElement("figure");
-    figure.className = "group";
-    if (mode === "occupation") figure.dataset.occKey = group.key;
-    const svg = renderCloud(
-      group.people,
-      occHexSize(),
-      function (person) { return person.gender === "female" ? FEMALE : MALE; },
-      function (person) { return person.gender === "female" ? FEMALE_HOT : MALE_HOT; }
-    );
-    const womenHere = group.people.filter(function (person) { return person.gender === "female"; }).length;
-    svg.setAttribute("role", "img");
-    svg.setAttribute("aria-label", cloudAria(group.people.length, occSplitLabel(group.key), womenHere));
-    svg.setAttribute("width", svg.dataset.w);
-    svg.setAttribute("height", svg.dataset.h);
-    const caption = document.createElement("figcaption");
-    const line = document.createElement("span");
-    line.className = "caption-line";
-    line.textContent = cloudCaption(group.people.length, group.key);
-    caption.appendChild(line);
-    figure.appendChild(svg);
-    figure.appendChild(caption);
-    clouds.appendChild(figure);
-    if (occChartNarrow()) {
-      // Let CSS wrap inside the grid cell; balanced <br> splits fight the column.
-      line.style.whiteSpace = "normal";
-    } else {
-      fitCaptionTitle(line, Number(svg.dataset.w));
-    }
+    occAppendCloudFigure(clouds, group, {
+      dataAttr: "occKey",
+      wrapLines: true
+    });
   }
 
   prepareOccCloudEntrance();
@@ -164,16 +215,17 @@ function renderOccupations() {
   var chordBlock = document.getElementById("occ-chord-block");
   var note = document.getElementById("occ-chord-note");
   var srcChord = document.getElementById("src-occ-chord");
-  if (chordBlock) chordBlock.hidden = mode !== "occupation";
-  if (note) note.hidden = mode !== "occupation";
-  if (srcChord) srcChord.hidden = mode !== "occupation";
-  if (mode === "occupation" && typeof renderOccChord === "function") {
-    renderOccChord();
-  }
+  if (chordBlock) chordBlock.hidden = false;
+  if (note) note.hidden = true;
+  if (srcChord) srcChord.hidden = false;
+  if (typeof renderOccChord === "function") renderOccChord();
+  if (typeof renderOccRain === "function") renderOccRain();
   if (typeof afterRenderOccMorph === "function") afterRenderOccMorph();
 }
 
 var occCloudSeen = false;
+var occCloudEntering = false;
+var occCloudEnterTimer = 0;
 var occCloudObserver = null;
 
 function occCloudReduced() {
@@ -191,47 +243,33 @@ function occCloudHash(n) {
   return (x - Math.floor(x)) * 2 - 1;
 }
 
-function prepareOccCloudEntrance() {
+function occCloudSettleMarks() {
+  var clouds = document.getElementById("clouds");
+  var viz = occCloudViz();
+  if (!clouds) return;
+  if (occCloudEnterTimer) {
+    window.clearTimeout(occCloudEnterTimer);
+    occCloudEnterTimer = 0;
+  }
+  occCloudEntering = false;
+  clouds.classList.add("is-in");
+  clouds.classList.remove("is-pending");
+  if (viz) {
+    viz.classList.add("is-occ-in");
+    viz.classList.remove("is-occ-pending");
+  }
+  Array.prototype.forEach.call(clouds.querySelectorAll("polygon"), occClearPolyMotion);
+}
+
+// Arm hexes above the flock - gender colors already on (no gold recolor).
+// Like the hero dove: the link is the flight, not a paint change.
+function armOccCloudEntrance() {
   var clouds = document.getElementById("clouds");
   var viz = occCloudViz();
   if (!clouds) return;
 
   if (occCloudReduced()) {
-    clouds.classList.add("is-in");
-    clouds.classList.remove("is-pending");
-    if (viz) {
-      viz.classList.add("is-occ-in");
-      viz.classList.remove("is-occ-pending");
-    }
-    return;
-  }
-
-  // Already played once this session — keep final paints on re-render (lang / split).
-  if (occCloudSeen) {
-    clouds.classList.add("is-in");
-    clouds.classList.remove("is-pending");
-    if (viz) {
-      viz.classList.add("is-occ-in");
-      viz.classList.remove("is-occ-pending");
-    }
-    return;
-  }
-
-  // Reload already on Fig. 3a: skip the gold flock. It races morph/FLIP and
-  // ghosts Fig. 3 hexes over the chord flower (same class of bug as hero Mandela).
-  if (
-    typeof occUseSticky === "function" &&
-    occUseSticky() &&
-    typeof occScrollWantsChord === "function" &&
-    occScrollWantsChord()
-  ) {
-    occCloudSeen = true;
-    clouds.classList.add("is-in");
-    clouds.classList.remove("is-pending");
-    if (viz) {
-      viz.classList.add("is-occ-in");
-      viz.classList.remove("is-occ-pending");
-    }
+    occCloudSettleMarks();
     return;
   }
 
@@ -242,52 +280,36 @@ function prepareOccCloudEntrance() {
     viz.classList.remove("is-occ-in");
   }
 
-  // Same randomization as the top-rain version, but clustered at top-center
-  // of Fig. 3. Measure once per SVG (viewBox → screen) instead of per polygon.
   var flock = clouds.getBoundingClientRect();
   var originX = flock.left + flock.width / 2;
-  var originY = flock.top - Math.max(56, Math.min(120, flock.height * 0.18));
+  // Gather from above the stage top - past the frame edge, not from mid-cloud.
+  var stage = document.getElementById("occ-stage");
+  var stageTop = stage ? stage.getBoundingClientRect().top : flock.top;
+  var originY = Math.min(flock.top, stageTop) - Math.max(96, Math.min(200, flock.height * 0.36));
 
   var figures = clouds.querySelectorAll(".group");
   var seed = 0;
   figures.forEach(function (figure, groupIndex) {
-    var svg = figure.querySelector("svg");
-    var svgBox = svg ? svg.getBoundingClientRect() : null;
-    var vb = svg && svg.viewBox && svg.viewBox.baseVal;
-    var sx = svgBox && vb && vb.width ? svgBox.width / vb.width : 1;
-    var sy = svgBox && vb && vb.height ? svgBox.height / vb.height : 1;
-    var ox = svgBox ? svgBox.left - (vb ? vb.x * sx : 0) : 0;
-    var oy = svgBox ? svgBox.top - (vb ? vb.y * sy : 0) : 0;
     var polys = figure.querySelectorAll("polygon");
     var groupN = polys.length || 1;
     polys.forEach(function (poly, index) {
-      var finalFill = poly.getAttribute("fill") || poly.style.fill || MALE;
-      poly.dataset.finalFill = finalFill;
-      poly.style.fill = GOLD;
-      poly.removeAttribute("fill");
-
-      var cx;
-      var cy;
-      var pts = poly.points;
-      if (pts && pts.numberOfItems) {
-        var sumX = 0;
-        var sumY = 0;
-        for (var p = 0; p < pts.numberOfItems; p++) {
-          sumX += pts.getItem(p).x;
-          sumY += pts.getItem(p).y;
-        }
-        cx = ox + (sumX / pts.numberOfItems) * sx;
-        cy = oy + (sumY / pts.numberOfItems) * sy;
-      } else {
-        var box = poly.getBoundingClientRect();
-        cx = box.left + box.width / 2;
-        cy = box.top + box.height / 2;
-      }
-      var jx = occCloudHash(seed++) * 48;
-      var jy = occCloudHash(seed++) * 36;
-      var dx = originX + jx - cx;
-      var dy = originY + jy - cy;
-      var scale = 0.22 + (occCloudHash(seed++) * 0.5 + 0.5) * 0.28;
+      // Hide before the CSS-delta probe - probing at opacity 1 flashes home seats.
+      poly.style.transition = "none";
+      poly.style.opacity = "0";
+      poly.style.transformBox = "fill-box";
+      poly.style.transformOrigin = "center";
+      // Screen seats (includes parent #clouds scale); CSS translate needs a probe.
+      var box = poly.getBoundingClientRect();
+      var cx = box.left + box.width / 2;
+      var cy = box.top + box.height / 2;
+      var jx = occCloudHash(seed++) * 56;
+      var jy = occCloudHash(seed++) * 40;
+      var screenDx = originX + jx - cx;
+      var screenDy = originY + jy - cy;
+      var local = typeof occCssDeltaForScreen === "function"
+        ? occCssDeltaForScreen(poly, screenDx, screenDy)
+        : { x: screenDx, y: screenDy };
+      var scale = 0.2 + (occCloudHash(seed++) * 0.5 + 0.5) * 0.3;
       var delay = Math.min(
         1.05,
         groupIndex * 0.07 +
@@ -295,40 +317,81 @@ function prepareOccCloudEntrance() {
           (occCloudHash(seed++) * 0.5 + 0.5) * 0.42
       );
       poly.dataset.enterDelay = delay.toFixed(3);
-
-      poly.style.transformBox = "fill-box";
-      poly.style.transformOrigin = "center";
       poly.style.transform =
-        "translate(" + dx.toFixed(1) + "px, " + dy.toFixed(1) + "px) scale(" + scale.toFixed(3) + ")";
-      poly.style.opacity = "0";
-      poly.style.transition = "none";
+        "translate(" + local.x.toFixed(1) + "px, " + local.y.toFixed(1) + "px) scale(" + scale.toFixed(3) + ")";
     });
   });
-
-  ensureOccCloudObserver();
 }
 
-function playOccCloudEntrance() {
+function prepareOccCloudEntrance() {
   var clouds = document.getElementById("clouds");
-  var viz = occCloudViz();
-  if (!clouds || occCloudSeen || occCloudReduced()) return;
-  // Sticky pin can still "intersect" while Fig. 3 is CSS-hidden under 3a.
+  if (!clouds) return;
+
+  if (occCloudReduced()) {
+    occCloudSettleMarks();
+    return;
+  }
+
+  // Reload already on Fig. 3b: do not arm a flight that races FLIP.
   if (
     typeof occUseSticky === "function" &&
     occUseSticky() &&
-    (occVisualMorph >= 0.5 || occTargetMorph >= 0.5 ||
+    typeof occScrollWantsChord === "function" &&
+    occScrollWantsChord()
+  ) {
+    occCloudSeen = true;
+    occCloudSettleMarks();
+    return;
+  }
+
+  if (occCloudSeen) {
+    occCloudSettleMarks();
+    return;
+  }
+
+  armOccCloudEntrance();
+  ensureOccCloudObserver();
+}
+
+// force: replay when arriving from the rain (every time). Observer / snap
+// paths stay once-per-session via occCloudSeen.
+// alreadyArmed: rain crossfade hid hexes before revealing fig3 - do not re-arm
+// (re-probe at visible opacity flashes the settled grid).
+function playOccCloudEntrance(force, alreadyArmed) {
+  var clouds = document.getElementById("clouds");
+  var viz = occCloudViz();
+  if (!clouds || occCloudReduced()) return;
+  if (!force && occCloudSeen) return;
+
+  // force = rain→3a landing; crossfade sets occMorphing/viewMode before us.
+  if (
+    !force &&
+    typeof occUseSticky === "function" &&
+    occUseSticky() &&
+    typeof occViewMode !== "undefined" &&
+    occViewMode === "rain"
+  ) {
+    return;
+  }
+  // Never fight the clouds↔chord FLIP - but do not block rain→3a force landings
+  // (crossfade sets occMorphing=true before playOccCloudEntrance(true)).
+  if (
+    !force &&
+    typeof occUseSticky === "function" &&
+    occUseSticky() &&
+    (occMorphing ||
+      (typeof occViewMode !== "undefined" && occViewMode === "chord") ||
       (typeof occScrollWantsChord === "function" && occScrollWantsChord()))
   ) {
     occCloudSeen = true;
-    clouds.classList.add("is-in");
-    clouds.classList.remove("is-pending");
-    if (viz) {
-      viz.classList.add("is-occ-in");
-      viz.classList.remove("is-occ-pending");
-    }
+    occCloudSettleMarks();
     return;
   }
+
+  if (!alreadyArmed) armOccCloudEntrance();
+
   occCloudSeen = true;
+  occCloudEntering = true;
   clouds.classList.remove("is-pending");
   clouds.classList.add("is-in");
   if (viz) {
@@ -341,12 +404,11 @@ function playOccCloudEntrance() {
   var settleMs = 0;
   polys.forEach(function (poly) {
     var delay = Number(poly.dataset.enterDelay || 0);
-    var dur = 0.78 + (occCloudHash(seed++) * 0.5 + 0.5) * 0.4;
-    settleMs = Math.max(settleMs, (delay + dur + 0.75) * 1000);
+    var dur = 0.82 + (occCloudHash(seed++) * 0.5 + 0.5) * 0.42;
+    settleMs = Math.max(settleMs, (delay + dur) * 1000);
     poly.style.transition =
       "transform " + dur.toFixed(2) + "s cubic-bezier(0.22, 1, 0.36, 1) " + delay.toFixed(3) + "s," +
-      " opacity 0.4s ease " + delay.toFixed(3) + "s," +
-      " fill 0.75s ease " + (delay + 0.48).toFixed(3) + "s";
+      " opacity 0.35s ease " + delay.toFixed(3) + "s";
   });
 
   requestAnimationFrame(function () {
@@ -354,28 +416,15 @@ function playOccCloudEntrance() {
       polys.forEach(function (poly) {
         poly.style.transform = "translate(0px, 0px) scale(1)";
         poly.style.opacity = "1";
-        poly.style.fill = poly.dataset.finalFill || MALE;
       });
     });
   });
 
-  // Drop compositor transforms after the flock lands — leftover identity
-  // transforms can keep SVG layer bounds clipping oddly in some browsers.
-  window.setTimeout(function () {
-    polys.forEach(function (poly) {
-      poly.style.transition = "";
-      poly.style.transform = "";
-      poly.style.transformBox = "";
-      poly.style.transformOrigin = "";
-      poly.style.opacity = "";
-      var finalFill = poly.dataset.finalFill;
-      if (finalFill) {
-        poly.setAttribute("fill", finalFill);
-        poly.style.fill = "";
-      }
-      delete poly.dataset.enterDelay;
-      delete poly.dataset.finalFill;
-    });
+  if (occCloudEnterTimer) window.clearTimeout(occCloudEnterTimer);
+  occCloudEnterTimer = window.setTimeout(function () {
+    occCloudEnterTimer = 0;
+    occCloudEntering = false;
+    polys.forEach(occClearPolyMotion);
   }, settleMs + 80);
 }
 

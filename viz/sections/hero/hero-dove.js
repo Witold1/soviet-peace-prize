@@ -82,7 +82,7 @@ function heroDoveLayout() {
   var dove = packPeaceDove(heroMarks.length);
   var narrow = width <= 520;
   // Stretch dove to the wall/grid height on every breakpoint so board + chart
-  // height stay put — intro copy must not ride when the morph runs.
+  // height stay put - intro copy must not ride when the morph runs.
   var cloudW = narrow ? width * 0.98 : width * 0.94;
   var tile = narrow
     ? Math.max(9, Math.min(14, cloudW / 28))
@@ -134,7 +134,7 @@ function heroDoveLayout() {
     if (item.tile) item.tile.style.opacity = "";
   });
 
-  // Relayout must not leave absolute marks without a transform — they stack at
+  // Relayout must not leave absolute marks without a transform - they stack at
   // (0,0) and the last DOM face (Mandela) reads as a stuck portrait. If a
   // canvas flight was mid-way, className above already dropped is-canvas-flight;
   // snap to the target pose instead of hoping sync finishes the morph.

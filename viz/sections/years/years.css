@@ -23,7 +23,7 @@
   position: sticky;
   top: 16px;
   z-index: 1;
-  /* No desktop overflow:auto — inner scrollbar / max-height fights page scroll. */
+  /* No desktop overflow:auto - inner scrollbar / max-height fights page scroll. */
   padding-bottom: 8px;
   background: #fce5cd;
 }

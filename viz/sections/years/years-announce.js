@@ -68,6 +68,12 @@ function dayToYear(ms) {
   return y + (ms - start) / (next - start);
 }
 
+// Fig. 4 / top rail put cohort year Y on the Y tick (year as a label, not Jan 1).
+// Map calendar days the same way: mid-year on the tick, so Dec sits before Y+1.
+function announceDateYear(ms) {
+  return dayToYear(ms) - 0.5;
+}
+
 function announceRibbonPath(xLeft, xRight, y0, xTip, y1) {
   var h = y1 - y0;
   var c1 = y0 + h * 0.42;
@@ -397,7 +403,7 @@ function renderAnnounceChart() {
     var xRight = xYear(bounds[1]) + size / 2;
     var announcedMs = parseIsoDay(ev.announced);
     var missing = announcedMs == null;
-    var xTip = missing ? (xLeft + xRight) / 2 : xYear(dayToYear(announcedMs));
+    var xTip = missing ? (xLeft + xRight) / 2 : xYear(announceDateYear(announcedMs));
     appendAnnounceDualMark(layers, ev, index, {
       xLeft: xLeft,
       xRight: xRight,
@@ -416,7 +422,7 @@ function renderAnnounceChart() {
 }
 
 function centerAnnounceChartScroll() {
-  // Unlike the beeswarm, start at the left (1950) — title and timeline align.
+  // Unlike the beeswarm, start at the left (1950) - title and timeline align.
   var chart = document.getElementById("announce-chart");
   if (!chart) return;
   requestAnimationFrame(function () {

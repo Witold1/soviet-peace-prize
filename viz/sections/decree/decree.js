@@ -209,7 +209,7 @@ function syncDecreeAnnotProgress(zoom, front) {
   if (!root) return;
   var state = ukazAnnotStateFor("ukaz-annots");
   if (!state.built) renderUkazAnnots(ukazAnnotSetByRoot("ukaz-annots"));
-  // Markers only after the zoom settles — not while the crop is still moving in.
+  // Markers only after the zoom settles - not while the crop is still moving in.
   var show = !!front && zoom >= 0.9;
   root.hidden = !show;
   if (!show) {
@@ -229,7 +229,7 @@ function relayoutDecree(quote, target) {
   if (!quote.closest("#decree-1949") || typeof layoutPress !== "function") return;
   var decree = document.getElementById("decree-1949");
   // Inside the press stage the decree is sticky/absolute, so window scroll
-  // does not move it — chasing its top would jump the page (esp. on phone).
+  // does not move it - chasing its top would jump the page (esp. on phone).
   if (decree && decree.closest(".press-stage")) {
     if (typeof syncPress === "function") syncPress();
     return;
@@ -401,7 +401,7 @@ var DESTALIN_RUSH_SRCS = [
 ];
 var DESTALIN_RUSH_COUNT = 18;
 
-// Stable page tilts — same order as stops — so the land doesn't snap upright.
+// Stable page tilts - same order as stops - so the land doesn't snap upright.
 var DESTALIN_TILTS = [-1.15, 0.9, -0.7, 1.05, -0.95];
 
 // Start on the renaming decree; › then walks the earlier destalinization carousel.

@@ -23,7 +23,7 @@
 
 .hero-chart {
   box-sizing: border-box;
-  /* Same duration/easing as mark flight — text rides up with the morph. */
+  /* Same duration/easing as mark flight - text rides up with the morph. */
   transition: height var(--hero-morph-ms, 1350ms) cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -67,7 +67,7 @@ html[data-hero-mode="wall"] .hero-count-stack {
   overflow: visible;
 }
 
-/* Stack of framed captions — rides up onto the dove (JS scrub). */
+/* Stack of framed captions - rides up onto the dove (JS scrub). */
 .hero-count-stack {
   position: absolute;
   left: 50%;

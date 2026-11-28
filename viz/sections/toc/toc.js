@@ -51,7 +51,7 @@ function syncToc() {
       else links[i].removeAttribute("aria-current");
     }
     TOC_CURRENT = current;
-    // Keep the address bar on the active section (replaceState — no history spam).
+    // Keep the address bar on the active section (replaceState - no history spam).
     // Fig. 3 / 3a stay under #occupation; only TOC sections get a hash.
     try {
       var href = current.getAttribute("href") || "";

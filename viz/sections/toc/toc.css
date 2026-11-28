@@ -58,7 +58,7 @@ section {
   scroll-margin-top: 24px;
 }
 
-/* Smooth scroll only for in-page TOC jumps — not on html globally
+/* Smooth scroll only for in-page TOC jumps - not on html globally
    (global smooth + anchoring made morph/sticky height changes feel like
    the page sliding back to the section start). */
 @media (prefers-reduced-motion: no-preference) {

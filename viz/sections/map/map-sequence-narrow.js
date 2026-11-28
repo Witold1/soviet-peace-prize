@@ -1,4 +1,4 @@
-// Fig. 8я on narrow screens: continent frames in one view (Oesch-style),
+// Fig. 8 on narrow screens: continent frames in one view (Oesch-style),
 // so Europe / Africa / N·S America / Asia+Oceania can be read together
 // instead of one tiny world map or three tall strips.
 
@@ -10,35 +10,18 @@ function mapSeqNarrow() {
 }
 
 // Continent frames for the simultaneous phone collage.
-// Prefer birthContinent() when loaded (same bins as Fig. 8a).
+// Bins match Fig. 8a via birthContinent().
 function mapSeqContinentFrames() {
-  function cont(lon, lat) {
-    if (typeof birthContinent === "function") return birthContinent(lon, lat);
-    if (lon < -25) return lat < 8 ? "south" : "north";
-    if (lon >= 125 && lat < -5) return "oceania";
-    if (lon >= 150) return lat < 20 ? "oceania" : "asia";
-    if (-18 <= lon && lon <= 52 && -35 <= lat && lat <= 37.5) {
-      if (lat >= 36 && lon >= -10 && lon <= 28.5) {
-        if (lon < 0) return "europe";
-        if (lon <= 12) return "africa";
-        return "europe";
-      }
-      if (lat < 36) return "africa";
-    }
-    if (-25 <= lon && lon < 55 && lat > 35) return "europe";
-    if (lon >= 26) return "asia";
-    return "europe";
-  }
-
   // Oesch-like slices. Equirectangular portholes (not Mercator).
-  // Windows crop to the familiar landmass — not the full geographic bin
+  // Windows crop to the familiar landmass - not the full geographic bin
   // (e.g. NAM drops the high Arctic so Canada isn't a clipped stump).
-  // `disp` ≈ CSS width fraction — keeps mark size equal across frames.
+  // `disp` ≈ CSS width fraction - keeps mark size equal across frames.
+  // Defaults: disp 0.5, square, oval 0.38 - Asia overrides.
   return [
     {
       key: "mapSeqFacetEurope",
       cls: "is-europe",
-      test: function (lon, lat) { return cont(lon, lat) === "europe"; },
+      test: function (lon, lat) { return birthContinent(lon, lat) === "europe"; },
       lonLo: -14,
       lonHi: 42,
       latLo: 34,
@@ -51,7 +34,7 @@ function mapSeqContinentFrames() {
     {
       key: "mapSeqFacetAfrica",
       cls: "is-africa",
-      test: function (lon, lat) { return cont(lon, lat) === "africa"; },
+      test: function (lon, lat) { return birthContinent(lon, lat) === "africa"; },
       lonLo: -20,
       lonHi: 52,
       latLo: -36,
@@ -64,7 +47,7 @@ function mapSeqContinentFrames() {
     {
       key: "mapSeqFacetNorthAmerica",
       cls: "is-nam",
-      test: function (lon, lat) { return cont(lon, lat) === "north"; },
+      test: function (lon, lat) { return birthContinent(lon, lat) === "north"; },
       // Contiguous US + Central America + Caribbean; skip Arctic waste.
       lonLo: -128,
       lonHi: -58,
@@ -78,7 +61,7 @@ function mapSeqContinentFrames() {
     {
       key: "mapSeqFacetSouthAmerica",
       cls: "is-sam",
-      test: function (lon, lat) { return cont(lon, lat) === "south"; },
+      test: function (lon, lat) { return birthContinent(lon, lat) === "south"; },
       lonLo: -82,
       lonHi: -34,
       latLo: -55,
@@ -92,7 +75,7 @@ function mapSeqContinentFrames() {
       key: "mapSeqFacetAsiaOceania",
       cls: "is-asia",
       test: function (lon, lat) {
-        var c = cont(lon, lat);
+        var c = birthContinent(lon, lat);
         return c === "asia" || c === "oceania";
       },
       // Include West Asia (lon < 60); 40° cut was dragging that tile into India.
@@ -109,17 +92,4 @@ function mapSeqContinentFrames() {
       ovalCy: 0.46
     }
   ];
-}
-
-// Back-compat alias used by map-sequence.js
-function mapSeqRegions() {
-  return mapSeqContinentFrames();
-}
-
-function mapSeqSeatRegionKey(lon, lat) {
-  var regions = mapSeqContinentFrames();
-  for (var i = 0; i < regions.length; i += 1) {
-    if (regions[i].test(lon, lat == null ? 0 : lat)) return regions[i].key;
-  }
-  return regions[regions.length - 1].key;
 }

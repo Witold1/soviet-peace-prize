@@ -123,9 +123,30 @@ html:not([data-dev-plain]) #decree-1989 {
   outline-offset: -1px;
 }
 
+.dev-controls {
+  margin: 28px 0 0;
+}
+
+.dev-controls > summary {
+  display: list-item;
+  width: fit-content;
+  padding: 8px 12px;
+  border: 1px dashed #888;
+  background: #f7f7f7;
+  color: #333;
+  font: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.dev-controls > summary:focus-visible {
+  outline: 1px solid #000;
+  outline-offset: 3px;
+}
+
 .dev-plain-toggle {
   display: block;
-  margin: 28px 0 0;
+  margin: 10px 0 0;
   padding: 8px 12px;
   border: 1px dashed #888;
   background: #f7f7f7;

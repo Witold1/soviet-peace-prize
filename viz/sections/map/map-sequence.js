@@ -1,11 +1,5 @@
-// Fig. 8я — three sequential states on one Mercator chart:
+// Fig. 8 - three sequential states on one Mercator chart:
 // 1) raw birth scatter → 2) birth-region packs → 3) Pravda-region packs.
-
-function mapSeqUnitLabel(meta) {
-  if (typeof squareUnitLabel === "function") return squareUnitLabel(meta);
-  if (meta.kind === "country" && meta.matchCountry) return countryLabel(meta.matchCountry);
-  return t(meta.key);
-}
 
 function mapSeqNameLines(label) {
   var words = String(label || "").split(/\s+/).filter(Boolean);
@@ -16,7 +10,7 @@ function mapSeqNameLines(label) {
   return lines;
 }
 
-// Shorter region names for phone portholes — long labels collide with packs.
+// Shorter region names for phone portholes - long labels collide with packs.
 function narrowSeatLabel(key, fallback) {
   var short = lang === "ru"
     ? {
@@ -57,6 +51,7 @@ function renderMapSequence() {
   if (typeof MAP_SQUARE_UNITS === "undefined") return;
 
   chart.replaceChildren();
+  PLACE_GROUPS = [];
 
   var byBirth = new Map();
   var byPravda = new Map();
@@ -66,14 +61,14 @@ function renderMapSequence() {
   });
 
   PEOPLE_SEEN.forEach(function (person) {
-    if (person.birthLat != null && person.birthLon != null && typeof birthSquareUnitKey === "function") {
+    if (person.birthLat != null && person.birthLon != null) {
       var birthKey = birthSquareUnitKey(person);
       if (birthKey) {
         if (!byBirth.has(birthKey)) byBirth.set(birthKey, []);
         byBirth.get(birthKey).push(person);
       }
     }
-    var pravdaKey = typeof pravdaRegionKey === "function" ? pravdaRegionKey(person) : null;
+    var pravdaKey = pravdaRegionKey(person);
     if (pravdaKey) {
       if (!byPravda.has(pravdaKey)) byPravda.set(pravdaKey, []);
       byPravda.get(pravdaKey).push(person);
@@ -93,7 +88,7 @@ function renderMapSequence() {
     birthUnits.push({
       meta: meta,
       key: meta.key,
-      label: mapSeqUnitLabel(meta),
+      label: squareUnitLabel(meta),
       people: people,
       count: people.length,
       lon: lonSum / people.length,
@@ -111,8 +106,8 @@ function renderMapSequence() {
     var latSum = 0;
     var geoN = 0;
     people.forEach(function (person) {
-      var country = typeof pravdaCountryKey === "function" ? pravdaCountryKey(person) : null;
-      var geo = country && typeof PRAVDA_COUNTRY_GEO === "object" ? PRAVDA_COUNTRY_GEO[country] : null;
+      var country = pravdaCountryKey(person);
+      var geo = country ? PRAVDA_COUNTRY_GEO[country] : null;
       if (!geo) return;
       lonSum += geo[0];
       latSum += geo[1];
@@ -122,7 +117,7 @@ function renderMapSequence() {
     pravdaUnits.push({
       meta: meta,
       key: meta.key,
-      label: mapSeqUnitLabel(meta),
+      label: squareUnitLabel(meta),
       people: people,
       count: people.length,
       lon: lonSum / geoN,
@@ -167,51 +162,6 @@ function renderMapSequence() {
       w: Math.max(28, maxLen * charW),
       h: Math.max(lineH, lines.length * lineH)
     };
-  }
-
-  var minMX = Infinity;
-  var minMY = Infinity;
-  var maxMX = -Infinity;
-  var maxMY = -Infinity;
-  function includeMerc(xy) {
-    if (xy[0] < minMX) minMX = xy[0];
-    if (xy[1] < minMY) minMY = xy[1];
-    if (xy[0] > maxMX) maxMX = xy[0];
-    if (xy[1] > maxMY) maxMY = xy[1];
-  }
-  birthUnits.forEach(function (row) {
-    includeMerc(mercator(row.lon, row.lat));
-    row.people.forEach(function (person) {
-      includeMerc(mercator(person.birthLon, person.birthLat));
-    });
-  });
-  pravdaUnits.forEach(function (row) {
-    includeMerc(mercator(row.lon, row.lat));
-  });
-  includeMerc(mercator(-130, 0));
-  includeMerc(mercator(155, 0));
-  includeMerc(mercator(0, -45));
-  includeMerc(mercator(0, 70));
-  var padLon = 12 * RAD;
-  var padLat = mercator(0, 8)[1] - mercator(0, 0)[1];
-  minMX -= padLon;
-  maxMX += padLon;
-  minMY -= padLat;
-  maxMY += padLat;
-
-  var spanMX = maxMX - minMX;
-  var spanMY = maxMY - minMY;
-  var innerW = 960;
-  var innerH = Math.max(420, innerW * spanMY / spanMX);
-  var pad = 40;
-  var mapW = innerW + pad * 2;
-  var mapH = innerH + pad * 2;
-
-  function toSvg(xy) {
-    return [
-      pad + (xy[0] - minMX) / spanMX * innerW,
-      pad + (maxMY - xy[1]) / spanMY * innerH
-    ];
   }
 
   function packDots(cx, cy, side, n, fixedR) {
@@ -273,22 +223,24 @@ function renderMapSequence() {
     if (sharedKeys.indexOf(row.key) < 0) sharedKeys.push(row.key);
   });
 
-  var narrow = typeof mapSeqNarrow === "function" && mapSeqNarrow();
+  var narrow = mapSeqNarrow();
   if (narrow) chart.classList.add("is-regions");
   else chart.classList.remove("is-regions");
 
   var seatMetas = sharedKeys.map(function (key) {
     var birth = birthByKey.get(key);
     var pravda = pravdaByKey.get(key);
-    // Prefer Fig. 8c (Pravda) seats so the static shells match that chart.
-    var lon = pravda ? pravda.lon : birth.lon;
-    var lat = pravda ? pravda.lat : birth.lat;
+    // Prefer birth means (Fig. 8a) so packs like Canada sit where they did
+    // on the births-by-region chart; Pravda-only keys keep Pravda geo.
+    var lon = birth ? birth.lon : pravda.lon;
+    var lat = birth ? birth.lat : pravda.lat;
     var label = (pravda || birth).label;
     var metrics = nameMetrics(label);
-    var birthSide = birth ? sideFor(birth.count) : 0;
-    var pravdaSide = pravda ? sideFor(pravda.count) : 0;
     // Size + separation follow the Pravda pack when present (same as Fig. 8c).
-    var side = Math.max(pravdaSide || birthSide || sideSeed(), sideSeed());
+    var side = Math.max(
+      pravda ? sideFor(pravda.count) : (birth ? sideFor(birth.count) : 0),
+      sideSeed()
+    );
     return {
       key: key,
       lon: lon,
@@ -300,8 +252,6 @@ function renderMapSequence() {
       labelCorner: "br",
       labelPush: 0,
       side: side,
-      birthSide: birthSide,
-      pravdaSide: pravdaSide,
       birth: birth || null,
       pravda: pravda || null
     };
@@ -312,6 +262,34 @@ function renderMapSequence() {
   var dots = [];
   var flyHost = null;
   var flyPairs = [];
+  // Narrow facet captions: birth count → Pravda count during the flight morph.
+  var facetCaps = [];
+  var lastCapFly = -1;
+
+  function facetCountPhrase(count) {
+    return countNoun(count, "person", "people", "человек", "человека", "человек");
+  }
+
+  // tFly 0 = births, 1 = Pravda; integer steps pulse blue so the change is readable.
+  function updateFacetCaps(tFly) {
+    if (!facetCaps.length) return;
+    var e = reduceMotion
+      ? (tFly >= 0.5 ? 1 : 0)
+      : smootherstep(Math.max(0, Math.min(1, tFly)));
+    facetCaps.forEach(function (row) {
+      var count = Math.round(row.birthCount + (row.pravdaCount - row.birthCount) * e);
+      if (count === row.shown) return;
+      var had = row.shown != null;
+      row.shown = count;
+      row.nEl.textContent = facetCountPhrase(count);
+      if (!had || reduceMotion) return;
+      row.nEl.classList.remove("is-pulse");
+      // Restart the pulse even if the class was already on.
+      void row.nEl.offsetWidth;
+      row.nEl.classList.add("is-pulse");
+    });
+  }
+
   var reduceMotion = typeof window.matchMedia === "function"
     && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   var movedFill = "#c43c3c";
@@ -346,24 +324,19 @@ function renderMapSequence() {
       });
       flush();
     }
-    var densify = typeof mapGetProjection === "function" ? mapGetProjection().densifyRing : null;
-    var landDense = typeof mapDensifiedLand === "function"
-      ? mapDensifiedLand()
-      : LAND.map(function (ring) { return densify ? densify(ring) : ring; });
-    var lakeDense = typeof mapDensifiedLakes === "function" && typeof LAKES !== "undefined"
-      ? mapDensifiedLakes()
-      : (typeof LAKES !== "undefined" ? LAKES.map(function (ring) { return densify ? densify(ring) : ring; }) : []);
     var landShapes = [];
     var coastlines = [];
     var lakeShapes = [];
     var lakeshores = [];
     var lonCenter = ((lonLo == null ? -180 : lonLo) + (lonHi == null ? 180 : lonHi)) / 2;
-    landDense.forEach(function (ring) {
+    LAND.forEach(function (ring) {
       projectRing(ring, landShapes, coastlines, lonCenter);
     });
-    lakeDense.forEach(function (ring) {
-      projectRing(ring, lakeShapes, lakeshores, lonCenter);
-    });
+    if (typeof LAKES !== "undefined") {
+      LAKES.forEach(function (ring) {
+        projectRing(ring, lakeShapes, lakeshores, lonCenter);
+      });
+    }
     function trace(points, close) {
       var d = "";
       points.forEach(function (point, index) {
@@ -416,10 +389,10 @@ function renderMapSequence() {
       seat.labelCorner = "br";
       seat.labelPush = 0;
     });
-    if (typeof mapSeparateTiles === "function") mapSeparateTiles(seatList, 5);
+    mapSeparateTiles(seatList, 5);
     pickCorners(seatList);
     // Keep the full geographic canvas by default. Only expand if labels/tiles
-    // stick out — never crop land (that cut the bottom off Fig. 8я on desktop).
+    // stick out - never crop land (that cut the bottom off Fig. 8я on desktop).
     if (frame.mapW != null && frame.mapH != null) {
       var minX = 0;
       var minY = 0;
@@ -483,10 +456,10 @@ function renderMapSequence() {
 
   function drawSeqPanel(seatList, peopleList, lonLo, lonHi, ariaExtra, latLo, latHi, frameOpts) {
     // Continent frames: lock the geographic window so the silhouette stays
-    // readable. Do NOT crop the viewBox to tiles — that zooms into one coast.
+    // readable. Do NOT crop the viewBox to tiles - that zooms into one coast.
     var opts = frameOpts || {};
     var lockFrame = lonLo != null && lonHi != null && latLo != null && latHi != null;
-    // Phone portholes: target ~3.5–4 CSS px radius. unitScale keeps Asia
+    // Phone portholes: target ~3.5-4 CSS px radius. unitScale keeps Asia
     // (full width) equal to half-width continent circles.
     var disp = opts.disp == null ? 0.5 : opts.disp;
     var unitScale = Math.max(0.35, disp / 0.5);
@@ -552,8 +525,14 @@ function renderMapSequence() {
         includeMerc2(mercator(person.birthLon, person.birthLat));
       });
       if (!isFinite(minMX2)) return null;
-      var padLon2 = 8 * RAD;
-      var padLat2 = mercator(0, 6)[1] - mercator(0, 0)[1];
+      // Same world window as the old Fig. 8в - not a tight crop around seats,
+      // so north/south coasts stay in frame (slightly more than before).
+      includeMerc2(mercator(-130, 0));
+      includeMerc2(mercator(155, 0));
+      includeMerc2(mercator(0, -52));
+      includeMerc2(mercator(0, 68));
+      var padLon2 = 12 * RAD;
+      var padLat2 = mercator(0, 10)[1] - mercator(0, 0)[1];
       minMX2 -= padLon2;
       maxMX2 += padLon2;
       minMY2 -= padLat2;
@@ -563,12 +542,12 @@ function renderMapSequence() {
     var spanMY2 = Math.max(0.01, maxMY2 - minMY2);
     var innerW2 = narrow ? 360 : 960;
     var naturalH2 = innerW2 * spanMY2 / spanMX2;
-    // Never squash locked frames — anisotropic scale was warping continents.
+    // Never squash locked frames - anisotropic scale was warping continents.
     var innerH2 = lockFrame
       ? naturalH2
       : (narrow
         ? Math.max(150, Math.min(240, naturalH2))
-        : Math.max(420, Math.min(900, naturalH2)));
+        : Math.max(420, naturalH2));
     var pad2 = narrow ? (lockFrame ? 8 : 10) : 40;
     var mapW2 = innerW2 + pad2 * 2;
     var mapH2 = innerH2 + pad2 * 2;
@@ -592,7 +571,7 @@ function renderMapSequence() {
 
     function pullIntoOval(seats) {
       var o = frameOval();
-      // Soft edge clip — readability of geography beats fitting the ring.
+      // Soft edge clip - readability of geography beats fitting the ring.
       var rx = o.rx * 0.98;
       var ry = o.ry * 0.98;
       seats.forEach(function (seat) {
@@ -756,10 +735,10 @@ function renderMapSequence() {
 
     var framed;
     if (lockFrame) {
-      // Place seats inside the fixed continent window — never re-crop.
+      // Place seats inside the fixed continent window - never re-crop.
       seatList.forEach(function (seat) {
         // Keep regional centroids inside the porthole (don't project off-frame
-        // then drag toward the oval center — that put West Asia on India).
+        // then drag toward the oval center - that put West Asia on India).
         var seatLon = Math.max(minMX2, Math.min(maxMX2, seat.lon));
         var seatLat = Math.max(minMY2, Math.min(maxMY2, seat.lat));
         var xy = localToSvg(project(seatLon, seatLat));
@@ -784,7 +763,7 @@ function renderMapSequence() {
       var tileGap = seatList.length >= 3
         ? Math.max(6, 7 / Math.sqrt(unitScale))
         : Math.max(4, 5 / Math.sqrt(unitScale));
-      if (typeof mapSeparateTiles === "function") mapSeparateTiles(seatList, tileGap);
+      mapSeparateTiles(seatList, tileGap);
       pullIntoOval(seatList);
       // Hand nudge: West Asia a bit left + up (toward Middle East).
       seatList.forEach(function (seat) {
@@ -832,24 +811,14 @@ function renderMapSequence() {
       var row = seat.birth || seat.pravda;
       var birthPeople = seat.birth ? seat.birth.people.slice() : [];
       var pravdaPeople = seat.pravda ? seat.pravda.people.slice() : [];
-      var unitMeta = null;
-      if (typeof MAP_SQUARE_UNITS !== "undefined") {
-        for (var ui = 0; ui < MAP_SQUARE_UNITS.length; ui += 1) {
-          if (MAP_SQUARE_UNITS[ui].key === seat.key) {
-            unitMeta = MAP_SQUARE_UNITS[ui];
-            break;
-          }
-        }
-      }
-      var isRegion = !!(unitMeta && unitMeta.kind === "region");
       var gIndex = PLACE_GROUPS.length;
-      // Tip picks birth vs affiliation by map-seq step — never union both.
+      // Tip picks birth vs Pravda people by map-seq step - never union both.
       PLACE_GROUPS.push({
-        label: seat.label,
+        label: seat.tipLabel || seat.label,
         people: birthPeople.length ? birthPeople : pravdaPeople,
         birthPeople: birthPeople,
         pravdaPeople: pravdaPeople,
-        countryMode: isRegion ? "birth" : null
+        packTip: true
       });
       var rect = svgEl("rect");
       rect.setAttribute("class", "map-squares-tile");
@@ -865,7 +834,7 @@ function renderMapSequence() {
       rect.dataset.stroke = "#2a2a2a";
       rect.setAttribute("tabindex", "0");
       rect.setAttribute("role", "img");
-      rect.setAttribute("aria-label", seat.label);
+      rect.setAttribute("aria-label", seat.tipLabel || seat.label);
       tilesG.appendChild(rect);
 
       var name = svgEl("text");
@@ -937,8 +906,8 @@ function renderMapSequence() {
       var birthXy = framed.toSvg(project(person.birthLon, person.birthLat));
       var birthSlot = birthSlotByI.get(person.i) || { x: birthXy[0], y: birthXy[1], r: markRUse };
       var pravdaSlot = pravdaSlotByI.get(person.i) || null;
-      var birthKey = typeof birthSquareUnitKey === "function" ? birthSquareUnitKey(person) : null;
-      var pravdaKey = typeof pravdaRegionKey === "function" ? pravdaRegionKey(person) : null;
+      var birthKey = birthSquareUnitKey(person);
+      var pravdaKey = pravdaRegionKey(person);
       var moved = !!(birthKey && pravdaKey && birthKey !== pravdaKey);
       var crossFacet = moved && !pravdaSlot;
 
@@ -958,7 +927,7 @@ function renderMapSequence() {
       if (moved) circle.dataset.moved = "1";
       circle.setAttribute("tabindex", "0");
       circle.setAttribute("role", "img");
-      circle.setAttribute("aria-label", typeof mapMarkAria === "function" ? mapMarkAria(person) : personName(person));
+      circle.setAttribute("aria-label", mapMarkAria(person));
       if (!wikiFor(person)) circle.classList.add("no-link");
       dotsG.appendChild(circle);
       dots.push({
@@ -995,7 +964,7 @@ function renderMapSequence() {
       circle.dataset.moved = "1";
       circle.setAttribute("tabindex", "0");
       circle.setAttribute("role", "img");
-      circle.setAttribute("aria-label", typeof mapMarkAria === "function" ? mapMarkAria(person) : personName(person));
+      circle.setAttribute("aria-label", mapMarkAria(person));
       if (!wikiFor(person)) circle.classList.add("no-link");
       dotsG.appendChild(circle);
       var slot = { x: pravdaSlot.x, y: pravdaSlot.y, r: markRUse };
@@ -1080,15 +1049,10 @@ function renderMapSequence() {
     };
   }
 
-  function preferredCorners(key) {
-    if (typeof mapPravdaPreferredCorners === "function") return mapPravdaPreferredCorners(key);
-    return ["br", "bl", "tr", "tl"];
-  }
-
   function pickCorners(placed) {
     for (var round = 0; round < 3; round += 1) {
       placed.forEach(function (item, index) {
-        var corners = preferredCorners(item.key);
+        var corners = mapSquarePreferredCorners(item.key);
         var best = corners[0];
         var bestHits = Infinity;
         corners.forEach(function (corner) {
@@ -1113,9 +1077,7 @@ function renderMapSequence() {
   if (narrow) {
     var host = document.createElement("div");
     host.className = "map-seq-facets";
-    var regions = typeof mapSeqContinentFrames === "function"
-      ? mapSeqContinentFrames()
-      : (typeof mapSeqRegions === "function" ? mapSeqRegions() : []);
+    var regions = mapSeqContinentFrames();
     regions.forEach(function (region) {
       function inRegion(lon, lat) {
         return region.test.length > 1 ? region.test(lon, lat) : region.test(lon);
@@ -1126,7 +1088,7 @@ function renderMapSequence() {
       });
       var pravdaKeysHere = new Set();
       people.forEach(function (person) {
-        var pk = typeof pravdaRegionKey === "function" ? pravdaRegionKey(person) : null;
+        var pk = pravdaRegionKey(person);
         if (pk) pravdaKeysHere.add(pk);
       });
       // People born elsewhere whose Pravda seat lands in this continent.
@@ -1134,7 +1096,7 @@ function renderMapSequence() {
       PEOPLE_SEEN.forEach(function (person) {
         if (person.birthLon == null || person.birthLat == null) return;
         if (inRegion(person.birthLon, person.birthLat)) return;
-        var pk = typeof pravdaRegionKey === "function" ? pravdaRegionKey(person) : null;
+        var pk = pravdaRegionKey(person);
         if (!pk || !pravdaByKey.has(pk)) return;
         var prow = pravdaByKey.get(pk);
         if (!inRegion(prow.lon, prow.lat)) return;
@@ -1164,26 +1126,48 @@ function renderMapSequence() {
             lon: lon,
             lat: lat,
             label: shortLabel,
+            // Full i18n name for tooltips; map keeps the short label.
+            tipLabel: seat.label,
             nameLines: shortLines,
             labelW: shortMetrics.w,
             labelH: shortMetrics.h,
             labelCorner: "br",
             labelPush: 0,
             side: Math.max(18, seat.side * 0.78),
-            birthSide: seat.birthSide,
-            pravdaSide: seat.pravdaSide,
             birth: seat.birth,
             pravda: seat.pravda
           };
         });
       if (!seats.length && !people.length && !arrivals.length) return;
-      var count = people.length;
+      var birthCount = people.length;
+      var stayCount = 0;
+      people.forEach(function (person) {
+        var pk = pravdaRegionKey(person);
+        if (!pk || !pravdaByKey.has(pk)) {
+          stayCount += 1;
+          return;
+        }
+        var prow = pravdaByKey.get(pk);
+        if (inRegion(prow.lon, prow.lat)) stayCount += 1;
+      });
+      var pravdaCount = stayCount + arrivals.length;
       var label = t(region.key);
       var facet = document.createElement("figure");
       facet.className = "map-seq-facet" + (region.cls ? " " + region.cls : "");
       var cap = document.createElement("figcaption");
       cap.className = "map-seq-facet-cap";
-      cap.textContent = label + ", " + countNoun(count, "person", "people", "человек", "человека", "человек");
+      cap.appendChild(document.createTextNode(label + ", "));
+      var nEl = document.createElement("span");
+      nEl.className = "map-seq-facet-n";
+      nEl.textContent = facetCountPhrase(birthCount);
+      cap.appendChild(nEl);
+      facetCaps.push({
+        el: cap,
+        nEl: nEl,
+        birthCount: birthCount,
+        pravdaCount: pravdaCount,
+        shown: birthCount
+      });
       var frame = document.createElement("div");
       frame.className = "map-seq-facet-frame";
       var panel = drawSeqPanel(
@@ -1246,8 +1230,6 @@ function renderMapSequence() {
         labelCorner: "br",
         labelPush: 0,
         side: seat.side,
-        birthSide: seat.birthSide,
-        pravdaSide: seat.pravdaSide,
         birth: seat.birth,
         pravda: seat.pravda
       };
@@ -1392,7 +1374,7 @@ function renderMapSequence() {
 
   // Stage n is parked at tick n-1 and fully gone only at tick n.
   // Maps [n-1 → n] onto [PARK → 1] so the next stack is already entering
-  // while the current one exits — no empty gap between phases.
+  // while the current one exits - no empty gap between phases.
   function slipLocal(p, n) {
     if (n <= 1) return p;
     return PARK + (p - (n - 1)) * (1 - PARK);
@@ -1549,12 +1531,6 @@ function renderMapSequence() {
     labelsLayers.forEach(function (layer) { layer.style.opacity = v; });
   }
 
-  function setSeqSettled(on) {
-    chart.querySelectorAll("svg.map-seq").forEach(function (node) {
-      node.classList.toggle("is-settled", !!on);
-    });
-  }
-
   function displayStep(p) {
     if (p >= 2) return 3;
     if (p >= 1) return 2;
@@ -1632,18 +1608,15 @@ function renderMapSequence() {
     var step = displayStep(progress);
     if (step !== lastStep) {
       lastStep = step;
-      chart.querySelectorAll("svg.map-seq").forEach(function (node) {
-        node.setAttribute("data-step", String(step));
-      });
       if (block) block.setAttribute("data-step", String(step));
     }
     updateScrubUi(progress);
 
-    // Two stacks: question on top, short note below — same progress, move together.
+    // Two stacks: question on top, short note below - same progress, move together.
     paintSlips(askSlips, askWidths, progress, Math.min(272, railWidth * 0.48));
     paintSlips(noteSlips, noteWidths, progress, Math.min(260, railWidth * 0.46));
 
-    // Morph on the exit tail of each story beat — same cadence, wider windows:
+    // Morph on the exit tail of each story beat - same cadence, wider windows:
     // gather during late stage 1; Pravda flight during late stage 2.
     if (progress < 1) {
       setMoved(false);
@@ -1653,21 +1626,28 @@ function renderMapSequence() {
         lastFly = 0;
         setLayersOpacity(smootherstep(tGather).toFixed(3));
         lerpDots("scatter", "birth", tGather);
-        setSeqSettled(false);
+      }
+      if (lastCapFly !== 0) {
+        lastCapFly = 0;
+        updateFacetCaps(0);
       }
     } else if (progress < 2) {
-      lastGather = 1;
-      setLayersOpacity("1");
       var tFlyEarly = clamp((progress - 1.52) / 0.48, 0, 1);
-      if (tFlyEarly !== lastFly) lastFly = tFlyEarly;
-      if (tFlyEarly <= 0) {
-        setMoved(false);
-        lerpDots("birth", "birth", 1);
-        setSeqSettled(false);
-      } else {
-        lerpDots("birth", "pravda", tFlyEarly);
-        setMoved(smootherstep(tFlyEarly) > 0.28);
-        setSeqSettled(tFlyEarly >= 1);
+      if (tFlyEarly !== lastFly || lastGather !== 1) {
+        lastFly = tFlyEarly;
+        lastGather = 1;
+        setLayersOpacity("1");
+        if (tFlyEarly <= 0) {
+          setMoved(false);
+          lerpDots("birth", "birth", 1);
+        } else {
+          lerpDots("birth", "pravda", tFlyEarly);
+          setMoved(smootherstep(tFlyEarly) > 0.28);
+        }
+      }
+      if (tFlyEarly !== lastCapFly) {
+        lastCapFly = tFlyEarly;
+        updateFacetCaps(tFlyEarly);
       }
     } else {
       if (lastFly !== 1) {
@@ -1676,7 +1656,10 @@ function renderMapSequence() {
         setLayersOpacity("1");
         lerpDots("birth", "pravda", 1);
         setMoved(true);
-        setSeqSettled(true);
+      }
+      if (lastCapFly !== 1) {
+        lastCapFly = 1;
+        updateFacetCaps(1);
       }
     }
   }
@@ -1704,7 +1687,7 @@ function renderMapSequence() {
     var dt = lastTs ? Math.min(0.04, (ts - lastTs) / 1000) : 0.016;
     lastTs = ts;
     var diff = targetProgress - progress;
-    // Damped spring — continuous velocity, no lag-then-catch-up jerk.
+    // Damped spring - continuous velocity, no lag-then-catch-up jerk.
     var stiffness = 48;
     var damping = 14;
     progressVel += (diff * stiffness - progressVel * damping) * dt;
@@ -1762,23 +1745,21 @@ function renderMapSequence() {
     syncFromScroll();
   }
 
+  var mapLayoutWidth = 0;
   function onResize() {
+    // Same height-only gate as app.js - mobile URL-bar show/hide.
+    var width = window.innerWidth;
+    if (width === mapLayoutWidth) return;
+    mapLayoutWidth = width;
     measureRail();
     syncFacetLabelSizes();
     syncFromScroll();
   }
 
   if (block && block._mapSeqRaf) cancelAnimationFrame(block._mapSeqRaf);
-  if (block && block._mapSeqClick) block.removeEventListener("click", block._mapSeqClick);
-  if (block && block._mapSeqWheel) window.removeEventListener("wheel", block._mapSeqWheel);
   if (block && block._mapSeqScroll) {
     window.removeEventListener("scroll", block._mapSeqScroll);
     window.removeEventListener("resize", block._mapSeqResize);
-  }
-  if (block && block._mapSeqTouchStart) {
-    block.removeEventListener("touchstart", block._mapSeqTouchStart);
-    block.removeEventListener("touchmove", block._mapSeqTouchMove);
-    block.removeEventListener("touchend", block._mapSeqTouchEnd);
   }
   if (block && block._mapSeqScrubInput && scrubInput) {
     scrubInput.removeEventListener("input", block._mapSeqScrubInput);
@@ -1788,11 +1769,6 @@ function renderMapSequence() {
   }
 
   if (block) {
-    block._mapSeqClick = null;
-    block._mapSeqWheel = null;
-    block._mapSeqTouchStart = null;
-    block._mapSeqTouchMove = null;
-    block._mapSeqTouchEnd = null;
     block._mapSeqScroll = syncFromScroll;
     block._mapSeqResize = onResize;
     block._mapSeqRaf = 0;
@@ -1809,9 +1785,7 @@ function renderMapSequence() {
   window.addEventListener("scroll", syncFromScroll, { passive: true });
   window.addEventListener("resize", onResize);
 
-  allSlips.forEach(function (slip) {
-    slip.classList.remove("is-active", "is-ahead", "is-behind");
-  });
+  mapLayoutWidth = window.innerWidth;
   measureRail();
   syncFacetLabelSizes();
   // Second pass after layout settles (grid widths ready).
@@ -1822,14 +1796,14 @@ function renderMapSequence() {
 }
 
 function mapSeqSource() {
-  var narrow = typeof mapSeqNarrow === "function" && mapSeqNarrow();
+  var narrow = mapSeqNarrow();
   if (lang === "ru") {
-    return "Скролл по рис. 8я ведёт стопки слева направо, затем сменяет стадию. " +
-      "Состояния 1–2: координаты рождения, бины как на рис. 8a. Состояние 3: страна из подписи «Правды». " +
+    return "Скролл по рис. 8 ведёт стопки слева направо, затем сменяет стадию. " +
+      "Состояния 1-2: координаты рождения и региональные бины. Состояние 3: страна из подписи «Правды». " +
       "Кто сменил регион, заливается красным. Проекция: " +
       (narrow ? "равнопромежуточная в овальных фреймах континентов." : "Меркатор.");
   }
-  return "Scrolling through Fig. 8я walks the stacks left→right, then changes stage. " +
-    "States 1–2: birth coordinates and Fig. 8a bins. State 3: Pravda’s country line. Movers fill red. Projection: " +
+  return "Scrolling through Fig. 8 walks the stacks left→right, then changes stage. " +
+    "States 1-2: birth coordinates and regional bins. State 3: Pravda’s country line. Movers fill red. Projection: " +
     (narrow ? "equirectangular continent frames." : "Mercator.");
 }

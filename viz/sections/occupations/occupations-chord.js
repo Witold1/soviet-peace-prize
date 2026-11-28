@@ -53,8 +53,7 @@ function occClusterLabel(classes) {
 }
 
 function occClusterMain(person) {
-  var pravda = typeof pravdaOccClass === "function" ? pravdaOccClass(person) : null;
-  return pravda || person.occupationClass;
+  return occSplitKey(person);
 }
 
 function occClusterRawClasses(person) {
@@ -120,19 +119,13 @@ function occClusterRecords() {
     return {
       person: person,
       main: main,
+      raw: raw,
+      rawN: raw.length,
       classes: classes,
       multi: classes.length >= 2,
       key: classes.length >= 2 ? occClusterKey(classes) : main
     };
   });
-}
-
-function occClusterPickQuote(person) {
-  var row = typeof pravdaOccFor === "function" ? pravdaOccFor(person) : null;
-  if (!row || !row.text) return "";
-  var text = row.text.replace(/\s+/g, " ").trim();
-  if (row.source === "decree") return "«" + text + "»";
-  return text;
 }
 
 // disk() neighbors sit √3 apart; normalize so neighbors are exactly `step` apart.
@@ -287,7 +280,7 @@ function occBlendColor(a, b) {
 }
 
 function occClusterLayout(records, hexR) {
-  // One neighbor spacing for every cloud and hub — the Fig. 3 lattice pitch.
+  // One neighbor spacing for every cloud and hub - the Fig. 3 lattice pitch.
   var step = hexR * Math.sqrt(3);
   var minDist = step * 0.98;
   var counts = {};
@@ -335,10 +328,7 @@ function occClusterLayout(records, hexR) {
 
   var clusters = classOrder.map(function (key) {
     var idxs = (singles[key] || []).slice().sort(function (a, b) {
-      var pa = records[a].person;
-      var pb = records[b].person;
-      if (pa.gender !== pb.gender) return pa.gender === "female" ? -1 : 1;
-      return byYear(pa, pb);
+      return occSortPeople(records[a].person, records[b].person);
     });
     var local = occLocalPack(Math.max(idxs.length, 1), step);
     return {
@@ -517,28 +507,12 @@ function occClusterLayout(records, hexR) {
   };
 }
 
-// Best space split into two lines (character balance — SVG has no CSS wrap).
-function occWrapCaptionLines(text) {
-  if (!text || text.indexOf(" ") === -1) return [text];
-  var best = null;
-  for (var i = 0; i < text.length; i++) {
-    if (text.charAt(i) !== " ") continue;
-    var top = text.slice(0, i);
-    var bottom = text.slice(i + 1);
-    if (!bottom) continue;
-    var widest = Math.max(top.length, bottom.length);
-    var balance = Math.abs(top.length - bottom.length);
-    if (!best || widest < best.widest || (widest === best.widest && balance < best.balance)) {
-      best = { lines: [top, bottom], widest: widest, balance: balance };
-    }
-  }
-  if (!best || best.widest >= text.length) return [text];
-  return best.lines;
-}
+// occWrapCaptionLines: defined in occupations.js (shared with Fig. 3a captions).
 
 // fs: label font sizes in viewBox units ({ label, hub }).
-// narrow: straight wrapped captions; wide: arcs hugging each cloud.
+// narrow kept for call-site compatibility; labels are always straight wraps.
 function renderOccClusterCloud(layout, hexR, fs, narrow) {
+  void narrow;
   var draw = hexR * 0.93;
   var hullPad = hexR * 1.4;
   var pad = hexR * 2.6;
@@ -812,61 +786,7 @@ function renderOccClusterCloud(layout, hexR, fs, narrow) {
     seatLabel(c.x, c.y, c.y - topY + draw * 0.8, 0, -1, String(pts.length), hub.key, true);
   });
 
-  // Wide: class names bend along an arc hugging the cloud. Narrow: same
-  // above/below placement as straight wrapped lines (like Fig. 3 captions).
-  var arcDefs = null;
-  var arcId = 0;
-
-  function arcLabel(info, text, key, top) {
-    if (!arcDefs) {
-      arcDefs = document.createElementNS(SVG_NS, "defs");
-      svg.insertBefore(arcDefs, svg.firstChild);
-    }
-    var size = fs.label;
-    var gap = size * 0.3;
-    // Glyphs rise outward on the top arc and inward on the bottom one.
-    var hug = info.reach + hullPad + gap + (top ? 0 : size * 0.72);
-    // Long names on small clouds flatten the arc (bigger radius) instead of
-    // wrapping down the sides; the arc still touches the cloud's top/bottom.
-    var textLen = text.length * size * 0.55;
-    var r = Math.max(hug, textLen / 2.2);
-    var cx = info.x;
-    var cy = top ? info.y - hug + r : info.y + hug - r;
-    var start = top ? cy + r : cy - r;
-    var end = top ? cy - r : cy + r;
-    var sweep = top ? 1 : 0;
-    var path = document.createElementNS(SVG_NS, "path");
-    var id = "occ-arc-" + (arcId++);
-    path.setAttribute("id", id);
-    path.setAttribute("d",
-      "M" + cx.toFixed(1) + " " + start.toFixed(1) +
-      " A" + r.toFixed(1) + " " + r.toFixed(1) + " 0 1 " + sweep + " " + cx.toFixed(1) + " " + end.toFixed(1) +
-      " A" + r.toFixed(1) + " " + r.toFixed(1) + " 0 1 " + sweep + " " + cx.toFixed(1) + " " + start.toFixed(1));
-    arcDefs.appendChild(path);
-
-    var label = document.createElementNS(SVG_NS, "text");
-    label.setAttribute("font-size", size.toFixed(2));
-    label.setAttribute("class", "occ-compound-svg-label is-arc");
-    label.dataset.key = key;
-    label.dataset.kind = "class";
-    var tp = document.createElementNS(SVG_NS, "textPath");
-    tp.setAttribute("href", "#" + id);
-    tp.setAttribute("startOffset", "50%");
-    tp.setAttribute("text-anchor", "middle");
-    tp.textContent = text;
-    label.appendChild(tp);
-    labelLayer.appendChild(label);
-
-    // Bounds: the arc spans roughly the text length around the circle.
-    var half = Math.min(Math.PI, textLen / (2 * r));
-    var outer = r + (top ? size : 0);
-    var spanX = half > Math.PI / 2 ? outer : outer * Math.sin(half);
-    minX = Math.min(minX, cx - spanX);
-    maxX = Math.max(maxX, cx + spanX);
-    if (top) minY = Math.min(minY, cy - outer);
-    else maxY = Math.max(maxY, cy + outer);
-  }
-
+  // Straight wrapped captions above/below each cloud (same on wide and narrow).
   layout.clusters.forEach(function (cluster) {
     var info = cloudInfo[cluster.key];
     if (!info) return;
@@ -874,20 +794,16 @@ function renderOccClusterCloud(layout, hexR, fs, narrow) {
     var text = typeof occCountCaption === "function"
       ? occCountCaption(cluster.key, info.pts.length)
       : occLabel(cluster.key);
-    if (narrow) {
-      seatLabel(
-        info.x,
-        info.y,
-        info.reach + hullPad,
-        0,
-        top ? -1 : 1,
-        occWrapCaptionLines(text),
-        cluster.key,
-        false
-      );
-    } else {
-      arcLabel(info, text, cluster.key, top);
-    }
+    seatLabel(
+      info.x,
+      info.y,
+      info.reach + hullPad,
+      0,
+      top ? -1 : 1,
+      occWrapCaptionLines(text),
+      cluster.key,
+      false
+    );
   });
 
   minX -= hexR * 0.6;
@@ -902,8 +818,8 @@ function renderOccClusterCloud(layout, hexR, fs, narrow) {
     var person = p.rec.person;
     var poly = document.createElementNS(SVG_NS, "polygon");
     poly.setAttribute("points", hexPoints(p.x, p.y, draw));
-    var fill = person.gender === "female" ? FEMALE : MALE;
-    var hot = person.gender === "female" ? FEMALE_HOT : MALE_HOT;
+    var fill = occFillOf(person);
+    var hot = occHotOf(person);
     poly.setAttribute("fill", fill);
     poly.dataset.fill = fill;
     poly.dataset.hot = hot;
@@ -912,7 +828,11 @@ function renderOccClusterCloud(layout, hexR, fs, narrow) {
     poly.dataset.cluster = p.cluster;
     poly.dataset.compound = p.hub || "";
     poly.dataset.multi = p.hub ? "1" : "0";
+    poly.dataset.rawN = String(p.rec.rawN || p.rec.classes.length || 1);
+    poly.dataset.hasPf = (p.rec.raw || p.rec.classes || []).indexOf("public_figure") >= 0 ? "1" : "0";
     if (p.hub) poly.classList.add("is-multi");
+    if ((p.rec.rawN || 0) >= 3) poly.classList.add("is-triple");
+    if (poly.dataset.hasPf === "1" && p.hub) poly.classList.add("is-civic-multi");
     poly.dataset.stroke = "none";
     poly.setAttribute("tabindex", "0");
     poly.setAttribute("role", "img");
@@ -924,9 +844,90 @@ function renderOccClusterCloud(layout, hexR, fs, narrow) {
   return svg;
 }
 
-// How tall Fig. 3a may grow inside the sticky pin. The old 0.58×vh cap left
-// a crumpled flower on short laptop viewports (MacBook Air): spokes read short
-// and the stage (sized to Fig. 3) showed empty cream around 3a.
+// Scroll-story highlight: keep the three triple-class laureates lit on Fig. 3b.
+var occChordStory = null;
+var occChordHotSvg = null;
+var occChordHotParts = null;
+
+function occChordClearMarks(svg, hulls, washes, labels, hexes) {
+  if (svg) svg.classList.remove("is-filtering");
+  (hulls || []).forEach(function (h) { h.classList.remove("is-hot"); });
+  (washes || []).forEach(function (w) { w.classList.remove("is-hot"); });
+  (labels || []).forEach(function (l) { l.classList.remove("is-hot"); });
+  (hexes || []).forEach(function (poly) { poly.classList.remove("is-hot"); });
+}
+
+function occChordPaintStory() {
+  var svg = occChordHotSvg || document.querySelector("#occ-chord .occ-compound-union");
+  if (!svg) return;
+  var parts = occChordHotParts;
+  var hulls = parts ? parts.hulls : Array.prototype.slice.call(svg.querySelectorAll(".occ-compound-hull"));
+  var washes = parts ? parts.washes : Array.prototype.slice.call(svg.querySelectorAll(".occ-compound-wash"));
+  var labels = parts ? parts.labels : Array.prototype.slice.call(svg.querySelectorAll(".occ-compound-svg-label"));
+  var hexes = parts ? parts.hexes : Array.prototype.slice.call(svg.querySelectorAll("polygon[data-cluster]"));
+  occChordClearMarks(svg, hulls, washes, labels, hexes);
+  if (occChordStory !== "triples" && occChordStory !== "civic") return;
+
+  svg.classList.add("is-filtering");
+  var compounds = {};
+  var classKeys = {};
+
+  function hotChrome(key, kindClassOnly) {
+    hulls.forEach(function (h) {
+      if (kindClassOnly && h.dataset.kind !== "class") return;
+      if (h.dataset.key === key) h.classList.add("is-hot");
+    });
+    washes.forEach(function (w) {
+      if (kindClassOnly && w.dataset.kind !== "class") return;
+      if (w.dataset.key === key) w.classList.add("is-hot");
+    });
+    labels.forEach(function (l) {
+      if (kindClassOnly && l.dataset.kind !== "class") return;
+      if (l.dataset.key === key) l.classList.add("is-hot");
+    });
+  }
+
+  if (occChordStory === "civic") {
+    classKeys.public_figure = true;
+    hexes.forEach(function (poly) {
+      var onHub = poly.dataset.multi === "1" && (
+        poly.dataset.hasPf === "1" ||
+        poly.classList.contains("is-civic-multi") ||
+        (poly.dataset.compound && poly.dataset.compound.indexOf("public_figure") !== -1)
+      );
+      if (!onHub) return;
+      poly.classList.add("is-hot");
+      if (poly.dataset.compound) compounds[poly.dataset.compound] = true;
+    });
+    Object.keys(compounds).forEach(function (key) { hotChrome(key, false); });
+    Object.keys(classKeys).forEach(function (key) { hotChrome(key, true); });
+    return;
+  }
+
+  hexes.forEach(function (poly) {
+    if (Number(poly.dataset.rawN) < 3 && !poly.classList.contains("is-triple")) return;
+    poly.classList.add("is-hot");
+    if (poly.dataset.compound) {
+      compounds[poly.dataset.compound] = true;
+      poly.dataset.compound.split("|").forEach(function (k) { classKeys[k] = true; });
+    }
+  });
+  Object.keys(compounds).forEach(function (key) { hotChrome(key, false); });
+  Object.keys(classKeys).forEach(function (key) { hotChrome(key, true); });
+}
+
+function occChordSetStory(mode) {
+  var next = mode || null;
+  if (occChordStory === next) {
+    if (next) occChordPaintStory();
+    return;
+  }
+  occChordStory = next;
+  occChordPaintStory();
+}
+
+// How tall Fig. 3b may grow inside the sticky pin. 3b carries the denser
+// story, so it sets the shared frame; 3 / 3a simply center inside it.
 function occChordMaxH() {
   if (typeof occUseSticky !== "function" || !occUseSticky()) return Infinity;
   var vh = window.innerHeight || 800;
@@ -940,7 +941,7 @@ function occChordMaxH() {
   var note = document.getElementById("occ-chord-note");
   reserved += note && note.offsetHeight > 8 ? note.offsetHeight + 12 : 72;
   reserved += 16;
-  return Math.max(380, vh - reserved);
+  return Math.max(420, vh - reserved);
 }
 
 function renderOccChord() {
@@ -986,18 +987,17 @@ function renderOccChord() {
   var washes = Array.prototype.slice.call(svg.querySelectorAll(".occ-compound-wash"));
   var labels = Array.prototype.slice.call(svg.querySelectorAll(".occ-compound-svg-label"));
   var hexes = Array.prototype.slice.call(svg.querySelectorAll("polygon[data-cluster]"));
+  occChordHotSvg = svg;
+  occChordHotParts = { hulls: hulls, washes: washes, labels: labels, hexes: hexes };
 
   function clearHot() {
-    svg.classList.remove("is-filtering");
-    hulls.forEach(function (h) { h.classList.remove("is-hot"); });
-    washes.forEach(function (w) { w.classList.remove("is-hot"); });
-    labels.forEach(function (l) { l.classList.remove("is-hot"); });
-    hexes.forEach(function (poly) { poly.classList.remove("is-hot"); });
+    occChordClearMarks(svg, hulls, washes, labels, hexes);
+    occChordPaintStory();
   }
 
   function hotClass(key) {
-    if (!key) return;
-    clearHot();
+    if (!key || occChordStory) return;
+    occChordClearMarks(svg, hulls, washes, labels, hexes);
     svg.classList.add("is-filtering");
     hulls.forEach(function (h) {
       var on = h.dataset.kind === "class"
@@ -1024,8 +1024,8 @@ function renderOccChord() {
   }
 
   function hotCompound(key) {
-    if (!key) return;
-    clearHot();
+    if (!key || occChordStory) return;
+    occChordClearMarks(svg, hulls, washes, labels, hexes);
     svg.classList.add("is-filtering");
     var parts = key.split("|");
     hulls.forEach(function (h) {
@@ -1069,13 +1069,11 @@ function renderOccChord() {
     clearHot();
   });
 
+  occChordPaintStory();
+
+  // Story copy lives in the sticky stacks; keep the old lead slot empty.
   if (note) {
-    note.textContent = t("occChordHint")
-      .replace("{n}", String(records.length))
-      .replace("{k}", String(layout.classOrder.length))
-      .replace("{m}", String(layout.multiCount))
-      .replace("{p}", String(layout.hubs.length))
-      .replace("{c}", String(layout.centerTouch))
-      .replace("{cls}", occLabel(layout.centerKey).toLowerCase());
+    note.textContent = "";
+    note.hidden = true;
   }
 }

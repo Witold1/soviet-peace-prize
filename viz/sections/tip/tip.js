@@ -52,28 +52,43 @@ function fillTip(person, options) {
   tip.appendChild(name);
   const alt = personAlt(person);
   if (alt) {
-    const ru = document.createElement("div");
-    ru.className = "ru";
-    ru.textContent = alt;
-    tip.appendChild(ru);
+    const native = document.createElement("div");
+    native.className = "ru";
+    native.textContent = alt;
+    tip.appendChild(native);
   }
-  const meta = document.createElement("div");
-  meta.className = "meta";
-  meta.appendChild(document.createTextNode(tipPrizeLine(person)));
-  meta.appendChild(document.createElement("br"));
-  meta.appendChild(document.createTextNode(tipPlaceAgeLine(person)));
-  tip.appendChild(meta);
-  const occ = document.createElement("div");
-  occ.className = "meta";
-  occ.textContent = typeof tipOccupationLine === "function"
+  const prize = document.createElement("div");
+  prize.className = "meta";
+  prize.appendChild(document.createTextNode(tipPrizeLine(person)));
+  if (person.age != null && person.age !== "") {
+    prize.appendChild(document.createElement("br"));
+    prize.appendChild(document.createTextNode(agePhrase(person.age)));
+  }
+  tip.appendChild(prize);
+  const placeLine = typeof tipBornAffiliatedLine === "function"
+    ? tipBornAffiliatedLine(person)
+    : "";
+  if (placeLine) {
+    const place = document.createElement("div");
+    place.className = "meta";
+    place.textContent = placeLine;
+    tip.appendChild(place);
+  }
+  const quote = typeof tipOccupationLine === "function"
     ? tipOccupationLine(person)
-    : occLabel(person.occupation);
-  tip.appendChild(occ);
-  const workValue = workText(person);
-  if (workValue) {
+    : "";
+  if (quote) {
+    const ukaz = document.createElement("div");
+    ukaz.className = "work";
+    ukaz.textContent = quote;
+    tip.appendChild(ukaz);
+  }
+  // Temporary: Wikidata occupation / work blurb alongside the Pravda line.
+  const wikiWork = typeof workText === "function" ? workText(person) : (person.work || "");
+  if (wikiWork && wikiWork !== quote) {
     const work = document.createElement("div");
     work.className = "work";
-    work.textContent = workValue;
+    work.textContent = wikiWork;
     tip.appendChild(work);
   }
   appendWikiLink(person);
@@ -102,63 +117,39 @@ function insideTip(target) {
   return !!(target && tip.contains(target));
 }
 
-function placeTipPeopleAndMode(group) {
-  var mode = group.countryMode || null;
+function placeTipStep() {
+  var block = document.getElementById("map-seq-block");
+  return block ? Number(block.getAttribute("data-step") || 2) : 2;
+}
+
+function placeTipPeople(group) {
   var people = group.people || [];
   if (group.birthPeople || group.pravdaPeople) {
-    var block = document.getElementById("map-seq-block");
-    var step = block ? Number(block.getAttribute("data-step") || 2) : 2;
+    var step = placeTipStep();
     if (step >= 3) {
       people = group.pravdaPeople && group.pravdaPeople.length
         ? group.pravdaPeople
         : people;
-      if (mode) mode = "affiliation";
     } else {
       people = group.birthPeople && group.birthPeople.length
         ? group.birthPeople
         : people;
-      if (mode) mode = "birth";
     }
   }
-  return { mode: mode, people: people };
+  return people;
 }
 
-function countryKeyForTip(person, mode) {
-  if (mode === "affiliation") {
-    var aff = typeof pravdaCountryKey === "function" ? pravdaCountryKey(person) : null;
-    if (aff) return String(aff).split(";")[0].trim();
-    if (person && person.country) return String(person.country).split(";")[0].trim();
-    return lang === "ru" ? "неизвестно" : "unknown";
-  }
-  if (person && person.birthCountry) return String(person.birthCountry).split(";")[0].trim();
-  return lang === "ru" ? "неизвестно" : "unknown";
-}
-
-function countPeopleByCountry(people, mode) {
-  var counts = {};
-  var keys = [];
-  people.forEach(function (person) {
-    var key = countryKeyForTip(person, mode);
-    if (!Object.prototype.hasOwnProperty.call(counts, key)) {
-      counts[key] = 0;
-      keys.push(key);
-    }
-    counts[key] += 1;
-  });
-  return keys.map(function (key) {
-    return [key, counts[key]];
-  }).sort(function (a, b) {
-    if (b[1] !== a[1]) return b[1] - a[1];
-    return String(a[0]).localeCompare(String(b[0]));
-  });
+function placeTipMode(group) {
+  if (!(group.birthPeople || group.pravdaPeople || group.packTip)) return null;
+  return placeTipStep() >= 3 ? "affiliation" : "birth";
 }
 
 function fillPlaceTip(group) {
-  var resolved = placeTipPeopleAndMode(group);
-  var people = resolved.people;
-  var mode = resolved.mode;
+  var people = placeTipPeople(group);
+  var mode = placeTipMode(group);
 
-  if (!mode && people.length === 1) {
+  // Region/country packs always stay a list tip - even for a single laureate.
+  if (people.length === 1 && !group.packTip) {
     fillTip(people[0]);
     const born = document.createElement("div");
     born.className = "meta";
@@ -175,34 +166,9 @@ function fillPlaceTip(group) {
   tip.appendChild(name);
   const meta = document.createElement("div");
   meta.className = "meta";
-
-  if (mode === "birth" || mode === "affiliation") {
-    meta.textContent = typeof groupCountryModeMeta === "function"
-      ? groupCountryModeMeta(people.length, mode)
-      : groupBorn(people.length);
-    tip.appendChild(meta);
-    const list = document.createElement("div");
-    list.className = "work";
-    const rows = countPeopleByCountry(people, mode);
-    const shown = rows.slice(0, 10);
-    shown.forEach(function (row, index) {
-      if (index) list.appendChild(document.createElement("br"));
-      var label = typeof countryLabel === "function" ? countryLabel(row[0]) : row[0];
-      list.appendChild(document.createTextNode(label + " — " + row[1]));
-    });
-    if (rows.length > shown.length) {
-      list.appendChild(document.createElement("br"));
-      list.appendChild(document.createTextNode(
-        lang === "ru"
-          ? "и еще " + (rows.length - shown.length)
-          : "and " + (rows.length - shown.length) + " more"
-      ));
-    }
-    tip.appendChild(list);
-    return;
-  }
-
-  meta.textContent = groupBorn(people.length);
+  meta.textContent = group.packTip && typeof groupPackMeta === "function"
+    ? groupPackMeta(people.length, mode)
+    : groupBorn(people.length);
   tip.appendChild(meta);
   const list = document.createElement("div");
   list.className = "work";
@@ -210,6 +176,15 @@ function fillPlaceTip(group) {
   const shown = names.slice(0, 8);
   list.textContent = shown.join(", ") + (names.length > shown.length ? moreNames(names.length - shown.length) : "");
   tip.appendChild(list);
+}
+
+function isMapSquareMark(mark) {
+  return !!(
+    mark &&
+    (mark.classList.contains("map-square-dot") ||
+      mark.classList.contains("map-squares-tile") ||
+      mark.classList.contains("map-seq-fly-dot"))
+  );
 }
 
 function restoreMark(mark) {
@@ -231,6 +206,12 @@ function restoreMark(mark) {
     }
     var tile = mark.querySelector(".tile");
     if (tile && tile.dataset.fill) tile.style.background = tile.dataset.fill;
+    return;
+  }
+  // Map packs/dots: class-only highlight - do not rewrite fill/stroke (that
+  // turned open dots muddy gray against regional tile colors on phone).
+  if (isMapSquareMark(mark)) {
+    mark.classList.remove("is-hot");
     return;
   }
   mark.setAttribute("fill", mark.dataset.fill);
@@ -267,6 +248,8 @@ function activate(mark, x, y) {
     mark.classList.add("is-hot");
     var tile = mark.querySelector(".tile");
     if (tile && tile.dataset.hot) tile.style.background = tile.dataset.hot;
+  } else if (isMapSquareMark(mark)) {
+    mark.classList.add("is-hot");
   } else {
     mark.setAttribute("fill", mark.dataset.hot);
     mark.setAttribute("stroke", "#000");
@@ -276,13 +259,6 @@ function activate(mark, x, y) {
   var onWall = mark.dataset.kind === "medal" || mark.dataset.kind === "portrait" || mark.dataset.kind === "empty";
   if (mark.dataset.g) fillPlaceTip(PLACE_GROUPS[Number(mark.dataset.g)]);
   else fillTip(PEOPLE[Number(mark.dataset.i)], { skipPortrait: onWall });
-  if (mark.dataset.coords) {
-    const person = PEOPLE[Number(mark.dataset.i)];
-    const born = document.createElement("div");
-    born.className = "meta";
-    born.textContent = coordLine(birthPlaceText(person), formatCoord(person.birthLat), formatCoord(person.birthLon));
-    tip.querySelector(".name").insertAdjacentElement("afterend", born);
-  }
   placeTip(x, y);
 }
 
@@ -354,7 +330,7 @@ function pinFromEvent(event) {
 }
 
 // Touch/pen: pointerover opens the tip, then pointerout on lift closes it before
-// click can pin — open/close/open flicker. Pin on pointerdown so out is ignored.
+// click can pin - open/close/open flicker. Pin on pointerdown so out is ignored.
 document.body.addEventListener("pointerdown", function (event) {
   if (event.pointerType !== "touch" && event.pointerType !== "pen") return;
   pinFromEvent(event);

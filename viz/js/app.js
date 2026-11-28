@@ -55,7 +55,7 @@ function setDisplay(next) {
   refreshNear("worlds", 480, renderWorldParkIfReady);
   if (typeof renderAnnounceChart === "function") renderAnnounceChart();
   // Map only when already loaded or the section is near.
-  if (typeof renderMapChart === "function" || viewNear(sectionEl("births"), 640)) {
+  if (typeof renderMapSequence === "function" || viewNear(sectionEl("births"), 640)) {
     renderMap();
   }
   if (typeof centerAgeChartScroll === "function") centerAgeChartScroll();
@@ -88,7 +88,7 @@ function setLang(next) {
   syncFn();
   if (typeof syncMethod === "function") syncMethod();
   renderHero();
-  // Press sits above occupations — lock its runway before Fig. 3/3a reads
+  // Press sits above occupations - lock its runway before Fig. 3/3a reads
   // scroll progress, or reload@3a jumps when #prize height lands later.
   renderPress();
   renderOccupations();
@@ -97,7 +97,9 @@ function setLang(next) {
   if (typeof renderAnnounceChart === "function") renderAnnounceChart();
   renderAges();
   if (typeof renderAliveChart === "function") renderAliveChart();
-  if (typeof renderMapChart === "function" || viewNear(sectionEl("births"), 640)) {
+  if (typeof renderPosthumousChart === "function") renderPosthumousChart();
+  if (typeof renderCenturyChart === "function") renderCenturyChart();
+  if (typeof renderMapSequence === "function" || viewNear(sectionEl("births"), 640)) {
     renderMap();
   }
   if (typeof renderGhosts === "function") renderGhosts();
@@ -129,7 +131,7 @@ function runScrollSync() {
   ) {
     syncHero();
   }
-  // Fade is cheaper than before but still walks many rects — run every other frame.
+  // Fade is cheaper than before but still walks many rects - run every other frame.
   scrollFadeSkip ^= 1;
   if (scrollFadeSkip) syncSectionFade();
 }
@@ -169,7 +171,7 @@ window.addEventListener("resize", function () {
     var mapNarrow = typeof mapChartNarrow === "function" && mapChartNarrow();
     if (mapNarrow !== mapNarrowWas) {
       mapNarrowWas = mapNarrow;
-      if (typeof renderMapChart === "function" || viewNear(sectionEl("births"), 640)) {
+      if (typeof renderMapSequence === "function" || viewNear(sectionEl("births"), 640)) {
         renderMap();
       }
     }
@@ -286,7 +288,7 @@ window.addEventListener("resize", function () {
 })();
 
 // Only take over scroll when we have a Fig. 3/3a sticky anchor to revive.
-// Otherwise keep the browser's normal restoration — global "manual" was
+// Otherwise keep the browser's normal restoration - global "manual" was
 // leaving scroll at 0, then occScrollToProgress(0) yanked everyone to Fig. 3.
 try {
   if ("scrollRestoration" in history) {
@@ -310,10 +312,10 @@ if (typeof bootLazySections === "function") bootLazySections();
 window.addEventListener("load", function () {
   if (typeof occDisarmFlip === "function") occDisarmFlip(220);
   var progress = null;
-  var wantChord = null;
+  var wantMode = null;
   if (typeof occStickyInView === "function" && occStickyInView() && typeof occScrollProgress === "function") {
     progress = occScrollProgress();
-    wantChord = typeof occScrollWantsChord === "function" && occScrollWantsChord(progress);
+    wantMode = typeof occScrollMode === "function" ? occScrollMode(progress) : null;
   }
   layoutHero(true);
   syncHero();
@@ -322,7 +324,7 @@ window.addEventListener("load", function () {
   if (typeof layoutOccSticky === "function") layoutOccSticky();
   if (progress != null && typeof occScrollToProgress === "function") {
     occScrollToProgress(progress);
-    if (typeof occSnapMorph === "function") occSnapMorph(!!wantChord);
+    if (typeof occSnapMode === "function" && wantMode) occSnapMode(wantMode);
   } else if (typeof syncOccupations === "function") {
     syncOccupations();
   }

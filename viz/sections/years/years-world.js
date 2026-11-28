@@ -1,4 +1,4 @@
-// Optional product: Cold War “world” coloring — parked at #worlds for now.
+// Optional product: Cold War “world” coloring - parked at #worlds for now.
 // Does not overwrite main years.js fill/sort hooks.
 
 function worldYearFillOf(person) {

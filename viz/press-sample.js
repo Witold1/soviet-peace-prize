@@ -96,8 +96,8 @@ var PRESS_PEACE = [
 
 var PRESS_REAL = [
   ["1949-12-18", "Под солнцем Сталинской конституции", "Under the sun of the Stalin Constitution"],
-  ["1949-12-18", "Другу, отцу, учителю и вождю — великому Сталину от таджикского народа", "To the friend, father, teacher, and leader — the great Stalin, from the Tajik people"],
-  ["1949-12-18", "Товарищ Сталин — вдохновитель и организатор творческой инициативы трудящихся", "Comrade Stalin, inspirer and organizer of the working people's creative initiative"],
+  ["1949-12-18", "Другу, отцу, учителю и вождю - великому Сталину от таджикского народа", "To the friend, father, teacher, and leader - the great Stalin, from the Tajik people"],
+  ["1949-12-18", "Товарищ Сталин - вдохновитель и организатор творческой инициативы трудящихся", "Comrade Stalin, inspirer and organizer of the working people's creative initiative"],
   ["1949-12-18", "Трудящиеся всего мира готовятся достойно отметить семидесятилетие товарища И. В. Сталина", "Working people of the whole world prepare to mark the seventieth birthday of Comrade I. V. Stalin"],
   ["1949-12-18", "Слово о вожде народов", "A word about the leader of the peoples"],
   ["1949-12-18", "Положить конец преступной политике поджигателей войны", "Put an end to the criminal policy of the warmongers", "peace"],
@@ -127,7 +127,7 @@ var PRESS_REAL = [
   ["1949-12-21", "О награждении товарища Иосифа Виссарионовича Сталина", "On decorating Comrade Joseph Vissarionovich Stalin"],
   ["1949-12-21", "Товарищу Сталину, великому вождю и учителю, продолжателю бессмертного дела Ленина", "To Comrade Stalin, the great leader and teacher, continuer of the immortal cause of Lenin"],
   ["1949-12-21", "Указ Президиума Верховного Совета СССР об учреждении международных Сталинских премий «За укрепление мира между народами»", "Decree of the Presidium of the Supreme Soviet of the USSR on the establishment of the international Stalin Prizes \"For strengthening peace among the peoples\"", "prize"],
-  ["1949-12-21", "Товарищ Сталин — вождь прогрессивного человечества", "Comrade Stalin, leader of progressive humanity"],
+  ["1949-12-21", "Товарищ Сталин - вождь прогрессивного человечества", "Comrade Stalin, leader of progressive humanity"],
   ["1949-12-21", "Дорогой товарищ Сталин!", "Dear Comrade Stalin!"],
   ["1949-12-21", "Сталин и сталинское руководство", "Stalin and the Stalin leadership"],
   ["1949-12-21", "Великий вдохновитель и организатор побед коммунизма", "The great inspirer and organizer of the victories of communism"],
@@ -135,9 +135,9 @@ var PRESS_REAL = [
   ["1949-12-21", "Великий зодчий коммунизма", "The great architect of communism"],
   ["1949-12-21", "Сталин ведет нас к победе коммунизма", "Stalin leads us to the victory of communism"],
   ["1949-12-21", "Сталин и колхозное крестьянство", "Stalin and the collective-farm peasantry"],
-  ["1949-12-21", "Сталинская дружба народов — залог непобедимости нашей Родины", "The Stalin friendship of the peoples is the pledge of our Motherland's invincibility"],
+  ["1949-12-21", "Сталинская дружба народов - залог непобедимости нашей Родины", "The Stalin friendship of the peoples is the pledge of our Motherland's invincibility"],
   ["1949-12-21", "Нашими успехами мы обязаны великому Сталину", "We owe our successes to the great Stalin"],
-  ["1949-12-21", "Товарищ Сталин — продолжатель великого дела Ленина", "Comrade Stalin, continuer of the great cause of Lenin"]
+  ["1949-12-21", "Товарищ Сталин - продолжатель великого дела Ленина", "Comrade Stalin, continuer of the great cause of Lenin"]
 ];
 
 function buildPressSample() {

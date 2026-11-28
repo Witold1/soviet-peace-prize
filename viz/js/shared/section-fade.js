@@ -6,7 +6,7 @@ function sectionFadeReduced() {
 
 var SECTION_FADE_NODES = null;
 // Lock fade math to a stable viewport height. Live innerHeight jumps when the
-// mobile URL bar hides — on a tall section like #births (Fig. 8 regional maps)
+// mobile URL bar hides - on a tall section like #births (Fig. 8)
 // that makes opacity thresholds twitch and feels like a scroll jump.
 var SECTION_FADE_HEIGHT = 0;
 

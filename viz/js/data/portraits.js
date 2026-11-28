@@ -171,7 +171,7 @@ var PEOPLE_GHOST = PEOPLE.filter(function (person) {
   return !(typeof PORTRAITS === "object" && PORTRAITS && PORTRAITS[person.i]);
 });
 
-// Wikipedia lead images for the ghost wall only — not counted with the 161.
+// Wikipedia lead images for the ghost wall only - not counted with the 161.
 var GHOST_PORTRAITS = {
   49: "portraits/ghosts/1956 Louis Aragon 49.jpg",
   118: "portraits/ghosts/1970-1971 Funmilayo Ransome-Kuti 118.png",
